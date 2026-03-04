@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier 1 LLD — C# Code · Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Clash+Display:wght@400;600;700&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0c10;
+  --surface:  #13131a;
+  --surface2: #1a1a24;
+  --surface3: #21212e;
+  --border:   #252535;
+  --border2:  #2e2e42;
+
+  --green:  #3ddc84;
+  --blue:   #4d9fff;
+  --amber:  #ffc341;
+  --pink:   #ff6b9d;
+  --purple: #b794f4;
+  --teal:   #4ecdc4;
+  --red:    #ff6b6b;
+  --orange: #ff9a3c;
+
+  --text:   #e2e8f8;
+  --muted:  #606080;
+  --muted2: #3a3a55;
+
+  /* syntax */
+  --s-kw:      #c792ea;
+  --s-type:    #82aaff;
+  --s-str:     #c3e88d;
+  --s-cmt:     #546e7a;
+  --s-num:     #f78c6c;
+  --s-method:  #82aaff;
+  --s-prop:    #ffcb6b;
+  --s-iface:   #addb67;
+  --s-enum:    #f78c6c;
+  --s-plain:   #d4d4d4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Epilogue', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 48px 56px 40px;
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--green), var(--blue), var(--purple), transparent);
+}
+.h-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 14px;
+}
+h1 {
+  font-family: 'Clash Display', 'JetBrains Mono', monospace;
+  font-size: clamp(30px, 4.5vw, 54px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+h1 em { font-style: normal; color: var(--green); }
+.h-sub {
+  margin-top: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  max-width: 580px;
+  line-height: 1.8;
+}
+.h-pills { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; }
+.hpill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 13px;
+  border-radius: 2px;
+  border: 1px solid;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+}
+.hpill:hover { opacity: .75; }
+.p-g { color:var(--green);  border-color:rgba(61,220,132,.3);  background:rgba(61,220,132,.06); }
+.p-b { color:var(--blue);   border-color:rgba(77,159,255,.3);  background:rgba(77,159,255,.06); }
+.p-a { color:var(--amber);  border-color:rgba(255,195,65,.3);  background:rgba(255,195,65,.06); }
+.p-p { color:var(--purple); border-color:rgba(183,148,244,.3); background:rgba(183,148,244,.06);}
+.p-t { color:var(--teal);   border-color:rgba(78,205,196,.3);  background:rgba(78,205,196,.06); }
+
+/* ── SIDEBAR + LAYOUT ── */
+.layout { display: flex; min-height: calc(100vh - 200px); }
+
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.sidebar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background .15s;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+.sb-item:hover { background: var(--surface2); }
+.sb-item.active { background: var(--surface2); border-left-color: var(--green); }
+
+.sb-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  width: 18px;
+}
+.sb-name {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+}
+.sb-tier {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--green);
+  background: rgba(61,220,132,.08);
+  border: 1px solid rgba(61,220,132,.2);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.sb-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 20px;
+}
+
+/* ── MAIN CONTENT ── */
+.main { flex: 1; padding: 0 48px 80px; max-width: 960px; }
+
+/* ── SYSTEM SECTION ── */
+.system {
+  padding-top: 60px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.system:last-child { border-bottom: none; }
+
+.sys-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.sys-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  padding-top: 6px;
+}
+.sys-meta { flex: 1; }
+.sys-title {
+  font-family: 'Clash Display', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+.sys-tags { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.sys-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+
+/* ── EXPLANATION CARDS ── */
+.exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+@media(max-width:700px){ .exp-grid { grid-template-columns:1fr; } }
+
+.exp-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.exp-card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.exp-card-body {
+  font-size: 13px;
+  color: #8090b0;
+  line-height: 1.65;
+}
+.exp-card-body li {
+  list-style: none;
+  padding-left: 14px;
+  position: relative;
+  margin-bottom: 4px;
+}
+.exp-card-body li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--muted2);
+}
+
+/* ── INTERVIEW CALLOUT ── */
+.interview-box {
+  background: rgba(255,195,65,.04);
+  border: 1px solid rgba(255,195,65,.18);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 4px 4px 0;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: #a09060;
+  line-height: 1.7;
+}
+.interview-box strong { color: var(--amber); }
+.interview-box .q {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #c0a060;
+  margin-top: 6px;
+  display: block;
+}
+
+/* ── CODE BLOCK ── */
+.code-wrap {
+  background: #0a0a10;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.code-header {
+  background: var(--surface3);
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.code-dots { display:flex; gap:6px; }
+.code-dot { width:10px; height:10px; border-radius:50%; }
+.dot-r { background:#ff5f56; }
+.dot-y { background:#ffbd2e; }
+.dot-g { background:#27c93f; }
+.code-filename {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.code-lang {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--s-plain);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+/* syntax highlight classes */
+.kw     { color: var(--s-kw); }
+.typ    { color: var(--s-type); }
+.str    { color: var(--s-str); }
+.cmt    { color: var(--s-cmt); font-style: italic; }
+.num    { color: var(--s-num); }
+.mth    { color: var(--s-method); }
+.prop   { color: var(--s-prop); }
+.iface  { color: var(--s-iface); }
+.en     { color: var(--s-enum); }
+.sec-comment {
+  color: var(--muted2);
+  font-style: italic;
+  display: block;
+  margin: 4px 0 2px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 12px;
+}
+.sec-comment:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+/* ── PATTERN BADGE ── */
+.pattern-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.pattern-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.pat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+
+/* ── PATTERN PRIMER ── */
+.primer {
+  background: #0d1117;
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--green);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.primer-header {
+  background: rgba(61,220,132,0.06);
+  border-bottom: 1px solid rgba(61,220,132,0.15);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.primer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+}
+.primer-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #a0c0a0;
+  margin-left: auto;
+}
+.primer-desc {
+  padding: 10px 18px 4px;
+  font-size: 12.5px;
+  color: #607060;
+  font-style: italic;
+  line-height: 1.6;
+}
+.primer pre {
+  padding: 14px 20px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--s-plain);
+  overflow-x: auto;
+  background: transparent;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width: 900px) {
+  .sidebar { display: none; }
+  .main { padding: 0 20px 60px; }
+  header { padding: 36px 20px 28px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-eyebrow">// C# LLD Interview Prep · Tier 1 · 5 Systems</div>
+  <h1>Tier 1 — <em>Simple</em><br>LLD in C#</h1>
+  <p class="h-sub">Clean, interview-ready code. No over-engineering.<br>
+  Each system starts with a <strong style="color:var(--green)">plain pattern primer</strong> — then the full solution.</p>
+  <div class="h-pills">
+    <a class="hpill p-g" href="#tictactoe">Tic Tac Toe</a>
+    <a class="hpill p-b" href="#snake">Snake &amp; Food</a>
+    <a class="hpill p-a" href="#vending">Vending Machine</a>
+    <a class="hpill p-p" href="#logging">Logging System</a>
+    <a class="hpill p-t" href="#parking">Parking Lot</a>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-label">Systems</div>
+  <a class="sb-item active" href="#tictactoe">
+    <div class="sb-num">01</div>
+    <div class="sb-name">Tic Tac Toe</div>
+    <div class="sb-tier">T1</div>
+  </a>
+  <a class="sb-item" href="#snake">
+    <div class="sb-num">02</div>
+    <div class="sb-name">Snake &amp; Food</div>
+    <div class="sb-tier">T1</div>
+  </a>
+  <a class="sb-item" href="#vending">
+    <div class="sb-num">03</div>
+    <div class="sb-name">Vending Machine</div>
+    <div class="sb-tier">T1</div>
+  </a>
+  <a class="sb-item" href="#logging">
+    <div class="sb-num">04</div>
+    <div class="sb-name">Logging System</div>
+    <div class="sb-tier">T1</div>
+  </a>
+  <a class="sb-item" href="#parking">
+    <div class="sb-num">05</div>
+    <div class="sb-name">Parking Lot</div>
+    <div class="sb-tier">T1</div>
+  </a>
+  <div class="sb-divider"></div>
+  <div class="sidebar-label" style="margin-top:4px">Coming Next</div>
+  <div class="sb-item" style="opacity:.4;cursor:default">
+    <div class="sb-num">06</div><div class="sb-name">Chess</div>
+    <div style="font-family:monospace;font-size:9px;color:var(--muted2);margin-left:auto">T2</div>
+  </div>
+  <div class="sb-item" style="opacity:.4;cursor:default">
+    <div class="sb-num">07</div><div class="sb-name">ATM</div>
+    <div style="font-family:monospace;font-size:9px;color:var(--muted2);margin-left:auto">T2</div>
+  </div>
+  <div class="sb-item" style="opacity:.4;cursor:default">
+    <div class="sb-num">08</div><div class="sb-name">Blackjack</div>
+    <div style="font-family:monospace;font-size:9px;color:var(--muted2);margin-left:auto">T2</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ════════════════════════════════════════
+     1. TIC TAC TOE
+════════════════════════════════════════ -->
+<section class="system" id="tictactoe">
+  <div class="sys-header">
+    <div class="sys-num">01</div>
+    <div class="sys-meta">
+      <div class="sys-title">Tic Tac Toe</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">State Pattern</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Factory</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Strategy (AI)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Board is a 2D array of <code>CellState</code> enum — simple and clear</li>
+          <li><code>Game</code> owns state; <code>Board</code> is just data + win detection</li>
+          <li><code>IPlayer</code> interface lets Human and AI be swappable (Strategy)</li>
+          <li>Game state (Active / Won / Draw) lives in an enum — no booleans</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Board</strong> — holds cells, checks win/draw</li>
+          <li><strong>Game</strong> — orchestrates turns, switches players</li>
+          <li><strong>IPlayer</strong> — Human or AI, both make a Move</li>
+          <li><strong>Move</strong> — a row/col value object</li>
+          <li><strong>GameStatus</strong> enum — InProgress / Won / Draw</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How would you extend this to a 4×4 or NxN board?</span>
+    <span style="font-size:12px;color:#a09060">→ Board takes <code>int size</code> in constructor. Win check uses size as threshold. Zero code change elsewhere.</span>
+    <span class="q">Q: How do you add an AI player?</span>
+    <span style="font-size:12px;color:#a09060">→ Implement <code>IPlayer</code> with a minimax strategy. <code>Game</code> doesn't change at all — that's the Strategy pattern.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">State — GameStatus</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — IPlayer</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Factory — PlayerFactory</span>
+  </div>
+
+  <div class="primer">
+    <div class="primer-header">
+      <span class="primer-label">📖 Pattern Primer</span>
+      <span class="primer-name">Strategy Pattern — swap algorithms without changing the caller</span>
+    </div>
+    <div class="primer-desc">Define an interface for a behaviour. Write multiple implementations. The caller holds the interface — it never needs to change when you add a new strategy.</div>
+<pre>
+<span class="cmt">// ✅ Strategy: extract algorithm behind an interface</span>
+<span class="kw">public interface</span> <span class="iface">ISortStrategy</span>
+{
+    <span class="kw">void</span> <span class="mth">Sort</span>(<span class="kw">int</span>[] data);
+}
+
+<span class="kw">public class</span> <span class="typ">BubbleSort</span> : <span class="iface">ISortStrategy</span>
+{
+    <span class="kw">public void</span> <span class="mth">Sort</span>(<span class="kw">int</span>[] data) => Console.<span class="mth">WriteLine</span>(<span class="str">"Bubble sorting..."</span>);
+}
+
+<span class="kw">public class</span> <span class="typ">QuickSort</span> : <span class="iface">ISortStrategy</span>
+{
+    <span class="kw">public void</span> <span class="mth">Sort</span>(<span class="kw">int</span>[] data) => Console.<span class="mth">WriteLine</span>(<span class="str">"Quick sorting..."</span>);
+}
+
+<span class="kw">public class</span> <span class="typ">Sorter</span>
+{
+    <span class="kw">private</span> <span class="iface">ISortStrategy</span> _strategy;
+    <span class="kw">public</span> <span class="mth">Sorter</span>(<span class="iface">ISortStrategy</span> strategy) => _strategy = strategy;
+    <span class="kw">public void</span> <span class="mth">SetStrategy</span>(<span class="iface">ISortStrategy</span> s) => _strategy = s;
+    <span class="kw">public void</span> <span class="mth">Sort</span>(<span class="kw">int</span>[] data) => _strategy.<span class="mth">Sort</span>(data);
+}
+
+<span class="cmt">// Caller swaps strategies — Sorter never changes</span>
+<span class="kw">var</span> sorter = <span class="kw">new</span> <span class="typ">Sorter</span>(<span class="kw">new</span> <span class="typ">BubbleSort</span>());
+sorter.<span class="mth">Sort</span>(<span class="kw">new</span>[] { 3, 1, 2 });        <span class="cmt">// Bubble sorting...</span>
+sorter.<span class="mth">SetStrategy</span>(<span class="kw">new</span> <span class="typ">QuickSort</span>());
+sorter.<span class="mth">Sort</span>(<span class="kw">new</span>[] { 3, 1, 2 });        <span class="cmt">// Quick sorting...</span>
+
+<span class="cmt">// In Tic Tac Toe → IPlayer IS the strategy.</span>
+<span class="cmt">// HumanPlayer vs AiPlayer are two strategies. Game never changes.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">TicTacToe.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">CellState</span> { Empty, X, O }
+
+<span class="kw">public enum</span> <span class="en">GameStatus</span> { InProgress, Won, Draw }
+
+<span class="sec-comment">// ── Value Object ──────────────────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">Move</span>(<span class="kw">int</span> Row, <span class="kw">int</span> Col);
+
+<span class="sec-comment">// ── Board ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Board</span>
+{
+    <span class="kw">private readonly</span> <span class="en">CellState</span>[,] _cells;
+    <span class="kw">public int</span> <span class="prop">Size</span> { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="mth">Board</span>(<span class="kw">int</span> size = 3)
+    {
+        <span class="prop">Size</span> = size;
+        _cells = <span class="kw">new</span> <span class="en">CellState</span>[size, size];
+    }
+
+    <span class="kw">public bool</span> <span class="mth">IsCellEmpty</span>(<span class="kw">int</span> row, <span class="kw">int</span> col) =>
+        _cells[row, col] == <span class="en">CellState</span>.Empty;
+
+    <span class="kw">public void</span> <span class="mth">PlaceMark</span>(<span class="kw">int</span> row, <span class="kw">int</span> col, <span class="en">CellState</span> mark)
+    {
+        <span class="kw">if</span> (!<span class="mth">IsCellEmpty</span>(row, col))
+            <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>(<span class="str">"Cell already taken."</span>);
+        _cells[row, col] = mark;
+    }
+
+    <span class="kw">public bool</span> <span class="mth">HasWinner</span>(<span class="en">CellState</span> mark)
+    {
+        <span class="cmt">// Check all rows and columns</span>
+        <span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; <span class="prop">Size</span>; i++)
+        {
+            <span class="kw">if</span> (<span class="mth">AllMatch</span>(mark, Enumerable.<span class="mth">Range</span>(0, <span class="prop">Size</span>).<span class="mth">Select</span>(j => (i, j)))) <span class="kw">return true</span>;
+            <span class="kw">if</span> (<span class="mth">AllMatch</span>(mark, Enumerable.<span class="mth">Range</span>(0, <span class="prop">Size</span>).<span class="mth">Select</span>(j => (j, i)))) <span class="kw">return true</span>;
+        }
+        <span class="cmt">// Check diagonals</span>
+        <span class="kw">if</span> (<span class="mth">AllMatch</span>(mark, Enumerable.<span class="mth">Range</span>(0, <span class="prop">Size</span>).<span class="mth">Select</span>(i => (i, i)))) <span class="kw">return true</span>;
+        <span class="kw">if</span> (<span class="mth">AllMatch</span>(mark, Enumerable.<span class="mth">Range</span>(0, <span class="prop">Size</span>).<span class="mth">Select</span>(i => (i, <span class="prop">Size</span> - 1 - i)))) <span class="kw">return true</span>;
+        <span class="kw">return false</span>;
+    }
+
+    <span class="kw">public bool</span> <span class="prop">IsFull</span> => Enumerable.<span class="mth">Range</span>(0, <span class="prop">Size</span>)
+        .<span class="mth">SelectMany</span>(r => Enumerable.<span class="mth">Range</span>(0, <span class="prop">Size</span>).<span class="mth">Select</span>(c => (r, c)))
+        .<span class="mth">All</span>(p => _cells[p.r, p.c] != <span class="en">CellState</span>.Empty);
+
+    <span class="kw">private bool</span> <span class="mth">AllMatch</span>(<span class="en">CellState</span> mark, IEnumerable&lt;(int, int)&gt; cells) =>
+        cells.<span class="mth">All</span>(p => _cells[p.Item1, p.Item2] == mark);
+
+    <span class="kw">public void</span> <span class="mth">Print</span>()
+    {
+        <span class="kw">for</span> (<span class="kw">int</span> r = 0; r &lt; <span class="prop">Size</span>; r++)
+        {
+            <span class="kw">for</span> (<span class="kw">int</span> c = 0; c &lt; <span class="prop">Size</span>; c++)
+                Console.<span class="mth">Write</span>($<span class="str">"{(_cells[r, c] == CellState.Empty ? "." : _cells[r, c].ToString()),2}"</span>);
+            Console.<span class="mth">WriteLine</span>();
+        }
+    }
+}
+
+<span class="sec-comment">// ── Player (Strategy Pattern) ─────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IPlayer</span>
+{
+    <span class="en">CellState</span> <span class="prop">Mark</span> { <span class="kw">get</span>; }
+    <span class="typ">Move</span> <span class="mth">GetMove</span>(<span class="typ">Board</span> board);
+}
+
+<span class="kw">public class</span> <span class="typ">HumanPlayer</span> : <span class="iface">IPlayer</span>
+{
+    <span class="kw">public</span> <span class="en">CellState</span> <span class="prop">Mark</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">HumanPlayer</span>(<span class="en">CellState</span> mark) => <span class="prop">Mark</span> = mark;
+
+    <span class="kw">public</span> <span class="typ">Move</span> <span class="mth">GetMove</span>(<span class="typ">Board</span> board)
+    {
+        Console.<span class="mth">Write</span>($<span class="str">"Player {Mark} — enter row,col: "</span>);
+        <span class="kw">var</span> parts = Console.<span class="mth">ReadLine</span>()!.<span class="mth">Split</span>(<span class="str">','</span>);
+        <span class="kw">return new</span> <span class="typ">Move</span>(<span class="kw">int</span>.<span class="mth">Parse</span>(parts[0]), <span class="kw">int</span>.<span class="mth">Parse</span>(parts[1]));
+    }
+}
+
+<span class="cmt">// AI picks first available empty cell — swap for minimax for a real AI</span>
+<span class="kw">public class</span> <span class="typ">AiPlayer</span> : <span class="iface">IPlayer</span>
+{
+    <span class="kw">public</span> <span class="en">CellState</span> <span class="prop">Mark</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">AiPlayer</span>(<span class="en">CellState</span> mark) => <span class="prop">Mark</span> = mark;
+
+    <span class="kw">public</span> <span class="typ">Move</span> <span class="mth">GetMove</span>(<span class="typ">Board</span> board)
+    {
+        <span class="kw">for</span> (<span class="kw">int</span> r = 0; r &lt; board.<span class="prop">Size</span>; r++)
+            <span class="kw">for</span> (<span class="kw">int</span> c = 0; c &lt; board.<span class="prop">Size</span>; c++)
+                <span class="kw">if</span> (board.<span class="mth">IsCellEmpty</span>(r, c)) <span class="kw">return new</span> <span class="typ">Move</span>(r, c);
+        <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>(<span class="str">"No moves left."</span>);
+    }
+}
+
+<span class="sec-comment">// ── Game Orchestrator ─────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Game</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">Board</span> _board;
+    <span class="kw">private readonly</span> <span class="iface">IPlayer</span>[] _players;
+    <span class="kw">private int</span> _currentIndex = 0;
+
+    <span class="kw">public</span> <span class="en">GameStatus</span> <span class="prop">Status</span> { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="en">GameStatus</span>.InProgress;
+    <span class="kw">public</span> <span class="iface">IPlayer</span>? <span class="prop">Winner</span> { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Game</span>(<span class="iface">IPlayer</span> p1, <span class="iface">IPlayer</span> p2, <span class="kw">int</span> boardSize = 3)
+    {
+        _board = <span class="kw">new</span> <span class="typ">Board</span>(boardSize);
+        _players = <span class="kw">new</span>[] { p1, p2 };
+    }
+
+    <span class="kw">public void</span> <span class="mth">PlayTurn</span>()
+    {
+        <span class="kw">if</span> (<span class="prop">Status</span> != <span class="en">GameStatus</span>.InProgress) <span class="kw">return</span>;
+
+        <span class="kw">var</span> player = _players[_currentIndex];
+        <span class="kw">var</span> move   = player.<span class="mth">GetMove</span>(_board);
+
+        _board.<span class="mth">PlaceMark</span>(move.Row, move.Col, player.<span class="prop">Mark</span>);
+        _board.<span class="mth">Print</span>();
+
+        <span class="kw">if</span> (_board.<span class="mth">HasWinner</span>(player.<span class="prop">Mark</span>))
+        {
+            <span class="prop">Status</span> = <span class="en">GameStatus</span>.Won;
+            <span class="prop">Winner</span> = player;
+        }
+        <span class="kw">else if</span> (_board.<span class="prop">IsFull</span>)
+        {
+            <span class="prop">Status</span> = <span class="en">GameStatus</span>.Draw;
+        }
+
+        <span class="cmt">// Switch player</span>
+        _currentIndex = (_currentIndex + 1) % _players.Length;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Run</span>()
+    {
+        <span class="kw">while</span> (<span class="prop">Status</span> == <span class="en">GameStatus</span>.InProgress)
+            <span class="mth">PlayTurn</span>();
+
+        Console.<span class="mth">WriteLine</span>(<span class="prop">Status</span> == <span class="en">GameStatus</span>.Won
+            ? $<span class="str">"🎉 {Winner!.Mark} wins!"</span>
+            : <span class="str">"🤝 It's a draw!"</span>);
+    }
+}
+
+<span class="sec-comment">// ── Entry Point ───────────────────────────────────────</span>
+<span class="kw">var</span> game = <span class="kw">new</span> <span class="typ">Game</span>(
+    <span class="kw">new</span> <span class="typ">HumanPlayer</span>(<span class="en">CellState</span>.X),
+    <span class="kw">new</span> <span class="typ">AiPlayer</span>(<span class="en">CellState</span>.O)
+);
+game.<span class="mth">Run</span>();
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     2. SNAKE AND FOOD
+════════════════════════════════════════ -->
+<section class="system" id="snake">
+  <div class="sys-header">
+    <div class="sys-num">02</div>
+    <div class="sys-meta">
+      <div class="sys-title">Snake &amp; Food</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">State Pattern</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Observer</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Game Loop</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><code>LinkedList&lt;Point&gt;</code> for the snake body — O(1) add head, remove tail</li>
+          <li><code>HashSet&lt;Point&gt;</code> for O(1) self-collision detection</li>
+          <li><code>GameEngine</code> is a Singleton — owns the game loop</li>
+          <li>Direction changes are buffered — prevents reversing into self</li>
+          <li>Food spawning is a Strategy — easy to change algorithm</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Point</strong> — (Row, Col) value object</li>
+          <li><strong>Snake</strong> — body as LinkedList + HashSet</li>
+          <li><strong>Board</strong> — width/height, food position</li>
+          <li><strong>GameEngine</strong> — game loop, collision detection</li>
+          <li><strong>GameState</strong> — Running / Paused / GameOver</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: Why LinkedList for the snake body?</span>
+    <span style="font-size:12px;color:#a09060">→ AddFirst (new head) and RemoveLast (old tail) are both O(1). A List would be O(n) for removal from front.</span>
+    <span class="q">Q: How do you handle self-collision efficiently?</span>
+    <span style="font-size:12px;color:#a09060">→ Maintain a parallel HashSet of occupied points. Checking if the new head position is in the set is O(1).</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">State — GameState enum</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Singleton — GameEngine</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Strategy — Food spawner</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--blue)">
+    <div class="primer-header" style="background:rgba(77,159,255,0.06);border-bottom-color:rgba(77,159,255,0.15)">
+      <span class="primer-label" style="color:var(--blue)">📖 Pattern Primer</span>
+      <span class="primer-name">Singleton Pattern — one instance, globally accessible</span>
+    </div>
+    <div class="primer-desc">Guarantee that a class has exactly one instance. In .NET, use Lazy&lt;T&gt; — it's thread-safe and handles double-checked locking for you automatically.</div>
+<pre>
+<span class="cmt">// ❌ Without Singleton: anyone can create multiple instances</span>
+<span class="kw">var</span> db1 = <span class="kw">new</span> <span class="typ">Database</span>();  <span class="cmt">// separate connection</span>
+<span class="kw">var</span> db2 = <span class="kw">new</span> <span class="typ">Database</span>();  <span class="cmt">// another — wasteful!</span>
+
+<span class="cmt">// ✅ Singleton with Lazy&lt;T&gt; — the .NET idiomatic way</span>
+<span class="kw">public class</span> <span class="typ">Database</span>
+{
+    <span class="cmt">// Lazy ensures creation is deferred AND thread-safe</span>
+    <span class="kw">private static readonly</span> Lazy&lt;<span class="typ">Database</span>&gt; _instance =
+        <span class="kw">new</span>(() => <span class="kw">new</span> <span class="typ">Database</span>());
+
+    <span class="cmt">// Private constructor — no one else can call new Database()</span>
+    <span class="kw">private</span> <span class="mth">Database</span>() { Console.<span class="mth">WriteLine</span>(<span class="str">"DB connected."</span>); }
+
+    <span class="kw">public static</span> <span class="typ">Database</span> <span class="prop">Instance</span> => _instance.<span class="prop">Value</span>;
+
+    <span class="kw">public void</span> <span class="mth">Query</span>(<span class="kw">string</span> sql) => Console.<span class="mth">WriteLine</span>($<span class="str">"Running: {sql}"</span>);
+}
+
+<span class="cmt">// Both variables point to the exact same object</span>
+<span class="kw">var</span> a = <span class="typ">Database</span>.<span class="prop">Instance</span>;
+<span class="kw">var</span> b = <span class="typ">Database</span>.<span class="prop">Instance</span>;
+Console.<span class="mth">WriteLine</span>(ReferenceEquals(a, b));  <span class="cmt">// True</span>
+
+<span class="cmt">// In Snake → GameEngine.Instance is the one-and-only game loop controller.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">SnakeGame.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums & Value Objects ─────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">Direction</span> { Up, Down, Left, Right }
+<span class="kw">public enum</span> <span class="en">GameState</span>  { Running, Paused, GameOver }
+
+<span class="kw">public record</span> <span class="typ">Point</span>(<span class="kw">int</span> Row, <span class="kw">int</span> Col);
+
+<span class="sec-comment">// ── Snake ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Snake</span>
+{
+    <span class="cmt">// LinkedList for O(1) head insert and tail removal</span>
+    <span class="kw">private readonly</span> LinkedList&lt;<span class="typ">Point</span>&gt; _body = <span class="kw">new</span>();
+    <span class="cmt">// HashSet for O(1) collision checks</span>
+    <span class="kw">private readonly</span> HashSet&lt;<span class="typ">Point</span>&gt;   _occupied = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="typ">Point</span> <span class="prop">Head</span>    => _body.<span class="prop">First</span>!.<span class="prop">Value</span>;
+    <span class="kw">public int</span>   <span class="prop">Length</span>  => _body.<span class="prop">Count</span>;
+
+    <span class="kw">public</span> <span class="mth">Snake</span>(<span class="typ">Point</span> start)
+    {
+        _body.<span class="mth">AddFirst</span>(start);
+        _occupied.<span class="mth">Add</span>(start);
+    }
+
+    <span class="cmt">// Returns the tail point that was removed (null if snake grew)</span>
+    <span class="kw">public</span> <span class="typ">Point</span>? <span class="mth">Move</span>(<span class="typ">Point</span> newHead, <span class="kw">bool</span> grow)
+    {
+        _body.<span class="mth">AddFirst</span>(newHead);
+        _occupied.<span class="mth">Add</span>(newHead);
+
+        <span class="kw">if</span> (grow) <span class="kw">return null</span>;
+
+        <span class="kw">var</span> tail = _body.<span class="prop">Last</span>!.<span class="prop">Value</span>;
+        _body.<span class="mth">RemoveLast</span>();
+        _occupied.<span class="mth">Remove</span>(tail);
+        <span class="kw">return</span> tail;
+    }
+
+    <span class="kw">public bool</span> <span class="mth">Occupies</span>(<span class="typ">Point</span> p) => _occupied.<span class="mth">Contains</span>(p);
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Point</span>&gt; <span class="prop">Body</span> => _body;
+}
+
+<span class="sec-comment">// ── Food Spawner (Strategy) ───────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IFoodSpawner</span>
+{
+    <span class="typ">Point</span> <span class="mth">Spawn</span>(<span class="kw">int</span> rows, <span class="kw">int</span> cols, IEnumerable&lt;<span class="typ">Point</span>&gt; occupied);
+}
+
+<span class="kw">public class</span> <span class="typ">RandomFoodSpawner</span> : <span class="iface">IFoodSpawner</span>
+{
+    <span class="kw">private readonly</span> Random _rng = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="typ">Point</span> <span class="mth">Spawn</span>(<span class="kw">int</span> rows, <span class="kw">int</span> cols, IEnumerable&lt;<span class="typ">Point</span>&gt; occupied)
+    {
+        <span class="kw">var</span> taken = <span class="kw">new</span> HashSet&lt;<span class="typ">Point</span>&gt;(occupied);
+        <span class="typ">Point</span> candidate;
+        <span class="kw">do</span> { candidate = <span class="kw">new</span> <span class="typ">Point</span>(_rng.<span class="mth">Next</span>(rows), _rng.<span class="mth">Next</span>(cols)); }
+        <span class="kw">while</span> (taken.<span class="mth">Contains</span>(candidate));
+        <span class="kw">return</span> candidate;
+    }
+}
+
+<span class="sec-comment">// ── Board ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Board</span>
+{
+    <span class="kw">public int</span> <span class="prop">Rows</span> { <span class="kw">get</span>; }
+    <span class="kw">public int</span> <span class="prop">Cols</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Point</span> <span class="prop">Food</span> { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">private readonly</span> <span class="iface">IFoodSpawner</span> _spawner;
+
+    <span class="kw">public</span> <span class="mth">Board</span>(<span class="kw">int</span> rows, <span class="kw">int</span> cols, <span class="iface">IFoodSpawner</span>? spawner = <span class="kw">null</span>)
+    {
+        <span class="prop">Rows</span> = rows; <span class="prop">Cols</span> = cols;
+        _spawner = spawner ?? <span class="kw">new</span> <span class="typ">RandomFoodSpawner</span>();
+        <span class="prop">Food</span> = <span class="kw">new</span> <span class="typ">Point</span>(rows / 2, cols / 2); <span class="cmt">// initial food position</span>
+    }
+
+    <span class="kw">public bool</span> <span class="mth">IsInBounds</span>(<span class="typ">Point</span> p) =>
+        p.Row >= 0 && p.Row &lt; <span class="prop">Rows</span> && p.Col >= 0 && p.Col &lt; <span class="prop">Cols</span>;
+
+    <span class="kw">public void</span> <span class="mth">SpawnFood</span>(IEnumerable&lt;<span class="typ">Point</span>&gt; snakeBody) =>
+        <span class="prop">Food</span> = _spawner.<span class="mth">Spawn</span>(<span class="prop">Rows</span>, <span class="prop">Cols</span>, snakeBody);
+}
+
+<span class="sec-comment">// ── Game Engine (Singleton) ───────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">GameEngine</span>
+{
+    <span class="kw">private static readonly</span> Lazy&lt;<span class="typ">GameEngine</span>&gt; _instance =
+        <span class="kw">new</span>(() => <span class="kw">new</span> <span class="typ">GameEngine</span>());
+    <span class="kw">public static</span> <span class="typ">GameEngine</span> <span class="prop">Instance</span> => _instance.<span class="prop">Value</span>;
+
+    <span class="kw">private</span> <span class="mth">GameEngine</span>() { }
+
+    <span class="kw">private</span> <span class="typ">Snake</span>     _snake    = <span class="kw">null</span>!;
+    <span class="kw">private</span> <span class="typ">Board</span>     _board    = <span class="kw">null</span>!;
+    <span class="kw">private</span> <span class="en">Direction</span> _direction = <span class="en">Direction</span>.Right;
+
+    <span class="kw">public</span> <span class="en">GameState</span> <span class="prop">State</span> { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="en">GameState</span>.GameOver;
+    <span class="kw">public int</span>       <span class="prop">Score</span> { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public void</span> <span class="mth">Start</span>(<span class="kw">int</span> rows = 10, <span class="kw">int</span> cols = 10)
+    {
+        _board     = <span class="kw">new</span> <span class="typ">Board</span>(rows, cols);
+        _snake     = <span class="kw">new</span> <span class="typ">Snake</span>(<span class="kw">new</span> <span class="typ">Point</span>(rows / 2, 0));
+        _direction = <span class="en">Direction</span>.Right;
+        <span class="prop">Score</span>      = 0;
+        <span class="prop">State</span>      = <span class="en">GameState</span>.Running;
+    }
+
+    <span class="cmt">// Called by UI/input handler on keypress</span>
+    <span class="kw">public void</span> <span class="mth">ChangeDirection</span>(<span class="en">Direction</span> newDir)
+    {
+        <span class="cmt">// Prevent 180-degree reversal</span>
+        <span class="kw">bool</span> invalid =
+            (newDir == <span class="en">Direction</span>.Up    && _direction == <span class="en">Direction</span>.Down)  ||
+            (newDir == <span class="en">Direction</span>.Down  && _direction == <span class="en">Direction</span>.Up)    ||
+            (newDir == <span class="en">Direction</span>.Left  && _direction == <span class="en">Direction</span>.Right) ||
+            (newDir == <span class="en">Direction</span>.Right && _direction == <span class="en">Direction</span>.Left);
+
+        <span class="kw">if</span> (!invalid) _direction = newDir;
+    }
+
+    <span class="cmt">// Called once per game tick</span>
+    <span class="kw">public void</span> <span class="mth">Tick</span>()
+    {
+        <span class="kw">if</span> (<span class="prop">State</span> != <span class="en">GameState</span>.Running) <span class="kw">return</span>;
+
+        <span class="kw">var</span> newHead = <span class="mth">NextHead</span>(_snake.<span class="prop">Head</span>, _direction);
+
+        <span class="cmt">// Wall collision</span>
+        <span class="kw">if</span> (!_board.<span class="mth">IsInBounds</span>(newHead)) { <span class="prop">State</span> = <span class="en">GameState</span>.GameOver; <span class="kw">return</span>; }
+        <span class="cmt">// Self collision</span>
+        <span class="kw">if</span> (_snake.<span class="mth">Occupies</span>(newHead))    { <span class="prop">State</span> = <span class="en">GameState</span>.GameOver; <span class="kw">return</span>; }
+
+        <span class="kw">bool</span> ateFood = newHead == _board.<span class="prop">Food</span>;
+        _snake.<span class="mth">Move</span>(newHead, grow: ateFood);
+
+        <span class="kw">if</span> (ateFood)
+        {
+            <span class="prop">Score</span>++;
+            _board.<span class="mth">SpawnFood</span>(_snake.<span class="prop">Body</span>);
+        }
+    }
+
+    <span class="kw">private static</span> <span class="typ">Point</span> <span class="mth">NextHead</span>(<span class="typ">Point</span> head, <span class="en">Direction</span> dir) => dir <span class="kw">switch</span>
+    {
+        <span class="en">Direction</span>.Up    => head <span class="kw">with</span> { Row = head.Row - 1 },
+        <span class="en">Direction</span>.Down  => head <span class="kw">with</span> { Row = head.Row + 1 },
+        <span class="en">Direction</span>.Left  => head <span class="kw">with</span> { Col = head.Col - 1 },
+        <span class="en">Direction</span>.Right => head <span class="kw">with</span> { Col = head.Col + 1 },
+        _ => <span class="kw">throw new</span> <span class="typ">ArgumentOutOfRangeException</span>()
+    };
+}
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     3. VENDING MACHINE
+════════════════════════════════════════ -->
+<section class="system" id="vending">
+  <div class="sys-header">
+    <div class="sys-num">03</div>
+    <div class="sys-meta">
+      <div class="sys-title">Vending Machine</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">State Pattern ★</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Singleton</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Strategy — Pricing</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--amber)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>State Pattern is the core — the machine behaves differently in each state</li>
+          <li>Each <code>IVendingState</code> only allows valid actions — invalid ones throw</li>
+          <li><code>VendingMachine</code> context delegates all behaviour to the current state</li>
+          <li>Inventory is a simple <code>Dictionary&lt;string, int&gt;</code> — keep it simple</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">States</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>IdleState</strong> — waiting for coin insert</li>
+          <li><strong>HasMoneyState</strong> — coin inserted, awaiting product select</li>
+          <li><strong>DispensingState</strong> — dispensing product</li>
+          <li><strong>OutOfStockState</strong> — machine has no inventory</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: Why use State pattern and not just if/else?</span>
+    <span style="font-size:12px;color:#a09060">→ With 4 states and 4 actions you'd have 16 if/else branches. Adding a 5th state means touching every action method. State pattern keeps each state self-contained — Open/Closed Principle.</span>
+    <span class="q">Q: What if someone inserts more money than the item costs?</span>
+    <span style="font-size:12px;color:#a09060">→ Track <code>_insertedAmount</code> in the context. After dispensing, return change: <code>insertedAmount - itemPrice</code>.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">State ★ — core of the design</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Singleton — VendingMachine</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--amber)">
+    <div class="primer-header" style="background:rgba(255,195,65,0.06);border-bottom-color:rgba(255,195,65,0.15)">
+      <span class="primer-label" style="color:var(--amber)">📖 Pattern Primer</span>
+      <span class="primer-name">State Pattern — object behaviour changes with its internal state</span>
+    </div>
+    <div class="primer-desc">Instead of giant if/else chains checking current state inside every method, each state is its own class that implements the same interface. The context just delegates to whichever state is current.</div>
+<pre>
+<span class="cmt">// Imagine a TrafficLight. Without State Pattern:</span>
+<span class="cmt">// every method has: if(state == Red) ... else if(state == Green) ...</span>
+<span class="cmt">// That's O(states × actions) if/else blocks.</span>
+
+<span class="cmt">// ✅ State Pattern</span>
+<span class="kw">public interface</span> <span class="iface">ITrafficLightState</span>
+{
+    <span class="kw">void</span> <span class="mth">Handle</span>(<span class="typ">TrafficLight</span> light);
+}
+
+<span class="kw">public class</span> <span class="typ">RedState</span> : <span class="iface">ITrafficLightState</span>
+{
+    <span class="kw">public void</span> <span class="mth">Handle</span>(<span class="typ">TrafficLight</span> light)
+    {
+        Console.<span class="mth">WriteLine</span>(<span class="str">"RED — Stop."</span>);
+        light.<span class="mth">SetState</span>(<span class="kw">new</span> <span class="typ">GreenState</span>());  <span class="cmt">// transitions to next state</span>
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">GreenState</span> : <span class="iface">ITrafficLightState</span>
+{
+    <span class="kw">public void</span> <span class="mth">Handle</span>(<span class="typ">TrafficLight</span> light)
+    {
+        Console.<span class="mth">WriteLine</span>(<span class="str">"GREEN — Go."</span>);
+        light.<span class="mth">SetState</span>(<span class="kw">new</span> <span class="typ">RedState</span>());
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">TrafficLight</span>
+{
+    <span class="kw">private</span> <span class="iface">ITrafficLightState</span> _state = <span class="kw">new</span> <span class="typ">RedState</span>();
+    <span class="kw">public void</span> <span class="mth">SetState</span>(<span class="iface">ITrafficLightState</span> s) => _state = s;
+    <span class="kw">public void</span> <span class="mth">Change</span>() => _state.<span class="mth">Handle</span>(<span class="kw">this</span>); <span class="cmt">// delegate — no if/else here</span>
+}
+
+<span class="kw">var</span> light = <span class="kw">new</span> <span class="typ">TrafficLight</span>();
+light.<span class="mth">Change</span>();  <span class="cmt">// RED — Stop.  → transitions to Green</span>
+light.<span class="mth">Change</span>();  <span class="cmt">// GREEN — Go.  → transitions to Red</span>
+light.<span class="mth">Change</span>();  <span class="cmt">// RED — Stop.</span>
+
+<span class="cmt">// In VendingMachine → Idle / HasMoney / Dispensing / OutOfStock</span>
+<span class="cmt">// are all IVendingState implementations. Machine.InsertMoney() just</span>
+<span class="cmt">// calls _currentState.InsertMoney(this) — zero if/else in the machine.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">VendingMachine.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Product ───────────────────────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">Product</span>(<span class="kw">string</span> Name, <span class="kw">decimal</span> Price);
+
+<span class="sec-comment">// ── State Interface ───────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IVendingState</span>
+{
+    <span class="kw">void</span> <span class="mth">InsertMoney</span>(<span class="typ">VendingMachine</span> machine, <span class="kw">decimal</span> amount);
+    <span class="kw">void</span> <span class="mth">SelectProduct</span>(<span class="typ">VendingMachine</span> machine, <span class="kw">string</span> productName);
+    <span class="kw">void</span> <span class="mth">Dispense</span>(<span class="typ">VendingMachine</span> machine);
+    <span class="kw">void</span> <span class="mth">Cancel</span>(<span class="typ">VendingMachine</span> machine);
+}
+
+<span class="sec-comment">// ── Idle State ────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">IdleState</span> : <span class="iface">IVendingState</span>
+{
+    <span class="kw">public void</span> <span class="mth">InsertMoney</span>(<span class="typ">VendingMachine</span> m, <span class="kw">decimal</span> amount)
+    {
+        m.<span class="prop">InsertedAmount</span> += amount;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"Inserted ${amount}. Total: ${m.InsertedAmount}"</span>);
+        m.<span class="mth">SetState</span>(m.<span class="prop">HasMoneyState</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">SelectProduct</span>(<span class="typ">VendingMachine</span> m, <span class="kw">string</span> _) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Please insert money first."</span>);
+
+    <span class="kw">public void</span> <span class="mth">Dispense</span>(<span class="typ">VendingMachine</span> m) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Please insert money and select a product."</span>);
+
+    <span class="kw">public void</span> <span class="mth">Cancel</span>(<span class="typ">VendingMachine</span> m) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Nothing to cancel."</span>);
+}
+
+<span class="sec-comment">// ── Has Money State ───────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">HasMoneyState</span> : <span class="iface">IVendingState</span>
+{
+    <span class="kw">public void</span> <span class="mth">InsertMoney</span>(<span class="typ">VendingMachine</span> m, <span class="kw">decimal</span> amount)
+    {
+        m.<span class="prop">InsertedAmount</span> += amount;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"Added ${amount}. Total: ${m.InsertedAmount}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">SelectProduct</span>(<span class="typ">VendingMachine</span> m, <span class="kw">string</span> name)
+    {
+        <span class="kw">if</span> (!m.<span class="prop">Inventory</span>.<span class="mth">TryGetValue</span>(name, <span class="kw">out var</span> stock) || stock == 0)
+        { Console.<span class="mth">WriteLine</span>($<span class="str">"'{name}' is out of stock."</span>); <span class="kw">return</span>; }
+
+        <span class="kw">if</span> (!m.<span class="prop">Products</span>.<span class="mth">TryGetValue</span>(name, <span class="kw">out var</span> product))
+        { Console.<span class="mth">WriteLine</span>($<span class="str">"Unknown product."</span>); <span class="kw">return</span>; }
+
+        <span class="kw">if</span> (m.<span class="prop">InsertedAmount</span> &lt; product.<span class="prop">Price</span>)
+        { Console.<span class="mth">WriteLine</span>($<span class="str">"Need ${product.Price - m.InsertedAmount} more."</span>); <span class="kw">return</span>; }
+
+        m.<span class="prop">SelectedProduct</span> = product;
+        m.<span class="mth">SetState</span>(m.<span class="prop">DispensingState</span>);
+        m.<span class="mth">Dispense</span>();  <span class="cmt">// auto-trigger dispense</span>
+    }
+
+    <span class="kw">public void</span> <span class="mth">Dispense</span>(<span class="typ">VendingMachine</span> m) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Please select a product first."</span>);
+
+    <span class="kw">public void</span> <span class="mth">Cancel</span>(<span class="typ">VendingMachine</span> m)
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"Returned ${m.InsertedAmount}."</span>);
+        m.<span class="prop">InsertedAmount</span> = 0;
+        m.<span class="mth">SetState</span>(m.<span class="prop">IdleState</span>);
+    }
+}
+
+<span class="sec-comment">// ── Dispensing State ──────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">DispensingState</span> : <span class="iface">IVendingState</span>
+{
+    <span class="kw">public void</span> <span class="mth">InsertMoney</span>(<span class="typ">VendingMachine</span> m, <span class="kw">decimal</span> _) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Dispensing in progress, please wait."</span>);
+
+    <span class="kw">public void</span> <span class="mth">SelectProduct</span>(<span class="typ">VendingMachine</span> m, <span class="kw">string</span> _) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Dispensing in progress, please wait."</span>);
+
+    <span class="kw">public void</span> <span class="mth">Dispense</span>(<span class="typ">VendingMachine</span> m)
+    {
+        <span class="kw">var</span> p = m.<span class="prop">SelectedProduct</span>!;
+        m.<span class="prop">Inventory</span>[p.<span class="prop">Name</span>]--;
+        <span class="kw">decimal</span> change = m.<span class="prop">InsertedAmount</span> - p.<span class="prop">Price</span>;
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🎉 Dispensing {p.Name}!"</span>);
+        <span class="kw">if</span> (change > 0) Console.<span class="mth">WriteLine</span>($<span class="str">"Change: ${change}"</span>);
+
+        m.<span class="prop">InsertedAmount</span> = 0;
+        m.<span class="prop">SelectedProduct</span> = <span class="kw">null</span>;
+
+        <span class="cmt">// Go to OutOfStock if inventory now zero, else Idle</span>
+        <span class="kw">bool</span> anyStock = m.<span class="prop">Inventory</span>.<span class="mth">Values</span>.<span class="mth">Any</span>(v => v > 0);
+        m.<span class="mth">SetState</span>(anyStock ? m.<span class="prop">IdleState</span> : m.<span class="prop">OutOfStockState</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Cancel</span>(<span class="typ">VendingMachine</span> m) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Cannot cancel while dispensing."</span>);
+}
+
+<span class="sec-comment">// ── Out-Of-Stock State ────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">OutOfStockState</span> : <span class="iface">IVendingState</span>
+{
+    <span class="kw">public void</span> <span class="mth">InsertMoney</span>(<span class="typ">VendingMachine</span> m, <span class="kw">decimal</span> _) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Machine is out of stock. Money not accepted."</span>);
+    <span class="kw">public void</span> <span class="mth">SelectProduct</span>(<span class="typ">VendingMachine</span> m, <span class="kw">string</span> _) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Machine is out of stock."</span>);
+    <span class="kw">public void</span> <span class="mth">Dispense</span>(<span class="typ">VendingMachine</span> m) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Machine is out of stock."</span>);
+    <span class="kw">public void</span> <span class="mth">Cancel</span>(<span class="typ">VendingMachine</span> m) =>
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Nothing to cancel."</span>);
+}
+
+<span class="sec-comment">// ── Vending Machine Context (Singleton) ───────────────</span>
+<span class="kw">public class</span> <span class="typ">VendingMachine</span>
+{
+    <span class="kw">private static readonly</span> Lazy&lt;<span class="typ">VendingMachine</span>&gt; _instance =
+        <span class="kw">new</span>(() => <span class="kw">new</span> <span class="typ">VendingMachine</span>());
+    <span class="kw">public static</span> <span class="typ">VendingMachine</span> <span class="prop">Instance</span> => _instance.<span class="prop">Value</span>;
+
+    <span class="cmt">// Pre-create all states — avoids allocation on every transition</span>
+    <span class="kw">public</span> <span class="iface">IVendingState</span> <span class="prop">IdleState</span>       { <span class="kw">get</span>; } = <span class="kw">new</span> <span class="typ">IdleState</span>();
+    <span class="kw">public</span> <span class="iface">IVendingState</span> <span class="prop">HasMoneyState</span>   { <span class="kw">get</span>; } = <span class="kw">new</span> <span class="typ">HasMoneyState</span>();
+    <span class="kw">public</span> <span class="iface">IVendingState</span> <span class="prop">DispensingState</span> { <span class="kw">get</span>; } = <span class="kw">new</span> <span class="typ">DispensingState</span>();
+    <span class="kw">public</span> <span class="iface">IVendingState</span> <span class="prop">OutOfStockState</span> { <span class="kw">get</span>; } = <span class="kw">new</span> <span class="typ">OutOfStockState</span>();
+
+    <span class="kw">private</span> <span class="iface">IVendingState</span> _currentState;
+
+    <span class="kw">public</span> Dictionary&lt;<span class="kw">string</span>, <span class="typ">Product</span>&gt; <span class="prop">Products</span>  { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> Dictionary&lt;<span class="kw">string</span>, <span class="kw">int</span>&gt;     <span class="prop">Inventory</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public decimal</span>                       <span class="prop">InsertedAmount</span>  { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="typ">Product</span>?                      <span class="prop">SelectedProduct</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">private</span> <span class="mth">VendingMachine</span>() => _currentState = <span class="prop">IdleState</span>;
+
+    <span class="kw">public void</span> <span class="mth">LoadProduct</span>(<span class="typ">Product</span> p, <span class="kw">int</span> qty)
+    {
+        <span class="prop">Products</span>[p.<span class="prop">Name</span>]  = p;
+        <span class="prop">Inventory</span>[p.<span class="prop">Name</span>] = qty;
+        <span class="kw">if</span> (_currentState <span class="kw">is</span> <span class="typ">OutOfStockState</span>) <span class="mth">SetState</span>(<span class="prop">IdleState</span>);
+    }
+
+    <span class="cmt">// Delegate all actions to current state</span>
+    <span class="kw">public void</span> <span class="mth">InsertMoney</span>(<span class="kw">decimal</span> amount)    => _currentState.<span class="mth">InsertMoney</span>(<span class="kw">this</span>, amount);
+    <span class="kw">public void</span> <span class="mth">SelectProduct</span>(<span class="kw">string</span> name)      => _currentState.<span class="mth">SelectProduct</span>(<span class="kw">this</span>, name);
+    <span class="kw">public void</span> <span class="mth">Dispense</span>()                      => _currentState.<span class="mth">Dispense</span>(<span class="kw">this</span>);
+    <span class="kw">public void</span> <span class="mth">Cancel</span>()                         => _currentState.<span class="mth">Cancel</span>(<span class="kw">this</span>);
+    <span class="kw">public void</span> <span class="mth">SetState</span>(<span class="iface">IVendingState</span> state)   => _currentState = state;
+}
+
+<span class="sec-comment">// ── Usage ─────────────────────────────────────────────</span>
+<span class="kw">var</span> vm = <span class="typ">VendingMachine</span>.<span class="prop">Instance</span>;
+vm.<span class="mth">LoadProduct</span>(<span class="kw">new</span> <span class="typ">Product</span>(<span class="str">"Cola"</span>, 1.50m), qty: 5);
+vm.<span class="mth">LoadProduct</span>(<span class="kw">new</span> <span class="typ">Product</span>(<span class="str">"Chips"</span>, 1.00m), qty: 3);
+
+vm.<span class="mth">InsertMoney</span>(1.50m);    <span class="cmt">// → HasMoneyState</span>
+vm.<span class="mth">SelectProduct</span>(<span class="str">"Cola"</span>); <span class="cmt">// → DispensingState → Idle</span>
+vm.<span class="mth">InsertMoney</span>(0.50m);    <span class="cmt">// need more money message</span>
+vm.<span class="mth">SelectProduct</span>(<span class="str">"Chips"</span>);<span class="cmt">// need more money</span>
+vm.<span class="mth">InsertMoney</span>(0.50m);    <span class="cmt">// total $1.00</span>
+vm.<span class="mth">SelectProduct</span>(<span class="str">"Chips"</span>);<span class="cmt">// → dispenses, no change</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     4. LOGGING SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="logging">
+  <div class="sys-header">
+    <div class="sys-num">04</div>
+    <div class="sys-meta">
+      <div class="sys-title">Logging System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Chain of Responsibility ★</span>
+        <span class="sys-tag" style="color:var(--teal);border-color:rgba(78,205,196,.3)">Singleton</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Strategy — Formatters</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--purple)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Chain of Responsibility: each handler checks if it should handle the log level, then passes it on</li>
+          <li><code>Logger</code> is a Singleton — one entry point system-wide</li>
+          <li>Handlers are composable — add FileHandler, DbHandler without changing Logger</li>
+          <li>Log level is an int — trivial to compare (DEBUG=0, INFO=1, etc.)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--teal)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>LogLevel</strong> enum — Debug / Info / Warning / Error</li>
+          <li><strong>LogMessage</strong> — level + message + timestamp</li>
+          <li><strong>LogHandler</strong> — abstract base, has a Next handler</li>
+          <li><strong>ConsoleHandler / FileHandler</strong> — concrete handlers</li>
+          <li><strong>Logger</strong> — Singleton, builds and holds the chain</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: Why Chain of Responsibility over a simple switch?</span>
+    <span style="font-size:12px;color:#a09060">→ Adding a new handler (e.g. SlackHandler for errors) requires zero changes to Logger or existing handlers. Open/Closed. With a switch, you'd touch the Logger every time.</span>
+    <span class="q">Q: How would you make this thread-safe?</span>
+    <span style="font-size:12px;color:#a09060">→ Use a <code>Channel&lt;LogMessage&gt;</code> as a buffer. A single background Task drains the channel and calls the chain — serialises all writes, no locks needed on handlers.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Chain of Responsibility ★</span>
+    <span class="pat" style="background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--teal)">Singleton — Logger</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Decorator — formatters</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--purple)">
+    <div class="primer-header" style="background:rgba(183,148,244,0.06);border-bottom-color:rgba(183,148,244,0.15)">
+      <span class="primer-label" style="color:var(--purple)">📖 Pattern Primer</span>
+      <span class="primer-name">Chain of Responsibility — pass a request along a chain of handlers</span>
+    </div>
+    <div class="primer-desc">Each handler decides: "can I handle this? If yes, handle it. Then pass it along regardless." Handlers are linked together. The sender just calls the first one and forgets about the rest.</div>
+<pre>
+<span class="cmt">// Think of customer support tiers:</span>
+<span class="cmt">// Level1 handles basic issues → escalates → Level2 → Level3</span>
+
+<span class="kw">public abstract class</span> <span class="typ">SupportHandler</span>
+{
+    <span class="kw">private</span> <span class="typ">SupportHandler</span>? _next;
+
+    <span class="cmt">// SetNext returns next so you can chain: h1.SetNext(h2).SetNext(h3)</span>
+    <span class="kw">public</span> <span class="typ">SupportHandler</span> <span class="mth">SetNext</span>(<span class="typ">SupportHandler</span> next)
+    {
+        _next = next;
+        <span class="kw">return</span> next;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Handle</span>(<span class="kw">int</span> severity)
+    {
+        <span class="kw">if</span> (<span class="mth">CanHandle</span>(severity))
+            Console.<span class="mth">WriteLine</span>($<span class="str">"{GetType().Name} handled severity {severity}"</span>);
+
+        _next?.<span class="mth">Handle</span>(severity);  <span class="cmt">// always pass along</span>
+    }
+
+    <span class="kw">protected abstract bool</span> <span class="mth">CanHandle</span>(<span class="kw">int</span> severity);
+}
+
+<span class="kw">public class</span> <span class="typ">Level1Support</span> : <span class="typ">SupportHandler</span>
+{
+    <span class="kw">protected override bool</span> <span class="mth">CanHandle</span>(<span class="kw">int</span> s) => s &lt;= 1;
+}
+<span class="kw">public class</span> <span class="typ">Level2Support</span> : <span class="typ">SupportHandler</span>
+{
+    <span class="kw">protected override bool</span> <span class="mth">CanHandle</span>(<span class="kw">int</span> s) => s &lt;= 3;
+}
+<span class="kw">public class</span> <span class="typ">Level3Support</span> : <span class="typ">SupportHandler</span>
+{
+    <span class="kw">protected override bool</span> <span class="mth">CanHandle</span>(<span class="kw">int</span> s) => <span class="kw">true</span>;
+}
+
+<span class="cmt">// Build the chain</span>
+<span class="kw">var</span> l1 = <span class="kw">new</span> <span class="typ">Level1Support</span>();
+l1.<span class="mth">SetNext</span>(<span class="kw">new</span> <span class="typ">Level2Support</span>()).<span class="mth">SetNext</span>(<span class="kw">new</span> <span class="typ">Level3Support</span>());
+
+l1.<span class="mth">Handle</span>(1);  <span class="cmt">// Level1 handles it, passes to Level2 (can't), passes to Level3 (can)</span>
+l1.<span class="mth">Handle</span>(5);  <span class="cmt">// Level1 skips, Level2 skips, Level3 handles</span>
+
+<span class="cmt">// In Logger → ConsoleHandler (Debug+), FileHandler (Warning+),</span>
+<span class="cmt">// AlertHandler (Error only). Logger calls chain head — done.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">LoggingSystem.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Log Level & Message ───────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">LogLevel</span> { Debug = 0, Info = 1, Warning = 2, Error = 3 }
+
+<span class="kw">public record</span> <span class="typ">LogMessage</span>(
+    <span class="en">LogLevel</span>  Level,
+    <span class="kw">string</span>    Message,
+    DateTime  Timestamp)
+{
+    <span class="kw">public</span> <span class="kw">override string</span> <span class="mth">ToString</span>() =>
+        $<span class="str">"[{Timestamp:HH:mm:ss}] [{Level,-7}] {Message}"</span>;
+}
+
+<span class="sec-comment">// ── Abstract Handler (Chain of Responsibility) ────────</span>
+<span class="kw">public abstract class</span> <span class="typ">LogHandler</span>
+{
+    <span class="kw">private</span> <span class="typ">LogHandler</span>? _next;
+
+    <span class="cmt">// Fluent builder: ConsoleHandler.SetNext(FileHandler).SetNext(AlertHandler)</span>
+    <span class="kw">public</span> <span class="typ">LogHandler</span> <span class="mth">SetNext</span>(<span class="typ">LogHandler</span> next)
+    {
+        _next = next;
+        <span class="kw">return</span> next; <span class="cmt">// return next so calls can be chained</span>
+    }
+
+    <span class="kw">public void</span> <span class="mth">Handle</span>(<span class="typ">LogMessage</span> msg)
+    {
+        <span class="kw">if</span> (<span class="mth">CanHandle</span>(msg))
+            <span class="mth">Write</span>(msg);
+
+        <span class="cmt">// Always pass down the chain regardless</span>
+        _next?.<span class="mth">Handle</span>(msg);
+    }
+
+    <span class="kw">protected abstract bool</span> <span class="mth">CanHandle</span>(<span class="typ">LogMessage</span> msg);
+    <span class="kw">protected abstract void</span> <span class="mth">Write</span>(<span class="typ">LogMessage</span> msg);
+}
+
+<span class="sec-comment">// ── Console Handler ───────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">ConsoleLogHandler</span> : <span class="typ">LogHandler</span>
+{
+    <span class="kw">private readonly</span> <span class="en">LogLevel</span> _minLevel;
+
+    <span class="kw">public</span> <span class="mth">ConsoleLogHandler</span>(<span class="en">LogLevel</span> minLevel = <span class="en">LogLevel</span>.Debug)
+        => _minLevel = minLevel;
+
+    <span class="kw">protected override bool</span> <span class="mth">CanHandle</span>(<span class="typ">LogMessage</span> msg) =>
+        msg.<span class="prop">Level</span> >= _minLevel;
+
+    <span class="kw">protected override void</span> <span class="mth">Write</span>(<span class="typ">LogMessage</span> msg)
+    {
+        Console.<span class="prop">ForegroundColor</span> = msg.<span class="prop">Level</span> <span class="kw">switch</span>
+        {
+            <span class="en">LogLevel</span>.Error   => ConsoleColor.Red,
+            <span class="en">LogLevel</span>.Warning => ConsoleColor.Yellow,
+            <span class="en">LogLevel</span>.Info    => ConsoleColor.Cyan,
+            _                => ConsoleColor.Gray
+        };
+        Console.<span class="mth">WriteLine</span>(msg);
+        Console.<span class="mth">ResetColor</span>();
+    }
+}
+
+<span class="sec-comment">// ── File Handler ──────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">FileLogHandler</span> : <span class="typ">LogHandler</span>
+{
+    <span class="kw">private readonly</span> <span class="kw">string</span>   _path;
+    <span class="kw">private readonly</span> <span class="en">LogLevel</span> _minLevel;
+
+    <span class="kw">public</span> <span class="mth">FileLogHandler</span>(<span class="kw">string</span> path, <span class="en">LogLevel</span> minLevel = <span class="en">LogLevel</span>.Warning)
+    {
+        _path     = path;
+        _minLevel = minLevel;
+    }
+
+    <span class="kw">protected override bool</span> <span class="mth">CanHandle</span>(<span class="typ">LogMessage</span> msg) =>
+        msg.<span class="prop">Level</span> >= _minLevel;
+
+    <span class="kw">protected override void</span> <span class="mth">Write</span>(<span class="typ">LogMessage</span> msg) =>
+        File.<span class="mth">AppendAllText</span>(_path, msg + Environment.<span class="prop">NewLine</span>);
+}
+
+<span class="sec-comment">// ── Error Alert Handler ───────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">AlertLogHandler</span> : <span class="typ">LogHandler</span>
+{
+    <span class="kw">protected override bool</span> <span class="mth">CanHandle</span>(<span class="typ">LogMessage</span> msg) =>
+        msg.<span class="prop">Level</span> == <span class="en">LogLevel</span>.Error;
+
+    <span class="kw">protected override void</span> <span class="mth">Write</span>(<span class="typ">LogMessage</span> msg) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🚨 ALERT: {msg.Message} — would send email/SMS here"</span>);
+}
+
+<span class="sec-comment">// ── Logger Singleton ──────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Logger</span>
+{
+    <span class="kw">private static readonly</span> Lazy&lt;<span class="typ">Logger</span>&gt; _instance = <span class="kw">new</span>(() => <span class="kw">new</span> <span class="typ">Logger</span>());
+    <span class="kw">public static</span> <span class="typ">Logger</span> <span class="prop">Instance</span> => _instance.<span class="prop">Value</span>;
+
+    <span class="kw">private readonly</span> <span class="typ">LogHandler</span> _chain;
+
+    <span class="kw">private</span> <span class="mth">Logger</span>()
+    {
+        <span class="cmt">// Build the chain: Console → File → Alert</span>
+        <span class="kw">var</span> console = <span class="kw">new</span> <span class="typ">ConsoleLogHandler</span>(<span class="en">LogLevel</span>.Debug);
+        <span class="kw">var</span> file    = <span class="kw">new</span> <span class="typ">FileLogHandler</span>(<span class="str">"app.log"</span>, <span class="en">LogLevel</span>.Warning);
+        <span class="kw">var</span> alert   = <span class="kw">new</span> <span class="typ">AlertLogHandler</span>();
+
+        console.<span class="mth">SetNext</span>(file).<span class="mth">SetNext</span>(alert);
+        _chain = console;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Log</span>(<span class="en">LogLevel</span> level, <span class="kw">string</span> message) =>
+        _chain.<span class="mth">Handle</span>(<span class="kw">new</span> <span class="typ">LogMessage</span>(level, message, DateTime.<span class="prop">UtcNow</span>));
+
+    <span class="cmt">// Convenience methods</span>
+    <span class="kw">public void</span> <span class="mth">Debug</span>(<span class="kw">string</span> msg)   => <span class="mth">Log</span>(<span class="en">LogLevel</span>.Debug,   msg);
+    <span class="kw">public void</span> <span class="mth">Info</span>(<span class="kw">string</span> msg)    => <span class="mth">Log</span>(<span class="en">LogLevel</span>.Info,    msg);
+    <span class="kw">public void</span> <span class="mth">Warning</span>(<span class="kw">string</span> msg) => <span class="mth">Log</span>(<span class="en">LogLevel</span>.Warning, msg);
+    <span class="kw">public void</span> <span class="mth">Error</span>(<span class="kw">string</span> msg)   => <span class="mth">Log</span>(<span class="en">LogLevel</span>.Error,   msg);
+}
+
+<span class="sec-comment">// ── Usage ─────────────────────────────────────────────</span>
+<span class="kw">var</span> log = <span class="typ">Logger</span>.<span class="prop">Instance</span>;
+log.<span class="mth">Debug</span>(<span class="str">"App starting up"</span>);              <span class="cmt">// Console only</span>
+log.<span class="mth">Info</span>(<span class="str">"User logged in: alice"</span>);          <span class="cmt">// Console only</span>
+log.<span class="mth">Warning</span>(<span class="str">"Memory usage above 80%"</span>);       <span class="cmt">// Console + File</span>
+log.<span class="mth">Error</span>(<span class="str">"Database connection lost"</span>);       <span class="cmt">// Console + File + Alert</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     5. PARKING LOT
+════════════════════════════════════════ -->
+<section class="system" id="parking">
+  <div class="sys-header">
+    <div class="sys-num">05</div>
+    <div class="sys-meta">
+      <div class="sys-title">Parking Lot</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--teal);border-color:rgba(78,205,196,.3)">Factory</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Composite</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Strategy — Pricing</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Singleton</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--teal)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Composite: ParkingLot → Floors → Spots (treat uniformly)</li>
+          <li>Factory: <code>ParkingSpotFactory</code> creates correct spot type for vehicle</li>
+          <li>Strategy: <code>IPricingStrategy</code> makes pricing rules swappable</li>
+          <li>Ticket is a value object: created on entry, settled on exit</li>
+          <li>Spot state is an enum — not a boolean — to allow Reserved state later</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>ParkingLot</strong> — Singleton, owns floors</li>
+          <li><strong>ParkingFloor</strong> — list of spots</li>
+          <li><strong>ParkingSpot</strong> — SpotType + SpotStatus</li>
+          <li><strong>Vehicle</strong> — type determines spot needed</li>
+          <li><strong>Ticket</strong> — entry time, spot, vehicle</li>
+          <li><strong>IPricingStrategy</strong> — computes fee from ticket</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you find an available spot efficiently?</span>
+    <span style="font-size:12px;color:#a09060">→ Each floor tracks available spots per type using a counter. Finding a floor with availability is O(floors), then O(spots on floor). For production, maintain a queue of available spots per type.</span>
+    <span class="q">Q: How would you handle multiple entry/exit points concurrently?</span>
+    <span style="font-size:12px;color:#a09060">→ Use <code>Interlocked.Decrement</code> on the availability counter. For spot assignment, use a <code>ConcurrentQueue&lt;ParkingSpot&gt;</code> per type — dequeue on entry, enqueue on exit. No locks needed.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--teal)">Factory — spot type matching</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Composite — lot/floor/spot</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — pricing</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Singleton — ParkingLot</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--teal)">
+    <div class="primer-header" style="background:rgba(78,205,196,0.06);border-bottom-color:rgba(78,205,196,0.15)">
+      <span class="primer-label" style="color:var(--teal)">📖 Pattern Primer</span>
+      <span class="primer-name">Composite + Strategy — tree structures and swappable algorithms</span>
+    </div>
+    <div class="primer-desc">
+      <strong style="color:#8fb">Composite</strong> lets you treat individual objects and groups of objects identically through a shared interface. Perfect for tree structures (Lot → Floors → Spots).<br>
+      <strong style="color:#8bf">Strategy</strong> you've seen — here it makes pricing rules swappable without touching ParkingLot.
+    </div>
+<pre>
+<span class="cmt">// ── COMPOSITE: treat File and Folder the same way ──</span>
+<span class="kw">public interface</span> <span class="iface">IFileSystemItem</span>
+{
+    <span class="kw">string</span> <span class="prop">Name</span> { <span class="kw">get</span>; }
+    <span class="kw">void</span> <span class="mth">Print</span>(<span class="kw">string</span> indent = <span class="str">""</span>);
+}
+
+<span class="kw">public class</span> <span class="typ">File</span> : <span class="iface">IFileSystemItem</span>
+{
+    <span class="kw">public string</span> <span class="prop">Name</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">File</span>(<span class="kw">string</span> name) => <span class="prop">Name</span> = name;
+    <span class="kw">public void</span> <span class="mth">Print</span>(<span class="kw">string</span> indent = <span class="str">""</span>) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"{indent}📄 {Name}"</span>);
+}
+
+<span class="kw">public class</span> <span class="typ">Folder</span> : <span class="iface">IFileSystemItem</span>
+{
+    <span class="kw">public string</span> <span class="prop">Name</span> { <span class="kw">get</span>; }
+    <span class="kw">private</span> List&lt;<span class="iface">IFileSystemItem</span>&gt; _children = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="mth">Folder</span>(<span class="kw">string</span> name) => <span class="prop">Name</span> = name;
+    <span class="kw">public void</span> <span class="mth">Add</span>(<span class="iface">IFileSystemItem</span> item) => _children.<span class="mth">Add</span>(item);
+
+    <span class="cmt">// Folder and File both implement Print — caller treats them the same</span>
+    <span class="kw">public void</span> <span class="mth">Print</span>(<span class="kw">string</span> indent = <span class="str">""</span>)
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"{indent}📁 {Name}"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> child <span class="kw">in</span> _children)
+            child.<span class="mth">Print</span>(indent + <span class="str">"  "</span>);
+    }
+}
+
+<span class="kw">var</span> root = <span class="kw">new</span> <span class="typ">Folder</span>(<span class="str">"root"</span>);
+root.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">File</span>(<span class="str">"readme.txt"</span>));
+<span class="kw">var</span> src = <span class="kw">new</span> <span class="typ">Folder</span>(<span class="str">"src"</span>);
+src.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">File</span>(<span class="str">"Program.cs"</span>));
+root.<span class="mth">Add</span>(src);
+root.<span class="mth">Print</span>();
+<span class="cmt">// 📁 root</span>
+<span class="cmt">//   📄 readme.txt</span>
+<span class="cmt">//   📁 src</span>
+<span class="cmt">//     📄 Program.cs</span>
+
+<span class="cmt">// In Parking Lot → ParkingLot (root) contains ParkingFloors (folders)</span>
+<span class="cmt">// which contain ParkingSpots (files). All expose AvailableCount().</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">ParkingLot.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">VehicleType</span> { Motorcycle, Car, Truck }
+<span class="kw">public enum</span> <span class="en">SpotType</span>    { Compact, Regular, Large }
+<span class="kw">public enum</span> <span class="en">SpotStatus</span>  { Available, Occupied, Reserved }
+
+<span class="sec-comment">// ── Vehicle ───────────────────────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">Vehicle</span>(<span class="kw">string</span> LicensePlate, <span class="en">VehicleType</span> Type);
+
+<span class="sec-comment">// ── Ticket (Value Object) ─────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Ticket</span>
+{
+    <span class="kw">public</span> Guid         <span class="prop">Id</span>         { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="typ">Vehicle</span>      <span class="prop">Vehicle</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">ParkingSpot</span>  <span class="prop">Spot</span>       { <span class="kw">get</span>; }
+    <span class="kw">public</span> DateTime     <span class="prop">EntryTime</span>  { <span class="kw">get</span>; } = DateTime.<span class="prop">UtcNow</span>;
+    <span class="kw">public</span> DateTime?    <span class="prop">ExitTime</span>   { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public</span> <span class="kw">decimal</span>?    <span class="prop">Fee</span>        { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Ticket</span>(<span class="typ">Vehicle</span> vehicle, <span class="typ">ParkingSpot</span> spot)
+    {
+        <span class="prop">Vehicle</span> = vehicle;
+        <span class="prop">Spot</span>    = spot;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Settle</span>(<span class="kw">decimal</span> fee)
+    {
+        <span class="prop">ExitTime</span> = DateTime.<span class="prop">UtcNow</span>;
+        <span class="prop">Fee</span>      = fee;
+    }
+
+    <span class="kw">public</span> TimeSpan <span class="prop">Duration</span> =>
+        (<span class="prop">ExitTime</span> ?? DateTime.<span class="prop">UtcNow</span>) - <span class="prop">EntryTime</span>;
+}
+
+<span class="sec-comment">// ── Parking Spot ──────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">ParkingSpot</span>
+{
+    <span class="kw">public</span> <span class="kw">int</span>         <span class="prop">Id</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">SpotType</span>   <span class="prop">Type</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">SpotStatus</span> <span class="prop">Status</span> { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="en">SpotStatus</span>.Available;
+
+    <span class="kw">public</span> <span class="mth">ParkingSpot</span>(<span class="kw">int</span> id, <span class="en">SpotType</span> type) { <span class="prop">Id</span> = id; <span class="prop">Type</span> = type; }
+
+    <span class="kw">public bool</span> <span class="prop">IsAvailable</span> => <span class="prop">Status</span> == <span class="en">SpotStatus</span>.Available;
+
+    <span class="kw">public void</span> <span class="mth">Occupy</span>()   => <span class="prop">Status</span> = <span class="en">SpotStatus</span>.Occupied;
+    <span class="kw">public void</span> <span class="mth">Vacate</span>()   => <span class="prop">Status</span> = <span class="en">SpotStatus</span>.Available;
+}
+
+<span class="sec-comment">// ── Pricing Strategy ──────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">decimal</span> <span class="mth">Calculate</span>(<span class="typ">Ticket</span> ticket);
+}
+
+<span class="kw">public class</span> <span class="typ">HourlyPricing</span> : <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">private readonly</span> <span class="kw">decimal</span> _ratePerHour;
+    <span class="kw">public</span> <span class="mth">HourlyPricing</span>(<span class="kw">decimal</span> ratePerHour = 2.50m) => _ratePerHour = ratePerHour;
+
+    <span class="kw">public decimal</span> <span class="mth">Calculate</span>(<span class="typ">Ticket</span> ticket)
+    {
+        <span class="kw">var</span> hours = (<span class="kw">decimal</span>)Math.<span class="mth">Ceiling</span>(ticket.<span class="prop">Duration</span>.<span class="prop">TotalHours</span>);
+        <span class="kw">return</span> hours * _ratePerHour;
+    }
+}
+
+<span class="sec-comment">// ── Parking Floor (Composite leaf) ────────────────────</span>
+<span class="kw">public class</span> <span class="typ">ParkingFloor</span>
+{
+    <span class="kw">public int</span> <span class="prop">FloorNumber</span> { <span class="kw">get</span>; }
+    <span class="kw">private readonly</span> List&lt;<span class="typ">ParkingSpot</span>&gt; _spots = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">ParkingFloor</span>(<span class="kw">int</span> floorNumber) => <span class="prop">FloorNumber</span> = floorNumber;
+
+    <span class="kw">public void</span> <span class="mth">AddSpot</span>(<span class="typ">ParkingSpot</span> spot) => _spots.<span class="mth">Add</span>(spot);
+
+    <span class="kw">public</span> <span class="typ">ParkingSpot</span>? <span class="mth">FindAvailableSpot</span>(<span class="en">SpotType</span> type) =>
+        _spots.<span class="mth">FirstOrDefault</span>(s => s.<span class="prop">Type</span> == type && s.<span class="prop">IsAvailable</span>);
+
+    <span class="kw">public int</span> <span class="mth">AvailableCount</span>(<span class="en">SpotType</span> type) =>
+        _spots.<span class="mth">Count</span>(s => s.<span class="prop">Type</span> == type && s.<span class="prop">IsAvailable</span>);
+}
+
+<span class="sec-comment">// ── Spot Type Resolver ────────────────────────────────</span>
+<span class="kw">public static class</span> <span class="typ">SpotTypeResolver</span>
+{
+    <span class="kw">public static</span> <span class="en">SpotType</span> <span class="mth">For</span>(<span class="en">VehicleType</span> v) => v <span class="kw">switch</span>
+    {
+        <span class="en">VehicleType</span>.Motorcycle => <span class="en">SpotType</span>.Compact,
+        <span class="en">VehicleType</span>.Car        => <span class="en">SpotType</span>.Regular,
+        <span class="en">VehicleType</span>.Truck      => <span class="en">SpotType</span>.Large,
+        _ => <span class="kw">throw new</span> <span class="typ">ArgumentOutOfRangeException</span>()
+    };
+}
+
+<span class="sec-comment">// ── Parking Lot (Singleton + Composite root) ──────────</span>
+<span class="kw">public class</span> <span class="typ">ParkingLot</span>
+{
+    <span class="kw">private static readonly</span> Lazy&lt;<span class="typ">ParkingLot</span>&gt; _instance =
+        <span class="kw">new</span>(() => <span class="kw">new</span> <span class="typ">ParkingLot</span>());
+    <span class="kw">public static</span> <span class="typ">ParkingLot</span> <span class="prop">Instance</span> => _instance.<span class="prop">Value</span>;
+
+    <span class="kw">private readonly</span> List&lt;<span class="typ">ParkingFloor</span>&gt;          _floors  = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> Dictionary&lt;Guid, <span class="typ">Ticket</span>&gt;    _tickets = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IPricingStrategy</span>             _pricing;
+
+    <span class="kw">private</span> <span class="mth">ParkingLot</span>(<span class="iface">IPricingStrategy</span>? pricing = <span class="kw">null</span>)
+        => _pricing = pricing ?? <span class="kw">new</span> <span class="typ">HourlyPricing</span>();
+
+    <span class="kw">public void</span> <span class="mth">AddFloor</span>(<span class="typ">ParkingFloor</span> floor) => _floors.<span class="mth">Add</span>(floor);
+
+    <span class="kw">public</span> <span class="typ">Ticket</span>? <span class="mth">CheckIn</span>(<span class="typ">Vehicle</span> vehicle)
+    {
+        <span class="kw">var</span> spotType = <span class="typ">SpotTypeResolver</span>.<span class="mth">For</span>(vehicle.<span class="prop">Type</span>);
+        <span class="kw">var</span> spot     = _floors
+            .<span class="mth">Select</span>(f => f.<span class="mth">FindAvailableSpot</span>(spotType))
+            .<span class="mth">FirstOrDefault</span>(s => s != <span class="kw">null</span>);
+
+        <span class="kw">if</span> (spot == <span class="kw">null</span>)
+        {
+            Console.<span class="mth">WriteLine</span>($<span class="str">"No {spotType} spots available."</span>);
+            <span class="kw">return null</span>;
+        }
+
+        spot.<span class="mth">Occupy</span>();
+        <span class="kw">var</span> ticket = <span class="kw">new</span> <span class="typ">Ticket</span>(vehicle, spot);
+        _tickets[ticket.<span class="prop">Id</span>] = ticket;
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Checked in {vehicle.LicensePlate} → Spot {spot.Id} (Ticket: {ticket.Id})"</span>);
+        <span class="kw">return</span> ticket;
+    }
+
+    <span class="kw">public decimal</span>? <span class="mth">CheckOut</span>(Guid ticketId)
+    {
+        <span class="kw">if</span> (!_tickets.<span class="mth">TryGetValue</span>(ticketId, <span class="kw">out var</span> ticket))
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"Ticket not found."</span>);
+            <span class="kw">return null</span>;
+        }
+
+        <span class="kw">decimal</span> fee = _pricing.<span class="mth">Calculate</span>(ticket);
+        ticket.<span class="mth">Settle</span>(fee);
+        ticket.<span class="prop">Spot</span>.<span class="mth">Vacate</span>();
+        _tickets.<span class="mth">Remove</span>(ticketId);
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🚗 Checked out {ticket.Vehicle.LicensePlate}. Fee: ${fee:F2}"</span>);
+        <span class="kw">return</span> fee;
+    }
+
+    <span class="kw">public void</span> <span class="mth">PrintAvailability</span>()
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> floor <span class="kw">in</span> _floors)
+        {
+            Console.<span class="mth">WriteLine</span>($<span class="str">"Floor {floor.FloorNumber}:"</span>);
+            <span class="kw">foreach</span> (<span class="en">SpotType</span> t <span class="kw">in</span> Enum.<span class="mth">GetValues</span>&lt;<span class="en">SpotType</span>&gt;())
+                Console.<span class="mth">WriteLine</span>($<span class="str">"  {t}: {floor.AvailableCount(t)} available"</span>);
+        }
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> lot = <span class="typ">ParkingLot</span>.<span class="prop">Instance</span>;
+
+<span class="cmt">// Build the lot: 2 floors, different spot types</span>
+<span class="kw">var</span> floor1 = <span class="kw">new</span> <span class="typ">ParkingFloor</span>(1);
+floor1.<span class="mth">AddSpot</span>(<span class="kw">new</span> <span class="typ">ParkingSpot</span>(101, <span class="en">SpotType</span>.Compact));
+floor1.<span class="mth">AddSpot</span>(<span class="kw">new</span> <span class="typ">ParkingSpot</span>(102, <span class="en">SpotType</span>.Regular));
+floor1.<span class="mth">AddSpot</span>(<span class="kw">new</span> <span class="typ">ParkingSpot</span>(103, <span class="en">SpotType</span>.Regular));
+floor1.<span class="mth">AddSpot</span>(<span class="kw">new</span> <span class="typ">ParkingSpot</span>(104, <span class="en">SpotType</span>.Large));
+lot.<span class="mth">AddFloor</span>(floor1);
+
+<span class="kw">var</span> floor2 = <span class="kw">new</span> <span class="typ">ParkingFloor</span>(2);
+floor2.<span class="mth">AddSpot</span>(<span class="kw">new</span> <span class="typ">ParkingSpot</span>(201, <span class="en">SpotType</span>.Regular));
+floor2.<span class="mth">AddSpot</span>(<span class="kw">new</span> <span class="typ">ParkingSpot</span>(202, <span class="en">SpotType</span>.Regular));
+lot.<span class="mth">AddFloor</span>(floor2);
+
+<span class="cmt">// Simulate activity</span>
+lot.<span class="mth">PrintAvailability</span>();
+
+<span class="kw">var</span> car1   = <span class="kw">new</span> <span class="typ">Vehicle</span>(<span class="str">"MH-01-AB-1234"</span>, <span class="en">VehicleType</span>.Car);
+<span class="kw">var</span> moto   = <span class="kw">new</span> <span class="typ">Vehicle</span>(<span class="str">"MH-02-CD-5678"</span>, <span class="en">VehicleType</span>.Motorcycle);
+<span class="kw">var</span> truck  = <span class="kw">new</span> <span class="typ">Vehicle</span>(<span class="str">"MH-03-EF-9012"</span>, <span class="en">VehicleType</span>.Truck);
+
+<span class="kw">var</span> t1 = lot.<span class="mth">CheckIn</span>(car1)!;
+<span class="kw">var</span> t2 = lot.<span class="mth">CheckIn</span>(moto)!;
+<span class="kw">var</span> t3 = lot.<span class="mth">CheckIn</span>(truck)!;
+
+System.Threading.Thread.<span class="mth">Sleep</span>(100); <span class="cmt">// simulate time passing</span>
+lot.<span class="mth">CheckOut</span>(t1.<span class="prop">Id</span>);
+lot.<span class="mth">CheckOut</span>(t2.<span class="prop">Id</span>);
+lot.<span class="mth">PrintAvailability</span>();
+</pre>
+  </div>
+</section>
+
+</main>
+</div><!-- end layout -->
+
+<script>
+// Sidebar active state on scroll
+const sections = document.querySelectorAll('.system');
+const sbItems  = document.querySelectorAll('.sb-item[href]');
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sbItems.forEach(i => i.classList.remove('active'));
+      const id = e.target.id;
+      const active = document.querySelector(`.sb-item[href="#${id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

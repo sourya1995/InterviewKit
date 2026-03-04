@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLD Cheatsheet — .NET Engineer Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #2a2a35;
+    --accent: #e8c547;
+    --accent2: #7c6af7;
+    --accent3: #4fc4a0;
+    --accent4: #f07060;
+    --text: #e8e8f0;
+    --muted: #7070888;
+    --muted2: #555568;
+    --tag-bg: #1e1e28;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 60px 48px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,106,247,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 600px; height: 2px;
+    background: linear-gradient(to left, transparent, var(--accent2), transparent);
+  }
+
+  .header-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
+
+  header h1 span {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .header-sub {
+    margin-top: 14px;
+    color: #70708a;
+    font-size: 15px;
+    max-width: 560px;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #9090aa;
+  }
+
+  .meta-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── INTERVIEW QUESTIONS SECTION ── */
+  .section-header {
+    padding: 48px 0 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .section-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    background: rgba(124,106,247,0.1);
+    border: 1px solid rgba(124,106,247,0.25);
+    padding: 3px 10px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── QUESTION CARDS ── */
+  .q-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .q-card:hover { border-color: var(--accent2); }
+
+  .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .q-category {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    padding: 2px 0;
+  }
+
+  .q-cat-scope { color: var(--accent3); }
+  .q-cat-entity { color: var(--accent2); }
+  .q-cat-behavior { color: var(--accent); }
+  .q-cat-constraint { color: var(--accent4); }
+  .q-cat-nonfunc { color: #a0c4ff; }
+  .q-cat-extend { color: #c9a4ff; }
+
+  .q-questions {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .q-questions li {
+    font-size: 13px;
+    color: #c0c0d4;
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .q-questions li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--muted2);
+    font-weight: bold;
+  }
+
+  /* ── SYSTEM CARDS ── */
+  .systems-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 24px;
+  }
+
+  .sys-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .sys-card:hover {
+    transform: translateY(-2px);
+    border-color: #3a3a4f;
+  }
+
+  .sys-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .sys-icon {
+    font-size: 22px;
+    width: 42px; height: 42px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .sys-title-block { flex: 1; }
+
+  .sys-name {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .sys-tags {
+    display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
+  }
+
+  .sys-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+
+  .tag-c { background: rgba(232,197,71,0.08); border-color: rgba(232,197,71,0.3); color: var(--accent); }
+  .tag-s { background: rgba(124,106,247,0.08); border-color: rgba(124,106,247,0.3); color: var(--accent2); }
+  .tag-b { background: rgba(79,196,160,0.08); border-color: rgba(79,196,160,0.3); color: var(--accent3); }
+
+  .sys-body {
+    padding: 16px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pattern-section { }
+
+  .pattern-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .creational-title { color: var(--accent); }
+  .structural-title { color: var(--accent2); }
+  .behavioral-title { color: var(--accent3); }
+
+  .pattern-list {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+
+  .pattern-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    line-height: 1.3;
+  }
+
+  .chip-c { background: #1e1a08; border: 1px solid #3d3410; color: #d4a820; }
+  .chip-s { background: #150d2e; border: 1px solid #2e2060; color: #a08af0; }
+  .chip-b { background: #0a1e18; border: 1px solid #1a3d30; color: #3db890; }
+
+  .key-entities {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+
+  .ke-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .ke-list {
+    display: flex; flex-wrap: wrap; gap: 5px;
+  }
+
+  .ke-item {
+    font-size: 12px;
+    color: #8080a0;
+    background: #1a1a28;
+    border: 1px solid #28283a;
+    border-radius: 3px;
+    padding: 2px 9px;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .legend-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: #80809a;
+  }
+
+  .legend-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+
+  /* ── PATTERN REFERENCE ── */
+  .pattern-ref-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  @media (max-width: 900px) {
+    .pattern-ref-grid { grid-template-columns: 1fr; }
+    .systems-grid { grid-template-columns: 1fr; }
+    header { padding: 40px 24px 32px; }
+  }
+
+  .ref-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .ref-card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ref-card-title.c-t { color: var(--accent); }
+  .ref-card-title.s-t { color: var(--accent2); }
+  .ref-card-title.b-t { color: var(--accent3); }
+
+  .ref-pattern {
+    margin-bottom: 12px;
+  }
+
+  .ref-pname {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .rp-c { color: var(--accent); }
+  .rp-s { color: var(--accent2); }
+  .rp-b { color: var(--accent3); }
+
+  .ref-pdesc {
+    font-size: 12px;
+    color: #70708a;
+    line-height: 1.5;
+  }
+
+  /* search bar */
+  .search-bar {
+    width: 100%;
+    max-width: 500px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px 10px 40px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 28px;
+    transition: border-color 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555568' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 14px center;
+  }
+
+  .search-bar:focus { border-color: var(--accent2); }
+  .search-bar::placeholder { color: #404050; }
+
+  .hidden { display: none !important; }
+
+  /* ── SCROLL REVEAL ── */
+  .sys-card { opacity: 0; transform: translateY(20px); transition: opacity 0.4s, transform 0.4s; }
+  .sys-card.visible { opacity: 1; transform: translateY(0); }
+
+  .toc-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .toc-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: #70708a;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .toc-btn:hover, .toc-btn.active {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: white;
+  }
+
+  .count-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: rgba(124,106,247,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(124,106,247,0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: auto;
+  }
+
+  .section-header-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">// LLD Interview Cheatsheet · .NET Engineer · OOP Design</div>
+  <h1>Low-Level <span>Design</span><br>Cheatsheet</h1>
+  <p class="header-sub">29 systems. Key entities, clarifying questions, and Creational / Structural / Behavioral design patterns for each.</p>
+  <div class="header-meta">
+    <div class="meta-pill"><div class="dot"></div> 29 Systems</div>
+    <div class="meta-pill"><div class="dot" style="background:var(--accent2)"></div> GoF Design Patterns</div>
+    <div class="meta-pill"><div class="dot" style="background:var(--accent4)"></div> Interview Questions</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- INTERVIEW QUESTIONS SECTION -->
+  <div class="section-header">
+    <h2>The First 10 Minutes — Questions to Ask</h2>
+    <div class="section-label">Strategy</div>
+  </div>
+
+  <div class="q-grid">
+    <div class="q-card">
+      <div class="q-num">01</div>
+      <div class="q-category q-cat-scope">Functional Scope</div>
+      <ul class="q-questions">
+        <li>What are the core use cases we must support?</li>
+        <li>What is explicitly out of scope?</li>
+        <li>Is this a single-tenant or multi-tenant system?</li>
+        <li>What are the primary user roles/actors?</li>
+      </ul>
+    </div>
+    <div class="q-card">
+      <div class="q-num">02</div>
+      <div class="q-category q-cat-entity">Entities & Relationships</div>
+      <ul class="q-questions">
+        <li>What are the main nouns / domain objects?</li>
+        <li>What are the key 1:1, 1:N, M:N relationships?</li>
+        <li>Are there any lifecycle states we need to track?</li>
+        <li>Is there a concept of membership, roles, or ownership?</li>
+      </ul>
+    </div>
+    <div class="q-card">
+      <div class="q-num">03</div>
+      <div class="q-category q-cat-behavior">Behavioral Expectations</div>
+      <ul class="q-questions">
+        <li>Walk me through the happy-path flow end-to-end.</li>
+        <li>Who triggers each major action — user, timer, system?</li>
+        <li>What side effects happen when action X occurs?</li>
+        <li>Are notifications or events emitted to other systems?</li>
+      </ul>
+    </div>
+    <div class="q-card">
+      <div class="q-num">04</div>
+      <div class="q-category q-cat-constraint">Edge Cases & Constraints</div>
+      <ul class="q-questions">
+        <li>What happens when capacity is full or a resource is unavailable?</li>
+        <li>How do we handle concurrent modifications to the same entity?</li>
+        <li>Are there reservation vs. walk-in style conflicts?</li>
+        <li>What is the cancellation / rollback policy?</li>
+      </ul>
+    </div>
+    <div class="q-card">
+      <div class="q-num">05</div>
+      <div class="q-category q-cat-nonfunc">Non-Functional Requirements</div>
+      <ul class="q-questions">
+        <li>What is the expected read vs. write ratio?</li>
+        <li>Do we need real-time updates or is polling acceptable?</li>
+        <li>Are there SLA or latency requirements?</li>
+        <li>Is high availability a concern, or just correctness?</li>
+      </ul>
+    </div>
+    <div class="q-card">
+      <div class="q-num">06</div>
+      <div class="q-category q-cat-extend">Extensibility Intent</div>
+      <ul class="q-questions">
+        <li>What features are most likely to be added in v2?</li>
+        <li>Should pricing/rules be configurable without code changes?</li>
+        <li>Will new entity types need to be introduced (e.g., new vehicle type)?</li>
+        <li>Is plugin or third-party integration a future concern?</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PATTERN REFERENCE -->
+  <div class="section-header">
+    <h2>Design Pattern Quick Reference</h2>
+    <div class="section-label">GoF Patterns</div>
+  </div>
+
+  <div class="pattern-ref-grid">
+    <div class="ref-card">
+      <div class="ref-card-title c-t">Creational Patterns</div>
+      <div class="ref-pattern"><div class="ref-pname rp-c">Singleton</div><div class="ref-pdesc">One instance globally. Use for shared resources like a logger, config, or connection pool.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-c">Factory Method</div><div class="ref-pdesc">Subclasses decide which class to instantiate. Decouples creation from usage.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-c">Abstract Factory</div><div class="ref-pdesc">Creates families of related objects without specifying concrete classes.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-c">Builder</div><div class="ref-pdesc">Construct complex objects step-by-step. Useful when many optional fields exist.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-c">Prototype</div><div class="ref-pdesc">Clone existing objects rather than creating from scratch. Good for expensive init.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-c">Object Pool</div><div class="ref-pdesc">Reuse pre-instantiated objects. Critical for thread, connection, or locker pools.</div></div>
+    </div>
+    <div class="ref-card">
+      <div class="ref-card-title s-t">Structural Patterns</div>
+      <div class="ref-pattern"><div class="ref-pname rp-s">Adapter</div><div class="ref-pdesc">Bridges incompatible interfaces. Wrap legacy or third-party code.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-s">Decorator</div><div class="ref-pdesc">Add behavior dynamically without subclassing. Layered feature additions.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-s">Facade</div><div class="ref-pdesc">Simplified interface to a subsystem. Hide complexity behind a clean API.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-s">Composite</div><div class="ref-pdesc">Tree structures of objects treated uniformly. File systems, menus, org charts.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-s">Proxy</div><div class="ref-pdesc">Surrogate for another object. Lazy loading, access control, caching.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-s">Bridge</div><div class="ref-pdesc">Decouple abstraction from implementation. Change both independently.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-s">Flyweight</div><div class="ref-pdesc">Share fine-grained objects to reduce memory. Chess pieces, map tiles.</div></div>
+    </div>
+    <div class="ref-card">
+      <div class="ref-card-title b-t">Behavioral Patterns</div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">Observer</div><div class="ref-pdesc">One-to-many event notifications. Publish/subscribe, UI events, stock tickers.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">Strategy</div><div class="ref-pdesc">Swap algorithms at runtime. Pricing rules, sort strategies, payment methods.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">State</div><div class="ref-pdesc">Object changes behavior when its internal state changes. ATM, vending machine.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">Command</div><div class="ref-pdesc">Encapsulate requests as objects. Undo/redo, queuing, logging of actions.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">Iterator</div><div class="ref-pdesc">Sequentially access elements without exposing internals.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">Template Method</div><div class="ref-pdesc">Define algorithm skeleton in base class; subclasses fill in steps.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">Chain of Responsibility</div><div class="ref-pdesc">Pass request along a chain of handlers. Middleware, logging pipelines.</div></div>
+      <div class="ref-pattern"><div class="ref-pname rp-b">Mediator</div><div class="ref-pdesc">Centralize complex communications between objects. Chat rooms, ATCs.</div></div>
+    </div>
+  </div>
+
+  <!-- SYSTEMS -->
+  <div class="section-header">
+    <div class="section-header-row">
+      <h2>Systems</h2>
+      <div class="section-label" style="margin-left:16px">29 Designs</div>
+      <div class="count-badge" id="visibleCount">29 shown</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-chip chip-c">Factory</div> Creational</div>
+    <div class="legend-item"><div class="legend-chip chip-s">Decorator</div> Structural</div>
+    <div class="legend-item"><div class="legend-chip chip-b">Observer</div> Behavioral</div>
+  </div>
+
+  <input type="text" class="search-bar" id="searchInput" placeholder="Search systems, patterns, entities..." oninput="filterCards()">
+
+  <div class="toc-bar" id="filterBar">
+    <button class="toc-btn active" onclick="filterByCategory('all', this)">All</button>
+    <button class="toc-btn" onclick="filterByCategory('game', this)">Games</button>
+    <button class="toc-btn" onclick="filterByCategory('transport', this)">Transport</button>
+    <button class="toc-btn" onclick="filterByCategory('commerce', this)">Commerce</button>
+    <button class="toc-btn" onclick="filterByCategory('infra', this)">Infrastructure</button>
+    <button class="toc-btn" onclick="filterByCategory('social', this)">Social</button>
+    <button class="toc-btn" onclick="filterByCategory('enterprise', this)">Enterprise</button>
+  </div>
+
+  <div class="systems-grid" id="systemsGrid">
+
+    <!-- 1. PARKING LOT -->
+    <div class="sys-card" data-name="Parking Lot" data-cat="transport enterprise">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#1a1a0a">🚗</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Parking Lot</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">ParkingLot</span><span class="ke-item">ParkingFloor</span><span class="ke-item">ParkingSpot</span><span class="ke-item">Vehicle</span><span class="ke-item">Ticket</span><span class="ke-item">EntrancePanel</span><span class="ke-item">DisplayBoard</span><span class="ke-item">Payment</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — ParkingLot</span>
+            <span class="pattern-chip chip-c">Factory — Vehicle types</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Floor/Spot hierarchy</span>
+            <span class="pattern-chip chip-s">Proxy — Spot availability cache</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Strategy — Pricing rules</span>
+            <span class="pattern-chip chip-b">Observer — DisplayBoard updates</span>
+            <span class="pattern-chip chip-b">State — Spot (Free/Occupied/Reserved)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. ELEVATOR SYSTEM -->
+    <div class="sys-card" data-name="Elevator System" data-cat="enterprise infra">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0f0f1a">🛗</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Elevator System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">ElevatorSystem</span><span class="ke-item">Elevator</span><span class="ke-item">Floor</span><span class="ke-item">ElevatorButton</span><span class="ke-item">HallButton</span><span class="ke-item">Door</span><span class="ke-item">Display</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — ElevatorController</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Facade — ElevatorSystem API</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — Elevator (Idle/Moving/Open)</span>
+            <span class="pattern-chip chip-b">Strategy — Scheduling (SCAN/LOOK)</span>
+            <span class="pattern-chip chip-b">Command — Button press requests</span>
+            <span class="pattern-chip chip-b">Observer — Floor/door events</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. LIBRARY MANAGEMENT -->
+    <div class="sys-card" data-name="Library Management System" data-cat="enterprise">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a1408">📚</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Library Management System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Library</span><span class="ke-item">BookItem</span><span class="ke-item">Member</span><span class="ke-item">Librarian</span><span class="ke-item">BookLending</span><span class="ke-item">Catalog</span><span class="ke-item">Reservation</span><span class="ke-item">Fine</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — Catalog</span>
+            <span class="pattern-chip chip-c">Factory — Search strategies</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Fine calculations</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Reservation alerts</span>
+            <span class="pattern-chip chip-b">Strategy — Search (author/title/ISBN)</span>
+            <span class="pattern-chip chip-b">State — BookItem (Available/Loaned/Reserved)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. AMAZON LOCKER -->
+    <div class="sys-card" data-name="Amazon Locker Service" data-cat="commerce">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#1a100a">📦</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Amazon Locker Service</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">LockerLocation</span><span class="ke-item">Locker</span><span class="ke-item">Package</span><span class="ke-item">LockerAssignment</span><span class="ke-item">OTPCode</span><span class="ke-item">Customer</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Object Pool — Locker slots</span>
+            <span class="pattern-chip chip-c">Factory — Locker size matching</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — LockerLocation → Locker</span>
+            <span class="pattern-chip chip-s">Proxy — OTP validation gateway</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — Locker (Empty/Assigned/Overdue)</span>
+            <span class="pattern-chip chip-b">Observer — Expiry notifications</span>
+            <span class="pattern-chip chip-b">Strategy — Slot selection algorithm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. VENDING MACHINE -->
+    <div class="sys-card" data-name="Vending Machine" data-cat="enterprise">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0f0a18">🥤</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Vending Machine</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">VendingMachine</span><span class="ke-item">Slot</span><span class="ke-item">Product</span><span class="ke-item">Coin/Note</span><span class="ke-item">Inventory</span><span class="ke-item">Display</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — VendingMachine</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Facade — Machine controller API</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — (Idle/HasMoney/Dispensing/OutOfStock)</span>
+            <span class="pattern-chip chip-b">Command — Button presses</span>
+            <span class="pattern-chip chip-b">Chain of Responsibility — Coin validation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. ONLINE BLACKJACK -->
+    <div class="sys-card" data-name="Online Blackjack Game" data-cat="game">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0f1a0a">🃏</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Online Blackjack Game</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Game</span><span class="ke-item">Deck</span><span class="ke-item">Card</span><span class="ke-item">Hand</span><span class="ke-item">Player</span><span class="ke-item">Dealer</span><span class="ke-item">Bet</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Card creation</span>
+            <span class="pattern-chip chip-c">Builder — Game session setup</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Side bets / insurance</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — Game (Betting/Playing/Resolved)</span>
+            <span class="pattern-chip chip-b">Strategy — Dealer hit/stand rules</span>
+            <span class="pattern-chip chip-b">Template Method — Round flow</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. RIDE SHARING -->
+    <div class="sys-card" data-name="Ride Sharing System" data-cat="transport">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a180f">🚕</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Ride Sharing System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Rider</span><span class="ke-item">Driver</span><span class="ke-item">Trip</span><span class="ke-item">Vehicle</span><span class="ke-item">Location</span><span class="ke-item">Payment</span><span class="ke-item">Rating</span><span class="ke-item">MatchingEngine</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Ride types (Pool/X/XL)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Facade — Trip orchestration</span>
+            <span class="pattern-chip chip-s">Adapter — Map provider APIs</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Strategy — Surge pricing, matching</span>
+            <span class="pattern-chip chip-b">Observer — Driver location updates</span>
+            <span class="pattern-chip chip-b">State — Trip (Requested/Matched/InProgress/Done)</span>
+            <span class="pattern-chip chip-b">Command — Ride request/cancel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. MEETING SCHEDULER -->
+    <div class="sys-card" data-name="Meeting Scheduler" data-cat="enterprise">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0f180f">📅</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Meeting Scheduler</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Meeting</span><span class="ke-item">User</span><span class="ke-item">Room</span><span class="ke-item">Calendar</span><span class="ke-item">TimeSlot</span><span class="ke-item">Notification</span><span class="ke-item">Invitation</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Builder — Meeting builder with optionals</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Recurring meeting series</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Invitee notifications</span>
+            <span class="pattern-chip chip-b">Strategy — Availability slot algorithms</span>
+            <span class="pattern-chip chip-b">Command — Accept/decline/reschedule</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. MOVIE TICKET BOOKING -->
+    <div class="sys-card" data-name="Movie Ticket Booking System" data-cat="commerce">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#180f0a">🎬</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Movie Ticket Booking</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Movie</span><span class="ke-item">Show</span><span class="ke-item">Cinema</span><span class="ke-item">Screen</span><span class="ke-item">Seat</span><span class="ke-item">Booking</span><span class="ke-item">Payment</span><span class="ke-item">Coupon</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Seat types (Premium/Regular)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Cinema → Screen → Seat</span>
+            <span class="pattern-chip chip-s">Decorator — Discount on booking</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — Seat (Available/Locked/Booked)</span>
+            <span class="pattern-chip chip-b">Observer — Seat hold expiry</span>
+            <span class="pattern-chip chip-b">Strategy — Payment method</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. CAR RENTAL -->
+    <div class="sys-card" data-name="Car Rental System" data-cat="transport commerce">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a1020">🚙</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Car Rental System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Car</span><span class="ke-item">Rental</span><span class="ke-item">Customer</span><span class="ke-item">Branch</span><span class="ke-item">Reservation</span><span class="ke-item">Invoice</span><span class="ke-item">Insurance</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Vehicle category types</span>
+            <span class="pattern-chip chip-c">Builder — Rental contract builder</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Add-ons (GPS, insurance)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Strategy — Pricing (daily/weekly/mileage)</span>
+            <span class="pattern-chip chip-b">State — Car (Available/Rented/Maintenance)</span>
+            <span class="pattern-chip chip-b">Command — Reserve/extend/cancel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. ATM -->
+    <div class="sys-card" data-name="ATM" data-cat="enterprise infra">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#180f18">🏧</div>
+        <div class="sys-title-block">
+          <div class="sys-name">ATM</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">ATM</span><span class="ke-item">Card</span><span class="ke-item">BankAccount</span><span class="ke-item">CashDispenser</span><span class="ke-item">Keypad</span><span class="ke-item">Screen</span><span class="ke-item">Receipt</span><span class="ke-item">Transaction</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — ATM controller</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Facade — BankingService facade</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — ATM (Idle/CardInserted/PIN/Txn)</span>
+            <span class="pattern-chip chip-b">Chain of Responsibility — Denomination selection</span>
+            <span class="pattern-chip chip-b">Command — Withdraw/Deposit/Transfer</span>
+            <span class="pattern-chip chip-b">Mediator — ATM ↔ Bank communication</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. CHESS GAME -->
+    <div class="sys-card" data-name="Chess Game" data-cat="game">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#18180a">♟️</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Chess Game</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Game</span><span class="ke-item">Board</span><span class="ke-item">Piece</span><span class="ke-item">Player</span><span class="ke-item">Move</span><span class="ke-item">Cell</span><span class="ke-item">Clock</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Piece creation by type/color</span>
+            <span class="pattern-chip chip-c">Flyweight — Shared piece type properties</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Flyweight — Chess piece rendering</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Command — Move (with undo)</span>
+            <span class="pattern-chip chip-b">Observer — Check/checkmate detection</span>
+            <span class="pattern-chip chip-b">Strategy — Move validation per piece</span>
+            <span class="pattern-chip chip-b">Memento — Game state for save/undo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 13. HOTEL MANAGEMENT -->
+    <div class="sys-card" data-name="Hotel Management System" data-cat="enterprise commerce">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#100f1a">🏨</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Hotel Management System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Hotel</span><span class="ke-item">Room</span><span class="ke-item">Guest</span><span class="ke-item">Booking</span><span class="ke-item">Housekeeping</span><span class="ke-item">Invoice</span><span class="ke-item">Amenity</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Room type variants</span>
+            <span class="pattern-chip chip-c">Builder — Booking + extras</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Room add-ons (minibar, etc.)</span>
+            <span class="pattern-chip chip-s">Composite — Hotel → Floor → Room</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — Room (Available/Occupied/Cleaning)</span>
+            <span class="pattern-chip chip-b">Observer — Housekeeping queue</span>
+            <span class="pattern-chip chip-b">Strategy — Pricing (seasonal, loyalty)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. AMAZON SHOPPING -->
+    <div class="sys-card" data-name="Amazon Online Shopping System" data-cat="commerce">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#1a0f00">🛒</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Amazon Online Shopping</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Product</span><span class="ke-item">Cart</span><span class="ke-item">Order</span><span class="ke-item">Seller</span><span class="ke-item">Warehouse</span><span class="ke-item">Shipment</span><span class="ke-item">Review</span><span class="ke-item">Payment</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Abstract Factory — Payment processors</span>
+            <span class="pattern-chip chip-c">Builder — Order with line items</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Coupons, Prime discounts</span>
+            <span class="pattern-chip chip-s">Composite — Product categories</span>
+            <span class="pattern-chip chip-s">Adapter — Third-party logistics</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — Order (Cart/Placed/Shipped/Delivered)</span>
+            <span class="pattern-chip chip-b">Observer — Shipment tracking events</span>
+            <span class="pattern-chip chip-b">Strategy — Recommendation engine</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15. STACK OVERFLOW -->
+    <div class="sys-card" data-name="Stack Overflow" data-cat="social">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#1a0f00">🔶</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Stack Overflow</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Question</span><span class="ke-item">Answer</span><span class="ke-item">Comment</span><span class="ke-item">Tag</span><span class="ke-item">User</span><span class="ke-item">Vote</span><span class="ke-item">Badge</span><span class="ke-item">Reputation</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Post types (Q/A/Comment)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Reputation-based permissions</span>
+            <span class="pattern-chip chip-s">Composite — Thread hierarchy</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Notifications on activity</span>
+            <span class="pattern-chip chip-b">Strategy — Search/ranking algorithms</span>
+            <span class="pattern-chip chip-b">Command — Vote/flag/accept</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 16. RESTAURANT MANAGEMENT -->
+    <div class="sys-card" data-name="Restaurant Management System" data-cat="enterprise commerce">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#1a0a0a">🍽️</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Restaurant Management</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Table</span><span class="ke-item">Order</span><span class="ke-item">MenuItem</span><span class="ke-item">Kitchen</span><span class="ke-item">Waiter</span><span class="ke-item">Reservation</span><span class="ke-item">Bill</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Builder — Order customization</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Menu item modifiers</span>
+            <span class="pattern-chip chip-s">Composite — Menu sections</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Command — Order actions (place/modify/cancel)</span>
+            <span class="pattern-chip chip-b">Observer — Kitchen ticket system</span>
+            <span class="pattern-chip chip-b">State — Order (Placed/Cooking/Served)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 17. FACEBOOK -->
+    <div class="sys-card" data-name="Facebook" data-cat="social">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a0f1a">📱</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Facebook</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">User</span><span class="ke-item">Profile</span><span class="ke-item">Post</span><span class="ke-item">Group</span><span class="ke-item">Page</span><span class="ke-item">Comment</span><span class="ke-item">Friend</span><span class="ke-item">Newsfeed</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Post/Story/Reel types</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Post → Comment → Reply</span>
+            <span class="pattern-chip chip-s">Proxy — Privacy filter on content</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Newsfeed subscription</span>
+            <span class="pattern-chip chip-b">Strategy — Feed ranking algorithm</span>
+            <span class="pattern-chip chip-b">Iterator — Feed pagination</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 18. STOCK BROKERAGE -->
+    <div class="sys-card" data-name="Online Stock Brokerage System" data-cat="enterprise">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a1a0a">📈</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Online Stock Brokerage</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Account</span><span class="ke-item">Portfolio</span><span class="ke-item">Stock</span><span class="ke-item">Order</span><span class="ke-item">Trade</span><span class="ke-item">OrderBook</span><span class="ke-item">Watchlist</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Order types (Market/Limit/Stop)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Facade — Trading platform API</span>
+            <span class="pattern-chip chip-s">Proxy — Rate-limited market data</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Price alerts / ticker</span>
+            <span class="pattern-chip chip-b">Strategy — Order matching engine</span>
+            <span class="pattern-chip chip-b">Command — Place/cancel order</span>
+            <span class="pattern-chip chip-b">State — Order (Pending/Partial/Filled/Cancelled)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 19. JIGSAW PUZZLE -->
+    <div class="sys-card" data-name="Jigsaw Puzzle" data-cat="game">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0f0f1a">🧩</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Jigsaw Puzzle</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Puzzle</span><span class="ke-item">Piece</span><span class="ke-item">Board</span><span class="ke-item">Edge</span><span class="ke-item">Player</span><span class="ke-item">Image</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Piece edge type generation</span>
+            <span class="pattern-chip chip-c">Builder — Puzzle from image + size</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Flyweight — Shared edge shape data</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Command — Place/rotate piece (undo support)</span>
+            <span class="pattern-chip chip-b">Observer — Completion detection</span>
+            <span class="pattern-chip chip-b">Strategy — Fit validation algorithm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 20. AIRLINE MANAGEMENT -->
+    <div class="sys-card" data-name="Airline Management System" data-cat="transport enterprise">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a0f1a">✈️</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Airline Management System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Flight</span><span class="ke-item">Aircraft</span><span class="ke-item">Seat</span><span class="ke-item">Passenger</span><span class="ke-item">Booking</span><span class="ke-item">Crew</span><span class="ke-item">Itinerary</span><span class="ke-item">Baggage</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Seat class variants</span>
+            <span class="pattern-chip chip-c">Builder — Itinerary (multi-leg)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Itinerary → Legs</span>
+            <span class="pattern-chip chip-s">Adapter — GDS (Amadeus/Sabre) integration</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Flight status notifications</span>
+            <span class="pattern-chip chip-b">State — Booking (Held/Confirmed/Cancelled)</span>
+            <span class="pattern-chip chip-b">Strategy — Fare pricing rules</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 21. ESPN CRICINFO -->
+    <div class="sys-card" data-name="ESPN Cricinfo" data-cat="social enterprise">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a1810">🏏</div>
+        <div class="sys-title-block">
+          <div class="sys-name">ESPN Cricinfo</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Match</span><span class="ke-item">Team</span><span class="ke-item">Player</span><span class="ke-item">Innings</span><span class="ke-item">Over</span><span class="ke-item">Ball</span><span class="ke-item">Scorecard</span><span class="ke-item">Series</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Match types (Test/ODI/T20)</span>
+            <span class="pattern-chip chip-c">Builder — Scorecard builder</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Series → Match → Innings → Over</span>
+            <span class="pattern-chip chip-s">Decorator — Commentary overlays</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Live score push updates</span>
+            <span class="pattern-chip chip-b">Strategy — Rating computation (DRS, DL method)</span>
+            <span class="pattern-chip chip-b">Iterator — Ball-by-ball replay</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 22. LINKEDIN -->
+    <div class="sys-card" data-name="LinkedIn" data-cat="social">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a0f1a">💼</div>
+        <div class="sys-title-block">
+          <div class="sys-name">LinkedIn</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">User</span><span class="ke-item">Profile</span><span class="ke-item">Connection</span><span class="ke-item">Post</span><span class="ke-item">Job</span><span class="ke-item">Company</span><span class="ke-item">Message</span><span class="ke-item">Endorsement</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Content types (Post/Article/Job)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Proxy — Connection degree gating</span>
+            <span class="pattern-chip chip-s">Composite — Network graph traversal</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Feed / notification events</span>
+            <span class="pattern-chip chip-b">Strategy — Job recommendation ranking</span>
+            <span class="pattern-chip chip-b">Mediator — Connection request flow</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 23. TIC TAC TOE -->
+    <div class="sys-card" data-name="Tic Tac Toe" data-cat="game">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0f180f">❌</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Tic Tac Toe</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Game</span><span class="ke-item">Board</span><span class="ke-item">Cell</span><span class="ke-item">Player</span><span class="ke-item">Move</span><span class="ke-item">WinCondition</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Player types (Human/AI)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Board as grid of Cells</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Strategy — AI move selection (minimax)</span>
+            <span class="pattern-chip chip-b">State — Game (Active/Won/Draw)</span>
+            <span class="pattern-chip chip-b">Command — Move (undo support)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 24. SNAKE AND FOOD -->
+    <div class="sys-card" data-name="Snake and Food Game" data-cat="game">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a1808">🐍</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Snake and Food Game</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Snake</span><span class="ke-item">Food</span><span class="ke-item">Board</span><span class="ke-item">Cell</span><span class="ke-item">Direction</span><span class="ke-item">GameEngine</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — GameEngine</span>
+            <span class="pattern-chip chip-c">Factory — Food types</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Snake body (linked segments)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">State — Game (Running/Paused/GameOver)</span>
+            <span class="pattern-chip chip-b">Observer — Collision detection</span>
+            <span class="pattern-chip chip-b">Strategy — Food spawning algorithm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 25. FILE SYSTEM -->
+    <div class="sys-card" data-name="File System" data-cat="infra">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#100f18">🗂️</div>
+        <div class="sys-title-block">
+          <div class="sys-name">File System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">FileSystem</span><span class="ke-item">Directory</span><span class="ke-item">File</span><span class="ke-item">Permission</span><span class="ke-item">Inode</span><span class="ke-item">SymLink</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — File/Directory node creation</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Directory tree (File/Dir uniform)</span>
+            <span class="pattern-chip chip-s">Decorator — Permissions layer</span>
+            <span class="pattern-chip chip-s">Proxy — SymLink indirection</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Iterator — Directory traversal (DFS/BFS)</span>
+            <span class="pattern-chip chip-b">Command — File ops with undo</span>
+            <span class="pattern-chip chip-b">Observer — File watcher / change events</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 26. LOGGING SYSTEM -->
+    <div class="sys-card" data-name="Logging System" data-cat="infra">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#181008">📋</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Logging System</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Logger</span><span class="ke-item">LogLevel</span><span class="ke-item">LogEntry</span><span class="ke-item">Appender</span><span class="ke-item">Formatter</span><span class="ke-item">Filter</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — Logger instance</span>
+            <span class="pattern-chip chip-c">Factory — Appender types (File/Console/DB)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Decorator — Formatting, filtering layers</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Chain of Responsibility — Log level routing</span>
+            <span class="pattern-chip chip-b">Strategy — Log rotation strategies</span>
+            <span class="pattern-chip chip-b">Observer — Alert on error threshold</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 27. SPLITWISE -->
+    <div class="sys-card" data-name="Splitwise" data-cat="social commerce">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a1a10">💸</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Splitwise</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">User</span><span class="ke-item">Group</span><span class="ke-item">Expense</span><span class="ke-item">Split</span><span class="ke-item">Balance</span><span class="ke-item">Settlement</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Split types (Equal/Exact/Percentage/Shares)</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Group → Members → Expenses</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Strategy — Debt simplification algorithm</span>
+            <span class="pattern-chip chip-b">Observer — Settlement reminders</span>
+            <span class="pattern-chip chip-b">Command — Add/edit/delete expense</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 28. REDIS -->
+    <div class="sys-card" data-name="Redis" data-cat="infra">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#1a0808">⚡</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Redis</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">KeyValueStore</span><span class="ke-item">DataType</span><span class="ke-item">TTL</span><span class="ke-item">PubSub</span><span class="ke-item">Transaction</span><span class="ke-item">Persistence</span><span class="ke-item">Replication</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Singleton — Server instance</span>
+            <span class="pattern-chip chip-c">Factory — Data structure handlers</span>
+            <span class="pattern-chip chip-c">Object Pool — Connection pool</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Facade — Client API surface</span>
+            <span class="pattern-chip chip-s">Decorator — Pipelining / TTL wrapping</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Pub/Sub messaging</span>
+            <span class="pattern-chip chip-b">Command — RESP protocol commands</span>
+            <span class="pattern-chip chip-b">Strategy — Eviction policies (LRU/LFU)</span>
+            <span class="pattern-chip chip-b">Iterator — Cursor-based SCAN</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 29. KAFKA -->
+    <div class="sys-card" data-name="Kafka" data-cat="infra">
+      <div class="sys-header">
+        <div class="sys-icon" style="background:#0a0a1a">📨</div>
+        <div class="sys-title-block">
+          <div class="sys-name">Kafka</div>
+          <div class="sys-tags">
+            <span class="sys-tag tag-c">Creational</span>
+            <span class="sys-tag tag-s">Structural</span>
+            <span class="sys-tag tag-b">Behavioral</span>
+          </div>
+        </div>
+      </div>
+      <div class="sys-body">
+        <div class="key-entities">
+          <div class="ke-title">Key Entities</div>
+          <div class="ke-list">
+            <span class="ke-item">Broker</span><span class="ke-item">Topic</span><span class="ke-item">Partition</span><span class="ke-item">Producer</span><span class="ke-item">Consumer</span><span class="ke-item">ConsumerGroup</span><span class="ke-item">Offset</span><span class="ke-item">ZooKeeper</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title creational-title">Creational</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-c">Factory — Serializer/Deserializer</span>
+            <span class="pattern-chip chip-c">Builder — Producer/Consumer config</span>
+            <span class="pattern-chip chip-c">Object Pool — Broker connection pool</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title structural-title">Structural</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-s">Composite — Topic → Partition → Segment</span>
+            <span class="pattern-chip chip-s">Adapter — Connector framework (Source/Sink)</span>
+            <span class="pattern-chip chip-s">Facade — Kafka Streams API</span>
+          </div>
+        </div>
+        <div class="pattern-section">
+          <div class="pattern-section-title behavioral-title">Behavioral</div>
+          <div class="pattern-list">
+            <span class="pattern-chip chip-b">Observer — Consumer group subscriptions</span>
+            <span class="pattern-chip chip-b">Strategy — Partitioning strategy (key hash/round-robin)</span>
+            <span class="pattern-chip chip-b">Iterator — Offset-based message consumption</span>
+            <span class="pattern-chip chip-b">Mediator — Broker as central coordinator</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end systems-grid -->
+
+</div><!-- end container -->
+
+<script>
+  // Animate cards on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 40);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.sys-card').forEach(c => observer.observe(c));
+
+  // Search
+  function filterCards() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.sys-card');
+    let count = 0;
+    cards.forEach(c => {
+      const text = c.textContent.toLowerCase();
+      const match = text.includes(q);
+      c.classList.toggle('hidden', !match);
+      if (match) count++;
+    });
+    document.getElementById('visibleCount').textContent = count + ' shown';
+  }
+
+  // Category filter
+  let activeCategory = 'all';
+  function filterByCategory(cat, btn) {
+    activeCategory = cat;
+    document.querySelectorAll('.toc-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cards = document.querySelectorAll('.sys-card');
+    let count = 0;
+    cards.forEach(c => {
+      const cats = c.dataset.cat || '';
+      const match = cat === 'all' || cats.includes(cat);
+      c.classList.toggle('hidden', !match);
+      if (match) count++;
+    });
+    document.getElementById('visibleCount').textContent = count + ' shown';
+    document.getElementById('searchInput').value = '';
+  }
+</script>
+</body>
+</html>

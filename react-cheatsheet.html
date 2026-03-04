@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>React Concepts Cheatsheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1117;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    padding: 2rem 1rem 5rem;
+    line-height: 1.6;
+  }
+
+  .page { max-width: 860px; margin: 0 auto; }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { color: #64748b; font-size: 0.85rem; margin-bottom: 2.5rem; }
+
+  /* Card */
+  .card {
+    background: #161b27;
+    border: 1px solid #1e2a3a;
+    border-radius: 14px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: #1a2133;
+    border-bottom: 1px solid #1e2a3a;
+  }
+  .card-num { font-weight: 900; color: #60a5fa; font-size: 0.8rem; }
+  .card-title { font-weight: 700; font-size: 1rem; color: #f1f5f9; }
+  .card-tag {
+    margin-left: auto;
+    font-size: 0.65rem;
+    background: #60a5fa15;
+    color: #60a5fa;
+    border: 1px solid #60a5fa30;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  .card-body { padding: 1.25rem 1.5rem; }
+
+  /* Analogy box */
+  .analogy {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    background: #0d1220;
+    border-left: 3px solid #a78bfa;
+    padding: 0.75rem 1rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+  }
+  .analogy strong { color: #c4b5fd; }
+
+  /* Code block */
+  pre {
+    background: #090d15;
+    border: 1px solid #1e2a3a;
+    border-radius: 10px;
+    padding: 1.2rem;
+    overflow-x: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    line-height: 1.9;
+    tab-size: 2;
+  }
+
+  /* Syntax highlight classes */
+  .kw  { color: #c792ea; }   /* keyword: const, return, if */
+  .fn  { color: #82aaff; }   /* function name */
+  .str { color: #c3e88d; }   /* string */
+  .cm  { color: #4a5568; font-style: italic; }  /* comment */
+  .num { color: #f78c6c; }   /* number */
+  .tag { color: #f07178; }   /* JSX tag */
+  .at  { color: #ffcb6b; }   /* JSX attr */
+  .tp  { color: #80cbc4; }   /* type/hook */
+
+  /* Divider between snippets */
+  .divider {
+    border: none;
+    border-top: 1px dashed #1e2a3a;
+    margin: 1rem 0;
+  }
+
+  .label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #334155;
+    margin-bottom: 0.4rem;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>React Concepts Cheatsheet</h1>
+  <p class="subtitle">9 concepts · simple code snippets · no fluff</p>
+
+
+  <!-- ============================================================ -->
+  <!-- 1. DEBOUNCE & THROTTLE -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">01</span>
+      <span class="card-title">Debouncing &amp; Throttling</span>
+      <span class="card-tag">Performance</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        <strong>Dating analogy:</strong><br>
+        🔵 <strong>Debounce</strong> — You're drafting a text to your crush. You keep editing it every few seconds.
+        The text only <em>sends</em> after you stop typing for 1 second. No embarrassing half-finished messages.<br><br>
+        🟠 <strong>Throttle</strong> — You want to call her repeatedly, but your phone enforces a rule:
+        <em>max 1 call every 2 seconds</em>, no matter how many times you tap "Call".
+      </div>
+
+      <div class="label">Debounce — wait until user stops typing</div>
+      <pre><span class="kw">import</span> { <span class="tp">useState</span>, <span class="tp">useRef</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">SearchBox</span>() {
+  <span class="kw">const</span> [result, setResult] = <span class="fn">useState</span>(<span class="str">''</span>);
+  <span class="kw">const</span> timer = <span class="fn">useRef</span>(null);           <span class="cm">// holds the timer between renders</span>
+
+  <span class="kw">const</span> <span class="fn">handleChange</span> = (e) => {
+    <span class="fn">clearTimeout</span>(timer.current);          <span class="cm">// cancel previous timer on every keystroke</span>
+    timer.current = <span class="fn">setTimeout</span>(() => {
+      setResult(<span class="str">`Searching for: </span>${e.target.value}<span class="str">`</span>); <span class="cm">// fires 1s after LAST keystroke</span>
+    }, <span class="num">1000</span>);
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">input</span> <span class="at">onChange</span>={handleChange} <span class="at">placeholder</span>=<span class="str">"Type to search..."</span> /&gt;
+      &lt;<span class="tag">p</span>&gt;{result}&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+
+      <hr class="divider" />
+
+      <div class="label">Throttle — max once per interval</div>
+      <pre><span class="kw">function</span> <span class="fn">LikeButton</span>() {
+  <span class="kw">const</span> lastFired = <span class="fn">useRef</span>(<span class="num">0</span>);            <span class="cm">// timestamp of last call</span>
+
+  <span class="kw">const</span> <span class="fn">handleLike</span> = () => {
+    <span class="kw">const</span> now = <span class="fn">Date</span>.now();
+    <span class="kw">if</span> (now - lastFired.current &lt; <span class="num">2000</span>) <span class="kw">return</span>; <span class="cm">// block if &lt; 2s since last call</span>
+    lastFired.current = now;
+    <span class="fn">console</span>.log(<span class="str">'💕 Liked!'</span>);              <span class="cm">// only runs once every 2 seconds</span>
+  };
+
+  <span class="kw">return</span> &lt;<span class="tag">button</span> <span class="at">onClick</span>={handleLike}&gt;❤️ Like&lt;/<span class="tag">button</span>&gt;;
+}</pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 2. useLayoutEffect -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">02</span>
+      <span class="card-title">useLayoutEffect</span>
+      <span class="card-tag">Hook</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        <strong>useEffect</strong> runs <em>after</em> the browser paints — the user briefly sees the old state.<br>
+        <strong>useLayoutEffect</strong> runs <em>before</em> the browser paints — you measure/fix the DOM first, user sees nothing weird.<br>
+        <strong>Rule of thumb:</strong> Use <code>useEffect</code> always. Switch to <code>useLayoutEffect</code> only when you see a visual flicker.
+      </div>
+      <pre><span class="kw">import</span> { <span class="tp">useRef</span>, <span class="tp">useState</span>, <span class="tp">useLayoutEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Tooltip</span>() {
+  <span class="kw">const</span> boxRef = <span class="fn">useRef</span>(null);
+  <span class="kw">const</span> [left, setLeft] = <span class="fn">useState</span>(<span class="num">0</span>);
+
+  <span class="fn">useLayoutEffect</span>(() => {
+    <span class="cm">// DOM is ready but browser hasn't painted yet</span>
+    <span class="cm">// Safe to read size/position and adjust BEFORE user sees anything</span>
+    <span class="kw">const</span> width = boxRef.current.getBoundingClientRect().width;
+    setLeft(-width / <span class="num">2</span>);                  <span class="cm">// center the tooltip</span>
+  }, []);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> <span class="at">ref</span>={boxRef} <span class="at">style</span>={{ position: <span class="str">'absolute'</span>, left }}&gt;
+      I'm perfectly centered 🎯
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="cm">// useEffect  → runs AFTER paint → may flicker</span>
+<span class="cm">// useLayoutEffect → runs BEFORE paint → no flicker</span></pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 3. position: absolute/relative, z-index -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">03</span>
+      <span class="card-title">position: relative / absolute / z-index</span>
+      <span class="card-tag">CSS</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        <strong>position: relative</strong> — "I stay in the normal flow, but I can nudge myself."<br>
+        <strong>position: absolute</strong> — "I escape the normal flow and position myself relative to my nearest <em>relative</em> parent."<br>
+        <strong>z-index</strong> — who sits on top. Higher number = in front. Only works on positioned elements.
+      </div>
+      <pre><span class="cm">/* THE GOLDEN RULE:
+   absolute child needs a relative parent, otherwise
+   it positions itself relative to the whole page */</span>
+
+.parent {
+  position: relative;   <span class="cm">/* 🔑 anchor point for absolute children */</span>
+  width: <span class="num">300</span>px;
+  height: <span class="num">200</span>px;
+  background: #1e293b;
+}
+
+.badge {
+  position: absolute;   <span class="cm">/* escapes normal flow */</span>
+  top: <span class="num">8</span>px;            <span class="cm">/* 8px from top of .parent */</span>
+  right: <span class="num">8</span>px;           <span class="cm">/* 8px from right of .parent */</span>
+  z-index: <span class="num">10</span>;          <span class="cm">/* sits on top of siblings */</span>
+}
+
+.overlay {
+  position: absolute;
+  inset: <span class="num">0</span>;             <span class="cm">/* top/right/bottom/left all = 0 → covers parent fully */</span>
+  z-index: <span class="num">5</span>;           <span class="cm">/* below badge (10) but above normal content */</span>
+}
+
+<span class="cm">/* --- JSX --- */</span>
+<span class="kw">function</span> <span class="fn">Card</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> <span class="at">className</span>=<span class="str">"parent"</span>&gt;
+      &lt;<span class="tag">p</span>&gt;Normal content (in flow)&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">div</span> <span class="at">className</span>=<span class="str">"overlay"</span>&gt;Dim overlay&lt;/<span class="tag">div</span>&gt;
+      &lt;<span class="tag">span</span> <span class="at">className</span>=<span class="str">"badge"</span>&gt;NEW&lt;/<span class="tag">span</span>&gt;   <span class="cm">{/* sits on top */}</span>
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 4. Universal Error Handler -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">04</span>
+      <span class="card-title">Universal Error Handler (Error Boundary)</span>
+      <span class="card-tag">Resilience</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        Wrap your whole app in an Error Boundary — if any child crashes, it catches the error and shows a fallback UI instead of a blank white screen.
+        Like a try/catch, but for your component tree.
+      </div>
+      <pre><span class="kw">import</span> { Component } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cm">// Must be a class component — no hook equivalent exists yet</span>
+<span class="kw">class</span> <span class="fn">ErrorBoundary</span> <span class="kw">extends</span> Component {
+  state = { crashed: <span class="kw">false</span>, error: <span class="kw">null</span> };
+
+  <span class="cm">// React calls this when a child throws</span>
+  <span class="kw">static</span> <span class="fn">getDerivedStateFromError</span>(error) {
+    <span class="kw">return</span> { crashed: <span class="kw">true</span>, error };
+  }
+
+  <span class="fn">componentDidCatch</span>(error, info) {
+    <span class="fn">console</span>.error(<span class="str">'💥 App crashed:'</span>, error, info); <span class="cm">// send to Sentry etc.</span>
+  }
+
+  <span class="fn">render</span>() {
+    <span class="kw">if</span> (<span class="kw">this</span>.state.crashed) {
+      <span class="kw">return</span> &lt;<span class="tag">h2</span>&gt;Something went wrong 😵&lt;/<span class="tag">h2</span>&gt;;
+    }
+    <span class="kw">return</span> <span class="kw">this</span>.props.children; <span class="cm">// render normally if no crash</span>
+  }
+}
+
+<span class="cm">// Wrap your app once — catches ALL errors inside</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">ErrorBoundary</span>&gt;
+      &lt;<span class="tag">MyApp</span> /&gt;          <span class="cm">{/* any crash here is caught */}</span>
+    &lt;/<span class="tag">ErrorBoundary</span>&gt;
+  );
+}</pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 5. Data Provider with Context -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">05</span>
+      <span class="card-title">Data Provider with Context</span>
+      <span class="card-tag">Performance</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        Without context, you pass data down through every parent → child → grandchild (prop drilling).
+        Context is a <em>broadcast</em> — any component anywhere can tune in.
+        Splitting into separate contexts avoids re-rendering unrelated components.
+      </div>
+      <pre><span class="kw">import</span> { <span class="tp">createContext</span>, <span class="tp">useContext</span>, <span class="tp">useState</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cm">// 1. Create the context</span>
+<span class="kw">const</span> UserContext = <span class="fn">createContext</span>(null);
+
+<span class="cm">// 2. Provider — wraps the tree, holds the data</span>
+<span class="kw">function</span> <span class="fn">UserProvider</span>({ children }) {
+  <span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>({ name: <span class="str">'Priya'</span>, role: <span class="str">'admin'</span> });
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">UserContext.Provider</span> <span class="at">value</span>={{ user, setUser }}&gt;
+      {children}   <span class="cm">{/* only re-renders when user state changes */}</span>
+    &lt;/<span class="tag">UserContext.Provider</span>&gt;
+  );
+}
+
+<span class="cm">// 3. Any child reads it — no prop drilling needed</span>
+<span class="kw">function</span> <span class="fn">Navbar</span>() {
+  <span class="kw">const</span> { user } = <span class="fn">useContext</span>(UserContext);
+  <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;Hello, {user.name}!&lt;/<span class="tag">p</span>&gt;;
+}
+
+<span class="cm">// 4. Use provider at the top level</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">UserProvider</span>&gt;
+      &lt;<span class="tag">Navbar</span> /&gt;        <span class="cm">{/* no props needed! */}</span>
+      &lt;<span class="tag">Dashboard</span> /&gt;
+    &lt;/<span class="tag">UserProvider</span>&gt;
+  );
+}</pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 6. Suspense -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">06</span>
+      <span class="card-title">Suspense</span>
+      <span class="card-tag">Loading UI</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        Suspense says: "While this component is loading (lazy import or async data), show this <em>fallback</em> UI instead of a blank screen."
+        Think of it as a built-in loading boundary.
+      </div>
+      <pre><span class="kw">import</span> { <span class="tp">Suspense</span>, <span class="tp">lazy</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cm">// lazy() = don't load this file until it's actually needed</span>
+<span class="kw">const</span> HeavyChart = <span class="fn">lazy</span>(() => <span class="kw">import</span>(<span class="str">'./HeavyChart'</span>));
+
+<span class="kw">function</span> <span class="fn">Dashboard</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">Suspense</span> <span class="at">fallback</span>={&lt;<span class="tag">p</span>&gt;Loading chart...&lt;/<span class="tag">p</span>&gt;}&gt;
+      <span class="cm">{/* HeavyChart.js is fetched from network here */}</span>
+      <span class="cm">{/* While it loads → fallback is shown */}</span>
+      <span class="cm">{/* Once loaded → HeavyChart renders */}</span>
+      &lt;<span class="tag">HeavyChart</span> /&gt;
+    &lt;/<span class="tag">Suspense</span>&gt;
+  );
+}
+
+<span class="cm">// You can also nest Suspense for granular loading states:</span>
+<span class="kw">function</span> <span class="fn">Page</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">Suspense</span> <span class="at">fallback</span>={&lt;<span class="tag">p</span>&gt;Loading page...&lt;/<span class="tag">p</span>&gt;}&gt;
+      &lt;<span class="tag">Suspense</span> <span class="at">fallback</span>={&lt;<span class="tag">p</span>&gt;Loading sidebar...&lt;/<span class="tag">p</span>&gt;}&gt;
+        &lt;<span class="tag">Sidebar</span> /&gt;
+      &lt;/<span class="tag">Suspense</span>&gt;
+      &lt;<span class="tag">MainContent</span> /&gt;
+    &lt;/<span class="tag">Suspense</span>&gt;
+  );
+}</pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 7. Race Conditions -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">07</span>
+      <span class="card-title">Avoiding Race Conditions in Data Fetching</span>
+      <span class="card-tag">Async</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        You search "cat", then quickly change it to "dog". The "cat" response arrives <em>after</em> the "dog" response
+        and overwrites it — now you see cat results for a dog search. That's a race condition.
+        Fix: ignore responses from old/cancelled requests.
+      </div>
+      <pre><span class="kw">import</span> { <span class="tp">useState</span>, <span class="tp">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Search</span>({ query }) {
+  <span class="kw">const</span> [data, setData] = <span class="fn">useState</span>(null);
+
+  <span class="fn">useEffect</span>(() => {
+    <span class="kw">let</span> cancelled = <span class="kw">false</span>;   <span class="cm">// 🔑 flag for THIS specific request</span>
+
+    <span class="fn">fetch</span>(<span class="str">`/api/search?q=</span>${query}<span class="str">`</span>)
+      .then(res => res.<span class="fn">json</span>())
+      .then(result => {
+        <span class="kw">if</span> (!cancelled) {       <span class="cm">// only update if this request is still relevant</span>
+          <span class="fn">setData</span>(result);
+        }
+        <span class="cm">// if cancelled=true, we silently discard the stale response</span>
+      });
+
+    <span class="cm">// Cleanup: runs when query changes OR component unmounts</span>
+    <span class="kw">return</span> () => { cancelled = <span class="kw">true</span>; };
+
+  }, [query]);  <span class="cm">// re-runs every time query changes</span>
+
+  <span class="kw">return</span> &lt;<span class="tag">div</span>&gt;{data ? <span class="fn">JSON</span>.<span class="fn">stringify</span>(data) : <span class="str">'Loading...'</span>}&lt;/<span class="tag">div</span>&gt;;
+}
+
+<span class="cm">// AbortController is the cleaner native alternative:</span>
+<span class="fn">useEffect</span>(() => {
+  <span class="kw">const</span> controller = <span class="kw">new</span> <span class="fn">AbortController</span>();
+  <span class="fn">fetch</span>(url, { signal: controller.signal })
+    .then(res => res.<span class="fn">json</span>()).<span class="fn">then</span>(setData);
+  <span class="kw">return</span> () => controller.<span class="fn">abort</span>();  <span class="cm">// cancels the in-flight HTTP request</span>
+}, [url]);</pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 8. useRef + useCallback -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">08</span>
+      <span class="card-title">useRef &amp; useCallback</span>
+      <span class="card-tag">Hook</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        <strong>useRef</strong> — a box that holds a value (or a DOM node) that <em>persists across renders</em> without causing a re-render when it changes.<br>
+        <strong>useCallback</strong> — memoizes a function so its reference doesn't change on every render, preventing unnecessary child re-renders.
+      </div>
+
+      <div class="label">useRef — two common uses</div>
+      <pre><span class="kw">import</span> { <span class="tp">useRef</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">Demo</span>() {
+  <span class="cm">// USE 1: Access a DOM element directly</span>
+  <span class="kw">const</span> inputRef = <span class="fn">useRef</span>(null);
+  <span class="kw">const</span> <span class="fn">focusInput</span> = () => inputRef.current.<span class="fn">focus</span>();  <span class="cm">// directly manipulate DOM</span>
+
+  <span class="cm">// USE 2: Store a value that survives re-renders (no re-render on change)</span>
+  <span class="kw">const</span> clickCount = <span class="fn">useRef</span>(<span class="num">0</span>);
+  <span class="kw">const</span> <span class="fn">handleClick</span> = () => {
+    clickCount.current += <span class="num">1</span>;  <span class="cm">// updates silently — doesn't re-render</span>
+    <span class="fn">console</span>.log(clickCount.current);
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">input</span> <span class="at">ref</span>={inputRef} /&gt;
+      &lt;<span class="tag">button</span> <span class="at">onClick</span>={focusInput}&gt;Focus&lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">button</span> <span class="at">onClick</span>={handleClick}&gt;Count (silent)&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+
+      <hr class="divider" />
+
+      <div class="label">useCallback — stable function reference</div>
+      <pre><span class="kw">import</span> { <span class="tp">useState</span>, <span class="tp">useCallback</span>, <span class="tp">memo</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cm">// memo = only re-renders if props change</span>
+<span class="kw">const</span> Button = <span class="fn">memo</span>(({ onClick, label }) => {
+  <span class="fn">console</span>.log(<span class="str">`</span>${label}<span class="str"> rendered`</span>);
+  <span class="kw">return</span> &lt;<span class="tag">button</span> <span class="at">onClick</span>={onClick}&gt;{label}&lt;/<span class="tag">button</span>&gt;;
+});
+
+<span class="kw">function</span> <span class="fn">Parent</span>() {
+  <span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="num">0</span>);
+
+  <span class="cm">// ❌ Without useCallback: new function ref every render → Button re-renders every time</span>
+  <span class="cm">// const handleSave = () => saveData();</span>
+
+  <span class="cm">// ✅ With useCallback: same function ref → Button only re-renders if deps change</span>
+  <span class="kw">const</span> handleSave = <span class="fn">useCallback</span>(() => {
+    <span class="fn">saveData</span>();
+  }, []);  <span class="cm">// [] = never recreated</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">button</span> <span class="at">onClick</span>={() => <span class="fn">setCount</span>(c => c + <span class="num">1</span>)}&gt;{count}&lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">Button</span> <span class="at">onClick</span>={handleSave} <span class="at">label</span>=<span class="str">"Save"</span> /&gt;  <span class="cm">{/* won't re-render on count change */}</span>
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 9. Redux Toolkit -->
+  <!-- ============================================================ -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">09</span>
+      <span class="card-title">Redux Toolkit</span>
+      <span class="card-tag">State Management</span>
+    </div>
+    <div class="card-body">
+      <div class="analogy">
+        Redux = a single global storage room for your app's state. Anyone can read from it. You change it only by sending named "actions".<br>
+        <strong>Redux Toolkit</strong> is the modern, less-boilerplate version. 3 steps: <em>slice → store → use in component</em>.
+      </div>
+      <pre><span class="cm">// STEP 1: Create a slice (a piece of the global state)</span>
+<span class="cm">// counterSlice.js</span>
+<span class="kw">import</span> { <span class="fn">createSlice</span> } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit'</span>;
+
+<span class="kw">const</span> counterSlice = <span class="fn">createSlice</span>({
+  name: <span class="str">'counter'</span>,
+  initialState: { value: <span class="num">0</span> },
+  reducers: {
+    increment: (state) => { state.value += <span class="num">1</span>; },   <span class="cm">// action → state change</span>
+    decrement: (state) => { state.value -= <span class="num">1</span>; },
+    reset:     (state) => { state.value = <span class="num">0</span>; },
+  },
+});
+
+<span class="kw">export const</span> { increment, decrement, reset } = counterSlice.actions;
+<span class="kw">export default</span> counterSlice.reducer;</pre>
+
+      <hr class="divider" />
+
+      <pre><span class="cm">// STEP 2: Create the store</span>
+<span class="cm">// store.js</span>
+<span class="kw">import</span> { <span class="fn">configureStore</span> } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit'</span>;
+<span class="kw">import</span> counterReducer <span class="kw">from</span> <span class="str">'./counterSlice'</span>;
+
+<span class="kw">export const</span> store = <span class="fn">configureStore</span>({
+  reducer: {
+    counter: counterReducer,     <span class="cm">// state.counter is now available globally</span>
+  },
+});</pre>
+
+      <hr class="divider" />
+
+      <pre><span class="cm">// STEP 3: Provide store + use in any component</span>
+<span class="cm">// main.jsx</span>
+<span class="kw">import</span> { Provider } <span class="kw">from</span> <span class="str">'react-redux'</span>;
+<span class="kw">import</span> { store } <span class="kw">from</span> <span class="str">'./store'</span>;
+
+<span class="fn">ReactDOM</span>.<span class="fn">render</span>(
+  &lt;<span class="tag">Provider</span> <span class="at">store</span>={store}&gt;&lt;<span class="tag">App</span> /&gt;&lt;/<span class="tag">Provider</span>&gt;,
+  document.<span class="fn">getElementById</span>(<span class="str">'root'</span>)
+);
+
+<span class="cm">// Counter.jsx — any component, anywhere in the tree</span>
+<span class="kw">import</span> { <span class="fn">useSelector</span>, <span class="fn">useDispatch</span> } <span class="kw">from</span> <span class="str">'react-redux'</span>;
+<span class="kw">import</span> { increment, decrement, reset } <span class="kw">from</span> <span class="str">'./counterSlice'</span>;
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="kw">const</span> count    = <span class="fn">useSelector</span>(state => state.counter.value); <span class="cm">// READ</span>
+  <span class="kw">const</span> dispatch = <span class="fn">useDispatch</span>();                              <span class="cm">// WRITE</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">p</span>&gt;Count: {count}&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">button</span> <span class="at">onClick</span>={() => <span class="fn">dispatch</span>(<span class="fn">increment</span>())}&gt;+&lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">button</span> <span class="at">onClick</span>={() => <span class="fn">dispatch</span>(<span class="fn">decrement</span>())}&gt;-&lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">button</span> <span class="at">onClick</span>={() => <span class="fn">dispatch</span>(<span class="fn">reset</span>())}&gt;Reset&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

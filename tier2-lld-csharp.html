@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier 2 LLD — C# Code · Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Clash+Display:wght@400;600;700&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0c10;
+  --surface:  #13131a;
+  --surface2: #1a1a24;
+  --surface3: #21212e;
+  --border:   #252535;
+  --border2:  #2e2e42;
+
+  --green:  #3ddc84;
+  --blue:   #4d9fff;
+  --amber:  #ffc341;
+  --pink:   #ff6b9d;
+  --purple: #b794f4;
+  --teal:   #4ecdc4;
+  --red:    #ff6b6b;
+  --orange: #ff9a3c;
+
+  --text:   #e2e8f8;
+  --muted:  #606080;
+  --muted2: #3a3a55;
+
+  --s-kw:     #c792ea;
+  --s-type:   #82aaff;
+  --s-str:    #c3e88d;
+  --s-cmt:    #546e7a;
+  --s-num:    #f78c6c;
+  --s-prop:   #ffcb6b;
+  --s-iface:  #addb67;
+  --s-enum:   #f78c6c;
+  --s-plain:  #d4d4d4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Epilogue', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 48px 56px 40px;
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--purple), var(--blue), var(--amber), transparent);
+}
+.h-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--purple);
+  margin-bottom: 14px;
+}
+h1 {
+  font-family: 'Clash Display', 'JetBrains Mono', monospace;
+  font-size: clamp(30px, 4.5vw, 54px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -1px;
+}
+h1 em { font-style: normal; color: var(--purple); }
+.h-sub {
+  margin-top: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  max-width: 620px;
+  line-height: 1.8;
+}
+.h-pills { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; }
+.hpill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 13px;
+  border-radius: 2px;
+  border: 1px solid;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.hpill:hover { opacity:.7; }
+.p-p { color:var(--purple); border-color:rgba(183,148,244,.3); background:rgba(183,148,244,.06); }
+.p-b { color:var(--blue);   border-color:rgba(77,159,255,.3);  background:rgba(77,159,255,.06); }
+.p-a { color:var(--amber);  border-color:rgba(255,195,65,.3);  background:rgba(255,195,65,.06); }
+.p-g { color:var(--green);  border-color:rgba(61,220,132,.3);  background:rgba(61,220,132,.06); }
+.p-t { color:var(--teal);   border-color:rgba(78,205,196,.3);  background:rgba(78,205,196,.06); }
+
+/* ── LAYOUT ── */
+.layout { display: flex; min-height: calc(100vh - 200px); }
+
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.sidebar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background .15s;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+.sb-item:hover { background: var(--surface2); }
+.sb-item.active { background: var(--surface2); border-left-color: var(--purple); }
+.sb-num { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); width:18px; }
+.sb-name { font-size:13px; color:var(--text); font-weight:500; }
+.sb-tier {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--purple);
+  background: rgba(183,148,244,.08);
+  border: 1px solid rgba(183,148,244,.2);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+.sb-divider { height:1px; background:var(--border); margin:12px 20px; }
+
+/* ── MAIN ── */
+.main { flex:1; padding:0 48px 80px; max-width:960px; }
+
+.system {
+  padding-top: 60px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.system:last-child { border-bottom:none; }
+
+.sys-header { display:flex; align-items:flex-start; gap:16px; margin-bottom:28px; }
+.sys-num { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted2); padding-top:6px; }
+.sys-meta { flex:1; }
+.sys-title { font-family:'Clash Display',monospace; font-size:26px; font-weight:700; line-height:1.1; }
+.sys-tags { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.sys-tag {
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  padding:2px 9px;
+  border-radius:2px;
+  border:1px solid;
+}
+
+/* ── CARDS ── */
+.exp-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:28px; }
+@media(max-width:700px){ .exp-grid{grid-template-columns:1fr;} }
+
+.exp-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.exp-card-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px; letter-spacing:2.5px;
+  text-transform:uppercase; margin-bottom:8px;
+}
+.exp-card-body { font-size:13px; color:#8090b0; line-height:1.65; }
+.exp-card-body li { list-style:none; padding-left:14px; position:relative; margin-bottom:4px; }
+.exp-card-body li::before { content:'›'; position:absolute; left:0; color:var(--muted2); }
+
+/* ── INTERVIEW BOX ── */
+.interview-box {
+  background: rgba(255,195,65,.04);
+  border: 1px solid rgba(255,195,65,.18);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 4px 4px 0;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: #a09060;
+  line-height: 1.7;
+}
+.interview-box strong { color:var(--amber); }
+.interview-box .q {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px; color:#c0a060;
+  margin-top:6px; display:block;
+}
+
+/* ── PATTERN ROW ── */
+.pattern-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; align-items:center; }
+.pattern-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-right:4px; }
+.pat { font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 10px; border-radius:2px; }
+
+/* ── PRIMER ── */
+.primer {
+  background: #0d1117;
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--green);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.primer-header {
+  background: rgba(61,220,132,0.06);
+  border-bottom: 1px solid rgba(61,220,132,0.15);
+  padding: 10px 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.primer-label {
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--green);
+}
+.primer-name {
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px; color:#a0c0a0; margin-left:auto;
+}
+.primer-desc {
+  padding: 10px 18px 4px;
+  font-size: 12.5px; color:#607060;
+  font-style:italic; line-height:1.6;
+}
+.primer pre {
+  padding: 14px 20px 18px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px; line-height:1.8;
+  color:var(--s-plain);
+  overflow-x:auto; background:transparent;
+}
+
+/* ── CODE BLOCK ── */
+.code-wrap {
+  background: #0a0a10;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.code-header {
+  background: var(--surface3);
+  padding: 9px 16px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.code-dots { display:flex; gap:6px; }
+.code-dot { width:10px; height:10px; border-radius:50%; }
+.dot-r { background:#ff5f56; }
+.dot-y { background:#ffbd2e; }
+.dot-g { background:#27c93f; }
+.code-filename { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
+.code-lang { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); background:var(--surface2); padding:2px 8px; border-radius:2px; }
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--s-plain);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+/* syntax */
+.kw    { color:var(--s-kw); }
+.typ   { color:var(--s-type); }
+.str   { color:var(--s-str); }
+.cmt   { color:var(--s-cmt); font-style:italic; }
+.num   { color:var(--s-num); }
+.mth   { color:var(--s-type); }
+.prop  { color:var(--s-prop); }
+.iface { color:var(--s-iface); }
+.en    { color:var(--s-enum); }
+.sec-comment {
+  color:var(--muted2); font-style:italic; display:block;
+  border-top:1px solid var(--border); padding-top:8px; margin-top:12px;
+}
+.sec-comment:first-child { border-top:none; margin-top:0; padding-top:0; }
+
+@media(max-width:900px){
+  .sidebar{display:none;}
+  .main{padding:0 20px 60px;}
+  header{padding:36px 20px 28px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-eyebrow">// C# LLD Interview Prep · Tier 2 · 5 Systems</div>
+  <h1>Tier 2 — <em>Intermediate</em><br>LLD in C#</h1>
+  <p class="h-sub">More moving parts, richer state, deeper patterns.<br>
+  Each system begins with a <strong style="color:var(--purple)">plain pattern primer</strong> then the full solution.</p>
+  <div class="h-pills">
+    <a class="hpill p-p" href="#chess">Chess Game</a>
+    <a class="hpill p-b" href="#atm">ATM</a>
+    <a class="hpill p-a" href="#blackjack">Blackjack</a>
+    <a class="hpill p-g" href="#library">Library Mgmt</a>
+    <a class="hpill p-t" href="#jigsaw">Jigsaw Puzzle</a>
+  </div>
+</header>
+
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-label">Systems</div>
+  <a class="sb-item active" href="#chess">
+    <div class="sb-num">06</div>
+    <div class="sb-name">Chess Game</div>
+    <div class="sb-tier">T2</div>
+  </a>
+  <a class="sb-item" href="#atm">
+    <div class="sb-num">07</div>
+    <div class="sb-name">ATM</div>
+    <div class="sb-tier">T2</div>
+  </a>
+  <a class="sb-item" href="#blackjack">
+    <div class="sb-num">08</div>
+    <div class="sb-name">Blackjack</div>
+    <div class="sb-tier">T2</div>
+  </a>
+  <a class="sb-item" href="#library">
+    <div class="sb-num">09</div>
+    <div class="sb-name">Library Mgmt</div>
+    <div class="sb-tier">T2</div>
+  </a>
+  <a class="sb-item" href="#jigsaw">
+    <div class="sb-num">10</div>
+    <div class="sb-name">Jigsaw Puzzle</div>
+    <div class="sb-tier">T2</div>
+  </a>
+  <div class="sb-divider"></div>
+  <div class="sidebar-label" style="margin-top:4px">Previously</div>
+  <a class="sb-item" style="opacity:.45" href="tier1-lld-csharp.html">
+    <div class="sb-num">←</div>
+    <div class="sb-name">Tier 1 Systems</div>
+  </a>
+  <div class="sb-divider"></div>
+  <div class="sidebar-label" style="margin-top:4px">Coming Next</div>
+  <div class="sb-item" style="opacity:.4;cursor:default">
+    <div class="sb-num">11</div><div class="sb-name">Elevator</div>
+    <div style="font-family:monospace;font-size:9px;color:var(--muted2);margin-left:auto">T3</div>
+  </div>
+  <div class="sb-item" style="opacity:.4;cursor:default">
+    <div class="sb-num">12</div><div class="sb-name">Ride Sharing</div>
+    <div style="font-family:monospace;font-size:9px;color:var(--muted2);margin-left:auto">T3</div>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- ════════════════════════════════════════
+     06. CHESS GAME
+════════════════════════════════════════ -->
+<section class="system" id="chess">
+  <div class="sys-header">
+    <div class="sys-num">06</div>
+    <div class="sys-meta">
+      <div class="sys-title">Chess Game</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Factory — Pieces</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Command — Move/Undo</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Memento — History</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Strategy — Move Rules</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--purple)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Each <code>Piece</code> knows its own move rules via <code>GetValidMoves()</code> — Strategy per piece type</li>
+          <li><code>Move</code> is a Command object — encapsulates Execute + Undo</li>
+          <li><code>Board</code> is an 8×8 grid of nullable Pieces — simple and traversable</li>
+          <li>Move history is a <code>Stack&lt;Move&gt;</code> — undo is just Pop + reverse</li>
+          <li><code>PieceFactory</code> builds the initial board layout — one place to change setup</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Piece</strong> — abstract base: Color, Position, GetValidMoves()</li>
+          <li><strong>King / Queen / Rook / Bishop / Knight / Pawn</strong> — concrete pieces</li>
+          <li><strong>Board</strong> — 8×8 grid, move execution, check detection</li>
+          <li><strong>Move</strong> — from/to squares, captured piece (for undo)</li>
+          <li><strong>Game</strong> — turn management, check/checkmate detection</li>
+          <li><strong>Player</strong> — color + name</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you implement undo?</span>
+    <span style="font-size:12px;color:#a09060">→ Every Move stores the captured piece. Undo moves the piece back to its origin square and restores the captured piece. Stack&lt;Move&gt; history — Pop gives you the last move instantly.</span>
+    <span class="q">Q: How do you detect check?</span>
+    <span style="font-size:12px;color:#a09060">→ After every move, collect all valid moves for every opponent piece. If any of them land on the King's square, you're in check. Checkmate = in check AND no valid moves exist that escape it.</span>
+    <span class="q">Q: Where do special rules go (castling, en passant)?</span>
+    <span style="font-size:12px;color:#a09060">→ In the relevant piece's <code>GetValidMoves()</code>. King checks castling conditions. Pawn checks en passant on the last move stored in history. Board stays clean.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Factory — piece creation</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Command — Move with Undo</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Strategy — move rules per piece</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--blue)">
+    <div class="primer-header" style="background:rgba(77,159,255,0.06);border-bottom-color:rgba(77,159,255,0.15)">
+      <span class="primer-label" style="color:var(--blue)">📖 Pattern Primer</span>
+      <span class="primer-name">Command Pattern — encapsulate actions as objects, enabling undo</span>
+    </div>
+    <div class="primer-desc">Wrap an action (and its reverse) inside an object. Store those objects in a history stack. Undo = pop and call reverse. Great for editors, games, transaction systems.</div>
+<pre>
+<span class="kw">public interface</span> <span class="iface">ICommand</span>
+{
+    <span class="kw">void</span> <span class="mth">Execute</span>();
+    <span class="kw">void</span> <span class="mth">Undo</span>();
+}
+
+<span class="cmt">// A simple text editor example</span>
+<span class="kw">public class</span> <span class="typ">InsertTextCommand</span> : <span class="iface">ICommand</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">StringBuilder</span> _doc;
+    <span class="kw">private readonly</span> <span class="kw">string</span> _text;
+    <span class="kw">private readonly</span> <span class="kw">int</span>    _pos;
+
+    <span class="kw">public</span> <span class="mth">InsertTextCommand</span>(<span class="typ">StringBuilder</span> doc, <span class="kw">string</span> text, <span class="kw">int</span> pos)
+        => (_doc, _text, _pos) = (doc, text, pos);
+
+    <span class="kw">public void</span> <span class="mth">Execute</span>() => _doc.<span class="mth">Insert</span>(_pos, _text);
+    <span class="kw">public void</span> <span class="mth">Undo</span>()    => _doc.<span class="mth">Remove</span>(_pos, _text.Length);
+}
+
+<span class="kw">public class</span> <span class="typ">Editor</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">StringBuilder</span>  _doc     = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> Stack&lt;<span class="iface">ICommand</span>&gt; _history = <span class="kw">new</span>();
+
+    <span class="kw">public void</span> <span class="mth">Execute</span>(<span class="iface">ICommand</span> cmd)
+    {
+        cmd.<span class="mth">Execute</span>();
+        _history.<span class="mth">Push</span>(cmd);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Undo</span>()
+    {
+        <span class="kw">if</span> (_history.<span class="prop">Count</span> > 0)
+            _history.<span class="mth">Pop</span>().<span class="mth">Undo</span>();
+    }
+
+    <span class="kw">public override string</span> <span class="mth">ToString</span>() => _doc.<span class="mth">ToString</span>();
+}
+
+<span class="kw">var</span> ed = <span class="kw">new</span> <span class="typ">Editor</span>();
+ed.<span class="mth">Execute</span>(<span class="kw">new</span> <span class="typ">InsertTextCommand</span>(ed._doc, <span class="str">"Hello"</span>, 0));  <span class="cmt">// "Hello"</span>
+ed.<span class="mth">Execute</span>(<span class="kw">new</span> <span class="typ">InsertTextCommand</span>(ed._doc, <span class="str">" World"</span>, 5)); <span class="cmt">// "Hello World"</span>
+ed.<span class="mth">Undo</span>();                                                <span class="cmt">// "Hello"</span>
+
+<span class="cmt">// In Chess → Move IS the command. Execute() moves the piece.</span>
+<span class="cmt">// Undo() moves it back and restores any captured piece.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">ChessGame.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums & Position ──────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">PieceColor</span> { White, Black }
+<span class="kw">public enum</span> <span class="en">GameStatus</span> { Active, Check, Checkmate, Stalemate, Draw }
+
+<span class="kw">public record</span> <span class="typ">Position</span>(<span class="kw">int</span> Row, <span class="kw">int</span> Col)
+{
+    <span class="kw">public bool</span> <span class="prop">IsValid</span> => Row >= 0 && Row < 8 && Col >= 0 && Col < 8;
+    <span class="kw">public override string</span> <span class="mth">ToString</span>() =>
+        $<span class="str">"{(char)('a' + Col)}{Row + 1}"</span>;  <span class="cmt">// e.g. e4</span>
+}
+
+<span class="sec-comment">// ── Move (Command Object) ─────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Move</span>
+{
+    <span class="kw">public</span> <span class="typ">Piece</span>    Piece          { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Position</span> From           { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Position</span> To             { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Piece</span>?   CapturedPiece  { <span class="kw">get</span>; }  <span class="cmt">// needed for undo</span>
+
+    <span class="kw">public</span> <span class="mth">Move</span>(<span class="typ">Piece</span> piece, <span class="typ">Position</span> from, <span class="typ">Position</span> to, <span class="typ">Piece</span>? captured = <span class="kw">null</span>)
+        => (Piece, From, To, CapturedPiece) = (piece, from, to, captured);
+}
+
+<span class="sec-comment">// ── Piece (abstract) ──────────────────────────────────</span>
+<span class="kw">public abstract class</span> <span class="typ">Piece</span>
+{
+    <span class="kw">public</span> <span class="en">PieceColor</span> <span class="prop">Color</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Position</span>   <span class="prop">Position</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public bool</span>       <span class="prop">HasMoved</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">protected</span> <span class="mth">Piece</span>(<span class="en">PieceColor</span> color, <span class="typ">Position</span> position)
+        => (<span class="prop">Color</span>, <span class="prop">Position</span>) = (color, position);
+
+    <span class="cmt">// Each subclass implements its own movement rules</span>
+    <span class="kw">public abstract</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">GetValidMoves</span>(<span class="typ">Board</span> board);
+
+    <span class="kw">public abstract string</span> <span class="prop">Symbol</span> { <span class="kw">get</span>; }
+}
+
+<span class="sec-comment">// ── Concrete Pieces ───────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Rook</span> : <span class="typ">Piece</span>
+{
+    <span class="kw">public</span> <span class="mth">Rook</span>(<span class="en">PieceColor</span> c, <span class="typ">Position</span> p) : <span class="kw">base</span>(c, p) { }
+    <span class="kw">public override string</span> <span class="prop">Symbol</span> => <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? <span class="str">"R"</span> : <span class="str">"r"</span>;
+
+    <span class="kw">public override</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">GetValidMoves</span>(<span class="typ">Board</span> board)
+    {
+        <span class="cmt">// Rook moves along ranks and files — slide until blocked</span>
+        <span class="kw">var</span> moves = <span class="kw">new</span> List&lt;<span class="typ">Position</span>&gt;();
+        <span class="kw">int</span>[][] dirs = { <span class="kw">new</span>[]{1,0}, <span class="kw">new</span>[]{-1,0}, <span class="kw">new</span>[]{0,1}, <span class="kw">new</span>[]{0,-1} };
+        <span class="kw">foreach</span> (<span class="kw">var</span> d <span class="kw">in</span> dirs)
+            moves.<span class="mth">AddRange</span>(board.<span class="mth">SlideMoves</span>(<span class="prop">Position</span>, d[0], d[1], <span class="prop">Color</span>));
+        <span class="kw">return</span> moves;
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">Bishop</span> : <span class="typ">Piece</span>
+{
+    <span class="kw">public</span> <span class="mth">Bishop</span>(<span class="en">PieceColor</span> c, <span class="typ">Position</span> p) : <span class="kw">base</span>(c, p) { }
+    <span class="kw">public override string</span> <span class="prop">Symbol</span> => <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? <span class="str">"B"</span> : <span class="str">"b"</span>;
+
+    <span class="kw">public override</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">GetValidMoves</span>(<span class="typ">Board</span> board)
+    {
+        <span class="kw">var</span> moves = <span class="kw">new</span> List&lt;<span class="typ">Position</span>&gt;();
+        <span class="kw">int</span>[][] dirs = { <span class="kw">new</span>[]{1,1}, <span class="kw">new</span>[]{1,-1}, <span class="kw">new</span>[]{-1,1}, <span class="kw">new</span>[]{-1,-1} };
+        <span class="kw">foreach</span> (<span class="kw">var</span> d <span class="kw">in</span> dirs)
+            moves.<span class="mth">AddRange</span>(board.<span class="mth">SlideMoves</span>(<span class="prop">Position</span>, d[0], d[1], <span class="prop">Color</span>));
+        <span class="kw">return</span> moves;
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">Knight</span> : <span class="typ">Piece</span>
+{
+    <span class="kw">public</span> <span class="mth">Knight</span>(<span class="en">PieceColor</span> c, <span class="typ">Position</span> p) : <span class="kw">base</span>(c, p) { }
+    <span class="kw">public override string</span> <span class="prop">Symbol</span> => <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? <span class="str">"N"</span> : <span class="str">"n"</span>;
+
+    <span class="kw">public override</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">GetValidMoves</span>(<span class="typ">Board</span> board)
+    {
+        <span class="cmt">// Knight's L-shape offsets — all 8 possible jumps</span>
+        <span class="kw">int</span>[][] jumps = {
+            <span class="kw">new</span>[]{2,1}, <span class="kw">new</span>[]{2,-1}, <span class="kw">new</span>[]{-2,1},  <span class="kw">new</span>[]{-2,-1},
+            <span class="kw">new</span>[]{1,2}, <span class="kw">new</span>[]{1,-2}, <span class="kw">new</span>[]{-1, 2}, <span class="kw">new</span>[]{-1,-2}
+        };
+        <span class="kw">return</span> jumps
+            .<span class="mth">Select</span>(j => <span class="kw">new</span> <span class="typ">Position</span>(<span class="prop">Position</span>.Row + j[0], <span class="prop">Position</span>.Col + j[1]))
+            .<span class="mth">Where</span>(p => p.<span class="prop">IsValid</span> && board.<span class="mth">GetPiece</span>(p)?.<span class="prop">Color</span> != <span class="prop">Color</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">Queen</span> : <span class="typ">Piece</span>
+{
+    <span class="kw">public</span> <span class="mth">Queen</span>(<span class="en">PieceColor</span> c, <span class="typ">Position</span> p) : <span class="kw">base</span>(c, p) { }
+    <span class="kw">public override string</span> <span class="prop">Symbol</span> => <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? <span class="str">"Q"</span> : <span class="str">"q"</span>;
+
+    <span class="kw">public override</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">GetValidMoves</span>(<span class="typ">Board</span> board)
+    {
+        <span class="cmt">// Queen = Rook + Bishop combined</span>
+        <span class="kw">var</span> moves = <span class="kw">new</span> List&lt;<span class="typ">Position</span>&gt;();
+        <span class="kw">int</span>[][] dirs = {
+            <span class="kw">new</span>[]{1,0}, <span class="kw">new</span>[]{-1,0}, <span class="kw">new</span>[]{0,1},  <span class="kw">new</span>[]{0,-1},
+            <span class="kw">new</span>[]{1,1}, <span class="kw">new</span>[]{1,-1}, <span class="kw">new</span>[]{-1,1}, <span class="kw">new</span>[]{-1,-1}
+        };
+        <span class="kw">foreach</span> (<span class="kw">var</span> d <span class="kw">in</span> dirs)
+            moves.<span class="mth">AddRange</span>(board.<span class="mth">SlideMoves</span>(<span class="prop">Position</span>, d[0], d[1], <span class="prop">Color</span>));
+        <span class="kw">return</span> moves;
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">King</span> : <span class="typ">Piece</span>
+{
+    <span class="kw">public</span> <span class="mth">King</span>(<span class="en">PieceColor</span> c, <span class="typ">Position</span> p) : <span class="kw">base</span>(c, p) { }
+    <span class="kw">public override string</span> <span class="prop">Symbol</span> => <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? <span class="str">"K"</span> : <span class="str">"k"</span>;
+
+    <span class="kw">public override</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">GetValidMoves</span>(<span class="typ">Board</span> board)
+    {
+        <span class="cmt">// One step in any direction</span>
+        <span class="kw">int</span>[][] steps = {
+            <span class="kw">new</span>[]{1,0}, <span class="kw">new</span>[]{-1,0}, <span class="kw">new</span>[]{0,1},  <span class="kw">new</span>[]{0,-1},
+            <span class="kw">new</span>[]{1,1}, <span class="kw">new</span>[]{1,-1}, <span class="kw">new</span>[]{-1,1}, <span class="kw">new</span>[]{-1,-1}
+        };
+        <span class="kw">return</span> steps
+            .<span class="mth">Select</span>(s => <span class="kw">new</span> <span class="typ">Position</span>(<span class="prop">Position</span>.Row + s[0], <span class="prop">Position</span>.Col + s[1]))
+            .<span class="mth">Where</span>(p => p.<span class="prop">IsValid</span> && board.<span class="mth">GetPiece</span>(p)?.<span class="prop">Color</span> != <span class="prop">Color</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">Pawn</span> : <span class="typ">Piece</span>
+{
+    <span class="kw">public</span> <span class="mth">Pawn</span>(<span class="en">PieceColor</span> c, <span class="typ">Position</span> p) : <span class="kw">base</span>(c, p) { }
+    <span class="kw">public override string</span> <span class="prop">Symbol</span> => <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? <span class="str">"P"</span> : <span class="str">"p"</span>;
+
+    <span class="kw">public override</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">GetValidMoves</span>(<span class="typ">Board</span> board)
+    {
+        <span class="kw">var</span> moves = <span class="kw">new</span> List&lt;<span class="typ">Position</span>&gt;();
+        <span class="kw">int</span> dir = <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? 1 : -1;
+        <span class="kw">var</span> forward = <span class="kw">new</span> <span class="typ">Position</span>(<span class="prop">Position</span>.Row + dir, <span class="prop">Position</span>.Col);
+
+        <span class="cmt">// Forward move — only if square is empty</span>
+        <span class="kw">if</span> (forward.<span class="prop">IsValid</span> && board.<span class="mth">GetPiece</span>(forward) == <span class="kw">null</span>)
+        {
+            moves.<span class="mth">Add</span>(forward);
+            <span class="cmt">// Double move from starting rank</span>
+            <span class="kw">var</span> startRow = <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? 1 : 6;
+            <span class="kw">var</span> doubleForward = <span class="kw">new</span> <span class="typ">Position</span>(<span class="prop">Position</span>.Row + 2*dir, <span class="prop">Position</span>.Col);
+            <span class="kw">if</span> (!<span class="prop">HasMoved</span> && <span class="prop">Position</span>.Row == startRow
+                && doubleForward.<span class="prop">IsValid</span> && board.<span class="mth">GetPiece</span>(doubleForward) == <span class="kw">null</span>)
+                moves.<span class="mth">Add</span>(doubleForward);
+        }
+
+        <span class="cmt">// Diagonal captures</span>
+        <span class="kw">foreach</span> (<span class="kw">var</span> dc <span class="kw">in</span> <span class="kw">new</span>[] { -1, 1 })
+        {
+            <span class="kw">var</span> diag = <span class="kw">new</span> <span class="typ">Position</span>(<span class="prop">Position</span>.Row + dir, <span class="prop">Position</span>.Col + dc);
+            <span class="kw">if</span> (diag.<span class="prop">IsValid</span> && board.<span class="mth">GetPiece</span>(diag)?.<span class="prop">Color</span> == <span class="mth">Opponent</span>())
+                moves.<span class="mth">Add</span>(diag);
+        }
+        <span class="kw">return</span> moves;
+    }
+
+    <span class="kw">private</span> <span class="en">PieceColor</span> <span class="mth">Opponent</span>() =>
+        <span class="prop">Color</span> == <span class="en">PieceColor</span>.White ? <span class="en">PieceColor</span>.Black : <span class="en">PieceColor</span>.White;
+}
+
+<span class="sec-comment">// ── Board ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Board</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">Piece</span>?[,] _grid = <span class="kw">new</span> <span class="typ">Piece</span>[8, 8];
+    <span class="kw">public</span> Stack&lt;<span class="typ">Move</span>&gt; <span class="prop">History</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="typ">Piece</span>? <span class="mth">GetPiece</span>(<span class="typ">Position</span> p) => _grid[p.Row, p.Col];
+
+    <span class="kw">public void</span> <span class="mth">SetPiece</span>(<span class="typ">Position</span> p, <span class="typ">Piece</span>? piece)
+    {
+        _grid[p.Row, p.Col] = piece;
+        <span class="kw">if</span> (piece != <span class="kw">null</span>) piece.<span class="prop">Position</span> = p;
+    }
+
+    <span class="cmt">// Execute a move and record it in history</span>
+    <span class="kw">public void</span> <span class="mth">ExecuteMove</span>(<span class="typ">Move</span> move)
+    {
+        <span class="mth">SetPiece</span>(move.To, move.Piece);
+        <span class="mth">SetPiece</span>(move.From, <span class="kw">null</span>);
+        move.Piece.<span class="prop">HasMoved</span> = <span class="kw">true</span>;
+        <span class="prop">History</span>.<span class="mth">Push</span>(move);
+    }
+
+    <span class="cmt">// Undo the last move — restore piece and any capture</span>
+    <span class="kw">public void</span> <span class="mth">UndoMove</span>()
+    {
+        <span class="kw">if</span> (<span class="prop">History</span>.<span class="prop">Count</span> == 0) <span class="kw">return</span>;
+        <span class="kw">var</span> move = <span class="prop">History</span>.<span class="mth">Pop</span>();
+        <span class="mth">SetPiece</span>(move.From, move.Piece);
+        <span class="mth">SetPiece</span>(move.To, move.CapturedPiece);
+    }
+
+    <span class="cmt">// Slide in a direction until blocked (Rook, Bishop, Queen)</span>
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Position</span>&gt; <span class="mth">SlideMoves</span>(<span class="typ">Position</span> from, <span class="kw">int</span> dr, <span class="kw">int</span> dc, <span class="en">PieceColor</span> color)
+    {
+        <span class="kw">var</span> moves = <span class="kw">new</span> List&lt;<span class="typ">Position</span>&gt;();
+        <span class="kw">var</span> cur = <span class="kw">new</span> <span class="typ">Position</span>(from.Row + dr, from.Col + dc);
+        <span class="kw">while</span> (cur.<span class="prop">IsValid</span>)
+        {
+            <span class="kw">var</span> occupant = <span class="mth">GetPiece</span>(cur);
+            <span class="kw">if</span> (occupant == <span class="kw">null</span>) { moves.<span class="mth">Add</span>(cur); }
+            <span class="kw">else</span> {
+                <span class="kw">if</span> (occupant.<span class="prop">Color</span> != color) moves.<span class="mth">Add</span>(cur); <span class="cmt">// capture</span>
+                <span class="kw">break</span>;  <span class="cmt">// blocked regardless</span>
+            }
+            cur = <span class="kw">new</span> <span class="typ">Position</span>(cur.Row + dr, cur.Col + dc);
+        }
+        <span class="kw">return</span> moves;
+    }
+
+    <span class="cmt">// Is a given color's king in check?</span>
+    <span class="kw">public bool</span> <span class="mth">IsInCheck</span>(<span class="en">PieceColor</span> color)
+    {
+        <span class="kw">var</span> king = <span class="mth">AllPieces</span>().<span class="mth">FirstOrDefault</span>(p => p <span class="kw">is</span> <span class="typ">King</span> && p.<span class="prop">Color</span> == color);
+        <span class="kw">if</span> (king == <span class="kw">null</span>) <span class="kw">return false</span>;
+
+        <span class="kw">var</span> opponent = color == <span class="en">PieceColor</span>.White ? <span class="en">PieceColor</span>.Black : <span class="en">PieceColor</span>.White;
+        <span class="kw">return</span> <span class="mth">AllPieces</span>()
+            .<span class="mth">Where</span>(p => p.<span class="prop">Color</span> == opponent)
+            .<span class="mth">SelectMany</span>(p => p.<span class="mth">GetValidMoves</span>(<span class="kw">this</span>))
+            .<span class="mth">Any</span>(pos => pos == king.<span class="prop">Position</span>);
+    }
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Piece</span>&gt; <span class="mth">AllPieces</span>() =>
+        Enumerable.<span class="mth">Range</span>(0, 8)
+            .<span class="mth">SelectMany</span>(r => Enumerable.<span class="mth">Range</span>(0, 8).<span class="mth">Select</span>(c => _grid[r, c]))
+            .<span class="mth">Where</span>(p => p != <span class="kw">null</span>)!;
+
+    <span class="kw">public void</span> <span class="mth">Print</span>()
+    {
+        Console.<span class="mth">WriteLine</span>(<span class="str">"  a b c d e f g h"</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> r = 7; r >= 0; r--)
+        {
+            Console.<span class="mth">Write</span>($<span class="str">"{r + 1} "</span>);
+            <span class="kw">for</span> (<span class="kw">int</span> c = 0; c < 8; c++)
+                Console.<span class="mth">Write</span>(_grid[r, c]?.<span class="prop">Symbol</span> ?? <span class="str">"."</span> + <span class="str">" "</span>);
+            Console.<span class="mth">WriteLine</span>();
+        }
+    }
+}
+
+<span class="sec-comment">// ── Game ──────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Game</span>
+{
+    <span class="kw">public</span> <span class="typ">Board</span>     <span class="prop">Board</span>   { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="en">PieceColor</span> <span class="prop">Current</span> { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="en">PieceColor</span>.White;
+    <span class="kw">public</span> <span class="en">GameStatus</span> <span class="prop">Status</span>  { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="en">GameStatus</span>.Active;
+
+    <span class="kw">public</span> <span class="mth">Game</span>() => <span class="mth">SetupBoard</span>();
+
+    <span class="kw">public bool</span> <span class="mth">TryMove</span>(<span class="typ">Position</span> from, <span class="typ">Position</span> to)
+    {
+        <span class="kw">var</span> piece = <span class="prop">Board</span>.<span class="mth">GetPiece</span>(from);
+        <span class="kw">if</span> (piece == <span class="kw">null</span> || piece.<span class="prop">Color</span> != <span class="prop">Current</span>) <span class="kw">return false</span>;
+        <span class="kw">if</span> (!piece.<span class="mth">GetValidMoves</span>(<span class="prop">Board</span>).<span class="mth">Contains</span>(to))  <span class="kw">return false</span>;
+
+        <span class="kw">var</span> captured = <span class="prop">Board</span>.<span class="mth">GetPiece</span>(to);
+        <span class="kw">var</span> move     = <span class="kw">new</span> <span class="typ">Move</span>(piece, from, to, captured);
+        <span class="prop">Board</span>.<span class="mth">ExecuteMove</span>(move);
+
+        <span class="cmt">// Illegal if it leaves own king in check — must undo</span>
+        <span class="kw">if</span> (<span class="prop">Board</span>.<span class="mth">IsInCheck</span>(<span class="prop">Current</span>))
+        {
+            <span class="prop">Board</span>.<span class="mth">UndoMove</span>();
+            Console.<span class="mth">WriteLine</span>(<span class="str">"Illegal — leaves King in check!"</span>);
+            <span class="kw">return false</span>;
+        }
+
+        <span class="kw">var</span> opponent = <span class="prop">Current</span> == <span class="en">PieceColor</span>.White ? <span class="en">PieceColor</span>.Black : <span class="en">PieceColor</span>.White;
+        <span class="prop">Current</span>  = opponent;
+        <span class="prop">Status</span>   = <span class="mth">ComputeStatus</span>(opponent);
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Undo</span>() => <span class="prop">Board</span>.<span class="mth">UndoMove</span>();
+
+    <span class="kw">private</span> <span class="en">GameStatus</span> <span class="mth">ComputeStatus</span>(<span class="en">PieceColor</span> color)
+    {
+        <span class="kw">bool</span> inCheck  = <span class="prop">Board</span>.<span class="mth">IsInCheck</span>(color);
+        <span class="kw">bool</span> hasMoves = <span class="prop">Board</span>.<span class="mth">AllPieces</span>()
+            .<span class="mth">Where</span>(p => p.<span class="prop">Color</span> == color)
+            .<span class="mth">SelectMany</span>(p => p.<span class="mth">GetValidMoves</span>(<span class="prop">Board</span>))
+            .<span class="mth">Any</span>();
+
+        <span class="kw">if</span> (inCheck  && !hasMoves) <span class="kw">return</span> <span class="en">GameStatus</span>.Checkmate;
+        <span class="kw">if</span> (!inCheck && !hasMoves) <span class="kw">return</span> <span class="en">GameStatus</span>.Stalemate;
+        <span class="kw">if</span> (inCheck)               <span class="kw">return</span> <span class="en">GameStatus</span>.Check;
+        <span class="kw">return</span> <span class="en">GameStatus</span>.Active;
+    }
+
+    <span class="kw">private void</span> <span class="mth">SetupBoard</span>()
+    {
+        <span class="cmt">// Place pawns</span>
+        <span class="kw">for</span> (<span class="kw">int</span> c = 0; c < 8; c++)
+        {
+            <span class="prop">Board</span>.<span class="mth">SetPiece</span>(<span class="kw">new</span> <span class="typ">Position</span>(1, c), <span class="kw">new</span> <span class="typ">Pawn</span>(<span class="en">PieceColor</span>.White, <span class="kw">new</span> <span class="typ">Position</span>(1, c)));
+            <span class="prop">Board</span>.<span class="mth">SetPiece</span>(<span class="kw">new</span> <span class="typ">Position</span>(6, c), <span class="kw">new</span> <span class="typ">Pawn</span>(<span class="en">PieceColor</span>.Black, <span class="kw">new</span> <span class="typ">Position</span>(6, c)));
+        }
+        <span class="cmt">// Place back ranks (simplified — just a few key pieces)</span>
+        <span class="prop">Board</span>.<span class="mth">SetPiece</span>(<span class="kw">new</span> <span class="typ">Position</span>(0, 4), <span class="kw">new</span> <span class="typ">King</span>(<span class="en">PieceColor</span>.White, <span class="kw">new</span> <span class="typ">Position</span>(0, 4)));
+        <span class="prop">Board</span>.<span class="mth">SetPiece</span>(<span class="kw">new</span> <span class="typ">Position</span>(7, 4), <span class="kw">new</span> <span class="typ">King</span>(<span class="en">PieceColor</span>.Black, <span class="kw">new</span> <span class="typ">Position</span>(7, 4)));
+        <span class="prop">Board</span>.<span class="mth">SetPiece</span>(<span class="kw">new</span> <span class="typ">Position</span>(0, 3), <span class="kw">new</span> <span class="typ">Queen</span>(<span class="en">PieceColor</span>.White, <span class="kw">new</span> <span class="typ">Position</span>(0, 3)));
+        <span class="prop">Board</span>.<span class="mth">SetPiece</span>(<span class="kw">new</span> <span class="typ">Position</span>(7, 3), <span class="kw">new</span> <span class="typ">Queen</span>(<span class="en">PieceColor</span>.Black, <span class="kw">new</span> <span class="typ">Position</span>(7, 3)));
+    }
+}
+
+<span class="sec-comment">// ── Usage ─────────────────────────────────────────────</span>
+<span class="kw">var</span> game = <span class="kw">new</span> <span class="typ">Game</span>();
+game.<span class="prop">Board</span>.<span class="mth">Print</span>();
+game.<span class="mth">TryMove</span>(<span class="kw">new</span> <span class="typ">Position</span>(1, 4), <span class="kw">new</span> <span class="typ">Position</span>(3, 4)); <span class="cmt">// e2 → e4</span>
+Console.<span class="mth">WriteLine</span>($<span class="str">"Status: {game.Status}"</span>);
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     07. ATM
+════════════════════════════════════════ -->
+<section class="system" id="atm">
+  <div class="sys-header">
+    <div class="sys-num">07</div>
+    <div class="sys-meta">
+      <div class="sys-title">ATM</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">State Pattern ★</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Chain of Responsibility</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Singleton</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>State Pattern drives the ATM: Idle → CardInserted → PinVerified → Transaction</li>
+          <li>Cash dispensing uses Chain of Responsibility (£50 → £20 → £10 → £5 notes)</li>
+          <li>Account and Card are separate — a card references an account</li>
+          <li><code>Bank</code> is the Singleton system; <code>ATM</code> is a hardware endpoint</li>
+          <li>Balance check happens BEFORE dispensing, inside a single transaction</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--amber)">ATM States</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>IdleState</strong> — waiting for card insertion</li>
+          <li><strong>CardInsertedState</strong> — card in, awaiting PIN</li>
+          <li><strong>AuthenticatedState</strong> — PIN verified, show menu</li>
+          <li><strong>TransactionState</strong> — performing withdraw/deposit</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you prevent two ATMs withdrawing from the same account simultaneously?</span>
+    <span style="font-size:12px;color:#a09060">→ Use optimistic concurrency on the Account. Store a RowVersion/ETag. The update query only succeeds if the version matches. If it fails, return InsufficientFunds. At the class level: lock on the account object, or use Interlocked.CompareExchange on the balance.</span>
+    <span class="q">Q: What happens if the machine runs out of £20 notes?</span>
+    <span style="font-size:12px;color:#a09060">→ The Chain of Responsibility dispatcher skips that denomination and tries the next. If total can't be made with available notes, the transaction is declined.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">State ★ — ATM workflow</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Chain of Responsibility — cash dispenser</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Singleton — Bank</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--amber)">
+    <div class="primer-header" style="background:rgba(255,195,65,0.06);border-bottom-color:rgba(255,195,65,0.15)">
+      <span class="primer-label" style="color:var(--amber)">📖 Pattern Primer</span>
+      <span class="primer-name">Chain of Responsibility — denominations example</span>
+    </div>
+    <div class="primer-desc">Each handler tries to fulfil as much as it can of a request, then passes the remainder down. Perfect for cash dispensing, approval hierarchies, and middleware pipelines.</div>
+<pre>
+<span class="cmt">// Dispensing cash: try £50s first, then £20s, £10s, £5s</span>
+<span class="kw">public abstract class</span> <span class="typ">NoteDispenser</span>
+{
+    <span class="kw">protected</span> <span class="typ">NoteDispenser</span>? _next;
+    <span class="kw">protected</span> <span class="kw">int</span> _denomination;
+    <span class="kw">protected</span> <span class="kw">int</span> _count;  <span class="cmt">// notes in this cassette</span>
+
+    <span class="kw">public</span> <span class="typ">NoteDispenser</span> <span class="mth">SetNext</span>(<span class="typ">NoteDispenser</span> next)
+        => (_next = next, next).Item2;
+
+    <span class="kw">public</span> <span class="kw">int</span> <span class="mth">Dispense</span>(<span class="kw">int</span> amount)
+    {
+        <span class="kw">int</span> notesNeeded = amount / _denomination;
+        <span class="kw">int</span> notesUsed   = Math.<span class="mth">Min</span>(notesNeeded, _count);
+        <span class="kw">int</span> dispensed   = notesUsed * _denomination;
+
+        <span class="kw">if</span> (notesUsed > 0)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"Dispensing {notesUsed} x £{_denomination}"</span>);
+
+        <span class="kw">int</span> remaining = amount - dispensed;
+        <span class="kw">return</span> remaining > 0 ? (_next?.<span class="mth">Dispense</span>(remaining) ?? remaining) : 0;
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">Fifty</span>   : <span class="typ">NoteDispenser</span> { <span class="kw">public</span> <span class="mth">Fifty</span>()   { _denomination=50; _count=10; } }
+<span class="kw">public class</span> <span class="typ">Twenty</span>  : <span class="typ">NoteDispenser</span> { <span class="kw">public</span> <span class="mth">Twenty</span>()  { _denomination=20; _count=20; } }
+<span class="kw">public class</span> <span class="typ">Ten</span>     : <span class="typ">NoteDispenser</span> { <span class="kw">public</span> <span class="mth">Ten</span>()     { _denomination=10; _count=30; } }
+
+<span class="kw">var</span> dispenser = <span class="kw">new</span> <span class="typ">Fifty</span>();
+dispenser.<span class="mth">SetNext</span>(<span class="kw">new</span> <span class="typ">Twenty</span>()).<span class="mth">SetNext</span>(<span class="kw">new</span> <span class="typ">Ten</span>());
+
+<span class="kw">int</span> unpaid = dispenser.<span class="mth">Dispense</span>(130);  <span class="cmt">// £50 + £50 + £20 + £10</span>
+Console.<span class="mth">WriteLine</span>(unpaid == 0 ? <span class="str">"✅ Done"</span> : $<span class="str">"❌ Short by £{unpaid}"</span>);
+
+<span class="cmt">// In the ATM → same pattern. dispenser.Dispense(amount) called</span>
+<span class="cmt">// from TransactionState. ATM class itself is untouched.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">ATM.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Domain Models ─────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Account</span>
+{
+    <span class="kw">public</span> <span class="kw">string</span>  <span class="prop">AccountId</span> { <span class="kw">get</span>; }
+    <span class="kw">private decimal</span> _balance;
+    <span class="kw">private readonly</span> <span class="kw">object</span> _lock = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Account</span>(<span class="kw">string</span> id, <span class="kw">decimal</span> initialBalance)
+        => (<span class="prop">AccountId</span>, _balance) = (id, initialBalance);
+
+    <span class="kw">public decimal</span> <span class="prop">Balance</span> { <span class="kw">get</span> { <span class="kw">lock</span>(_lock) <span class="kw">return</span> _balance; } }
+
+    <span class="kw">public bool</span> <span class="mth">Debit</span>(<span class="kw">decimal</span> amount)
+    {
+        <span class="kw">lock</span> (_lock)
+        {
+            <span class="kw">if</span> (_balance < amount) <span class="kw">return false</span>;
+            _balance -= amount;
+            <span class="kw">return true</span>;
+        }
+    }
+
+    <span class="kw">public void</span> <span class="mth">Credit</span>(<span class="kw">decimal</span> amount) { <span class="kw">lock</span> (_lock) _balance += amount; }
+}
+
+<span class="kw">public class</span> <span class="typ">Card</span>
+{
+    <span class="kw">public string</span>  <span class="prop">CardNumber</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Account</span> <span class="prop">Account</span>    { <span class="kw">get</span>; }
+    <span class="kw">private readonly</span> <span class="kw">string</span> _pinHash;
+
+    <span class="kw">public</span> <span class="mth">Card</span>(<span class="kw">string</span> number, <span class="typ">Account</span> account, <span class="kw">string</span> pin)
+        => (<span class="prop">CardNumber</span>, <span class="prop">Account</span>, _pinHash) = (number, account, <span class="mth">Hash</span>(pin));
+
+    <span class="kw">public bool</span> <span class="mth">ValidatePin</span>(<span class="kw">string</span> pin) => <span class="mth">Hash</span>(pin) == _pinHash;
+
+    <span class="kw">private static string</span> <span class="mth">Hash</span>(<span class="kw">string</span> pin) => pin.GetHashCode().<span class="mth">ToString</span>(); <span class="cmt">// simplified</span>
+}
+
+<span class="sec-comment">// ── Cash Dispenser (Chain of Responsibility) ──────────</span>
+<span class="kw">public class</span> <span class="typ">CashDispenser</span>
+{
+    <span class="kw">private readonly</span> <span class="kw">int</span> _denomination;
+    <span class="kw">private</span> <span class="kw">int</span>          _count;
+    <span class="kw">private</span> <span class="typ">CashDispenser</span>? _next;
+
+    <span class="kw">public</span> <span class="mth">CashDispenser</span>(<span class="kw">int</span> denomination, <span class="kw">int</span> count)
+        => (_denomination, _count) = (denomination, count);
+
+    <span class="kw">public</span> <span class="typ">CashDispenser</span> <span class="mth">SetNext</span>(<span class="typ">CashDispenser</span> next)
+        => (_next = next, next).Item2;
+
+    <span class="cmt">// Returns amount it couldn't dispense (0 = success)</span>
+    <span class="kw">public int</span> <span class="mth">Dispense</span>(<span class="kw">int</span> amount)
+    {
+        <span class="kw">int</span> used      = Math.<span class="mth">Min</span>(amount / _denomination, _count);
+        <span class="kw">int</span> covered   = used * _denomination;
+        _count       -= used;
+
+        <span class="kw">if</span> (used > 0)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"  Dispensing {used} × £{_denomination}"</span>);
+
+        <span class="kw">int</span> remaining = amount - covered;
+        <span class="kw">return</span> remaining > 0 ? (_next?.<span class="mth">Dispense</span>(remaining) ?? remaining) : 0;
+    }
+}
+
+<span class="sec-comment">// ── ATM State Interface ───────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IAtmState</span>
+{
+    <span class="kw">void</span> <span class="mth">InsertCard</span>(<span class="typ">Atm</span> atm, <span class="typ">Card</span> card);
+    <span class="kw">void</span> <span class="mth">EnterPin</span>(<span class="typ">Atm</span> atm, <span class="kw">string</span> pin);
+    <span class="kw">void</span> <span class="mth">Withdraw</span>(<span class="typ">Atm</span> atm, <span class="kw">decimal</span> amount);
+    <span class="kw">void</span> <span class="mth">Deposit</span>(<span class="typ">Atm</span> atm, <span class="kw">decimal</span> amount);
+    <span class="kw">void</span> <span class="mth">EjectCard</span>(<span class="typ">Atm</span> atm);
+}
+
+<span class="sec-comment">// ── Idle State ────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">IdleState</span> : <span class="iface">IAtmState</span>
+{
+    <span class="kw">public void</span> <span class="mth">InsertCard</span>(<span class="typ">Atm</span> atm, <span class="typ">Card</span> card)
+    {
+        atm.<span class="prop">CurrentCard</span> = card;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"Card {card.CardNumber} inserted. Please enter PIN."</span>);
+        atm.<span class="mth">SetState</span>(atm.<span class="prop">CardInsertedState</span>);
+    }
+    <span class="kw">public void</span> <span class="mth">EnterPin</span>(<span class="typ">Atm</span> a, <span class="kw">string</span> p)  => Console.<span class="mth">WriteLine</span>(<span class="str">"Insert card first."</span>);
+    <span class="kw">public void</span> <span class="mth">Withdraw</span>(<span class="typ">Atm</span> a, <span class="kw">decimal</span> m) => Console.<span class="mth">WriteLine</span>(<span class="str">"Insert card first."</span>);
+    <span class="kw">public void</span> <span class="mth">Deposit</span>(<span class="typ">Atm</span> a, <span class="kw">decimal</span> m)  => Console.<span class="mth">WriteLine</span>(<span class="str">"Insert card first."</span>);
+    <span class="kw">public void</span> <span class="mth">EjectCard</span>(<span class="typ">Atm</span> a)           => Console.<span class="mth">WriteLine</span>(<span class="str">"No card inserted."</span>);
+}
+
+<span class="sec-comment">// ── Card Inserted State ───────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">CardInsertedState</span> : <span class="iface">IAtmState</span>
+{
+    <span class="kw">private int</span> _attempts = 0;
+
+    <span class="kw">public void</span> <span class="mth">InsertCard</span>(<span class="typ">Atm</span> a, <span class="typ">Card</span> c) => Console.<span class="mth">WriteLine</span>(<span class="str">"Card already inserted."</span>);
+
+    <span class="kw">public void</span> <span class="mth">EnterPin</span>(<span class="typ">Atm</span> atm, <span class="kw">string</span> pin)
+    {
+        <span class="kw">if</span> (atm.<span class="prop">CurrentCard</span>!.<span class="mth">ValidatePin</span>(pin))
+        {
+            _attempts = 0;
+            Console.<span class="mth">WriteLine</span>(<span class="str">"PIN accepted. Select transaction."</span>);
+            atm.<span class="mth">SetState</span>(atm.<span class="prop">AuthenticatedState</span>);
+        }
+        <span class="kw">else</span>
+        {
+            _attempts++;
+            Console.<span class="mth">WriteLine</span>($<span class="str">"Wrong PIN. Attempt {_attempts}/3."</span>);
+            <span class="kw">if</span> (_attempts >= 3)
+            {
+                Console.<span class="mth">WriteLine</span>(<span class="str">"Card blocked! Ejecting."</span>);
+                atm.<span class="mth">EjectCard</span>();
+            }
+        }
+    }
+
+    <span class="kw">public void</span> <span class="mth">Withdraw</span>(<span class="typ">Atm</span> a, <span class="kw">decimal</span> m) => Console.<span class="mth">WriteLine</span>(<span class="str">"Enter PIN first."</span>);
+    <span class="kw">public void</span> <span class="mth">Deposit</span>(<span class="typ">Atm</span> a, <span class="kw">decimal</span> m)  => Console.<span class="mth">WriteLine</span>(<span class="str">"Enter PIN first."</span>);
+    <span class="kw">public void</span> <span class="mth">EjectCard</span>(<span class="typ">Atm</span> atm)
+    {
+        atm.<span class="prop">CurrentCard</span> = <span class="kw">null</span>;
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Card ejected."</span>);
+        atm.<span class="mth">SetState</span>(atm.<span class="prop">IdleState</span>);
+    }
+}
+
+<span class="sec-comment">// ── Authenticated State ───────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">AuthenticatedState</span> : <span class="iface">IAtmState</span>
+{
+    <span class="kw">public void</span> <span class="mth">InsertCard</span>(<span class="typ">Atm</span> a, <span class="typ">Card</span> c) => Console.<span class="mth">WriteLine</span>(<span class="str">"Session active."</span>);
+
+    <span class="kw">public void</span> <span class="mth">EnterPin</span>(<span class="typ">Atm</span> a, <span class="kw">string</span> p) => Console.<span class="mth">WriteLine</span>(<span class="str">"Already authenticated."</span>);
+
+    <span class="kw">public void</span> <span class="mth">Withdraw</span>(<span class="typ">Atm</span> atm, <span class="kw">decimal</span> amount)
+    {
+        <span class="kw">var</span> account = atm.<span class="prop">CurrentCard</span>!.<span class="prop">Account</span>;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"Balance: £{account.Balance}. Withdrawing £{amount}..."</span>);
+
+        <span class="kw">if</span> (!account.<span class="mth">Debit</span>(amount))
+        { Console.<span class="mth">WriteLine</span>(<span class="str">"Insufficient funds."</span>); <span class="kw">return</span>; }
+
+        <span class="kw">int</span> unpaid = atm.<span class="prop">Dispenser</span>.<span class="mth">Dispense</span>((<span class="kw">int</span>)amount);
+        <span class="kw">if</span> (unpaid > 0)
+        {
+            <span class="cmt">// Refund if machine can't fully dispense</span>
+            account.<span class="mth">Credit</span>(unpaid);
+            Console.<span class="mth">WriteLine</span>($<span class="str">"Could only dispense £{amount - unpaid}. Refunded £{unpaid}."</span>);
+        }
+        <span class="kw">else</span>
+            Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Please collect £{amount}."</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Deposit</span>(<span class="typ">Atm</span> atm, <span class="kw">decimal</span> amount)
+    {
+        atm.<span class="prop">CurrentCard</span>!.<span class="prop">Account</span>.<span class="mth">Credit</span>(amount);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Deposited £{amount}. New balance: £{atm.CurrentCard.Account.Balance}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">EjectCard</span>(<span class="typ">Atm</span> atm)
+    {
+        Console.<span class="mth">WriteLine</span>(<span class="str">"Session ended. Card ejected."</span>);
+        atm.<span class="prop">CurrentCard</span> = <span class="kw">null</span>;
+        atm.<span class="mth">SetState</span>(atm.<span class="prop">IdleState</span>);
+    }
+}
+
+<span class="sec-comment">// ── ATM Context ───────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Atm</span>
+{
+    <span class="kw">public</span> <span class="iface">IAtmState</span>     <span class="prop">IdleState</span>          { <span class="kw">get</span>; } = <span class="kw">new</span> <span class="typ">IdleState</span>();
+    <span class="kw">public</span> <span class="iface">IAtmState</span>     <span class="prop">CardInsertedState</span>  { <span class="kw">get</span>; } = <span class="kw">new</span> <span class="typ">CardInsertedState</span>();
+    <span class="kw">public</span> <span class="iface">IAtmState</span>     <span class="prop">AuthenticatedState</span> { <span class="kw">get</span>; } = <span class="kw">new</span> <span class="typ">AuthenticatedState</span>();
+    <span class="kw">public</span> <span class="typ">CashDispenser</span>  <span class="prop">Dispenser</span>          { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Card</span>?          <span class="prop">CurrentCard</span>        { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">private</span> <span class="iface">IAtmState</span> _state;
+
+    <span class="kw">public</span> <span class="mth">Atm</span>()
+    {
+        _state = <span class="prop">IdleState</span>;
+        <span class="cmt">// Build the cash dispenser chain</span>
+        <span class="kw">var</span> fifty   = <span class="kw">new</span> <span class="typ">CashDispenser</span>(50, 10);
+        <span class="kw">var</span> twenty  = <span class="kw">new</span> <span class="typ">CashDispenser</span>(20, 20);
+        <span class="kw">var</span> ten     = <span class="kw">new</span> <span class="typ">CashDispenser</span>(10, 30);
+        <span class="kw">var</span> five    = <span class="kw">new</span> <span class="typ">CashDispenser</span>(5, 40);
+        fifty.<span class="mth">SetNext</span>(twenty).<span class="mth">SetNext</span>(ten).<span class="mth">SetNext</span>(five);
+        <span class="prop">Dispenser</span> = fifty;
+    }
+
+    <span class="kw">public void</span> <span class="mth">SetState</span>(<span class="iface">IAtmState</span> s) => _state = s;
+    <span class="kw">public void</span> <span class="mth">InsertCard</span>(<span class="typ">Card</span> c)      => _state.<span class="mth">InsertCard</span>(<span class="kw">this</span>, c);
+    <span class="kw">public void</span> <span class="mth">EnterPin</span>(<span class="kw">string</span> pin)    => _state.<span class="mth">EnterPin</span>(<span class="kw">this</span>, pin);
+    <span class="kw">public void</span> <span class="mth">Withdraw</span>(<span class="kw">decimal</span> amt)   => _state.<span class="mth">Withdraw</span>(<span class="kw">this</span>, amt);
+    <span class="kw">public void</span> <span class="mth">Deposit</span>(<span class="kw">decimal</span> amt)    => _state.<span class="mth">Deposit</span>(<span class="kw">this</span>, amt);
+    <span class="kw">public void</span> <span class="mth">EjectCard</span>()             => _state.<span class="mth">EjectCard</span>(<span class="kw">this</span>);
+}
+
+<span class="sec-comment">// ── Usage ─────────────────────────────────────────────</span>
+<span class="kw">var</span> acc  = <span class="kw">new</span> <span class="typ">Account</span>(<span class="str">"ACC-001"</span>, 500m);
+<span class="kw">var</span> card = <span class="kw">new</span> <span class="typ">Card</span>(<span class="str">"4111-1111-1111-1111"</span>, acc, <span class="str">"1234"</span>);
+<span class="kw">var</span> atm  = <span class="kw">new</span> <span class="typ">Atm</span>();
+
+atm.<span class="mth">InsertCard</span>(card);      <span class="cmt">// → CardInserted</span>
+atm.<span class="mth">EnterPin</span>(<span class="str">"0000"</span>);      <span class="cmt">// Wrong PIN</span>
+atm.<span class="mth">EnterPin</span>(<span class="str">"1234"</span>);      <span class="cmt">// → Authenticated</span>
+atm.<span class="mth">Withdraw</span>(130m);        <span class="cmt">// £50+£50+£20+£10</span>
+atm.<span class="mth">Deposit</span>(50m);          <span class="cmt">// Credit account</span>
+atm.<span class="mth">EjectCard</span>();            <span class="cmt">// → Idle</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     08. ONLINE BLACKJACK
+════════════════════════════════════════ -->
+<section class="system" id="blackjack">
+  <div class="sys-header">
+    <div class="sys-num">08</div>
+    <div class="sys-meta">
+      <div class="sys-title">Online Blackjack</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Factory — Deck/Hands</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Template Method — Game Flow</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Strategy — Dealer AI</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--amber)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Template Method: <code>BlackjackGame.Play()</code> defines the fixed flow — deal, player turns, dealer turn, settle. Subclasses can override steps</li>
+          <li>Ace value is dynamic — <code>Hand.Value</code> counts Aces as 11, then reduces if bust</li>
+          <li><code>Deck</code> is a shuffled stack of cards; draw = pop</li>
+          <li><code>Dealer</code> and <code>Player</code> both extend <code>Participant</code> — share hand logic</li>
+          <li>Result enum covers all outcomes: Win, Lose, Push, Blackjack, Bust</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Game Flow (Template Method)</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>1. <strong>DealInitialCards()</strong> — 2 to each participant</li>
+          <li>2. <strong>CheckBlackjack()</strong> — instant win check</li>
+          <li>3. <strong>PlayerTurns()</strong> — each player hits or stands</li>
+          <li>4. <strong>DealerTurn()</strong> — dealer hits until ≥17</li>
+          <li>5. <strong>SettleResults()</strong> — compare hands, pay out</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you handle the Ace being 1 or 11?</span>
+    <span style="font-size:12px;color:#a09060">→ In <code>Hand.Value</code>: count all Aces as 11 first. While total > 21 and there are Aces, reduce one Ace from 11 to 1 (subtract 10). This is the standard optimal Ace-counting algorithm.</span>
+    <span class="q">Q: What is the Template Method pattern doing here?</span>
+    <span style="font-size:12px;color:#a09060">→ <code>Play()</code> in the base class calls abstract methods in a fixed order. A <code>MultiDeckBlackjack</code> subclass only overrides <code>CreateDeck()</code> — the game flow stays identical. The skeleton is locked, the steps are swappable.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Template Method — game flow skeleton</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Factory — deck creation</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — dealer hit rule</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--green)">
+    <div class="primer-header" style="background:rgba(61,220,132,0.06);border-bottom-color:rgba(61,220,132,0.15)">
+      <span class="primer-label" style="color:var(--green)">📖 Pattern Primer</span>
+      <span class="primer-name">Template Method — define the skeleton, let subclasses fill in steps</span>
+    </div>
+    <div class="primer-desc">The base class defines the overall algorithm structure in a final method. Individual steps are abstract — subclasses implement them. The "what happens and when" is fixed; the "how" varies.</div>
+<pre>
+<span class="cmt">// Making a hot drink — the steps are always the same,</span>
+<span class="cmt">// but tea and coffee brew differently.</span>
+<span class="kw">public abstract class</span> <span class="typ">HotDrink</span>
+{
+    <span class="cmt">// Template method — sealed so nobody changes the order</span>
+    <span class="kw">public sealed void</span> <span class="mth">Prepare</span>()
+    {
+        <span class="mth">BoilWater</span>();      <span class="cmt">// same for all</span>
+        <span class="mth">Brew</span>();           <span class="cmt">// VARIES</span>
+        <span class="mth">PourInCup</span>();      <span class="cmt">// same for all</span>
+        <span class="mth">AddCondiments</span>(); <span class="cmt">// VARIES</span>
+    }
+
+    <span class="kw">private void</span>   <span class="mth">BoilWater</span>()  => Console.<span class="mth">WriteLine</span>(<span class="str">"Boiling water..."</span>);
+    <span class="kw">private void</span>   <span class="mth">PourInCup</span>() => Console.<span class="mth">WriteLine</span>(<span class="str">"Pouring..."</span>);
+    <span class="kw">protected abstract void</span> <span class="mth">Brew</span>();
+    <span class="kw">protected abstract void</span> <span class="mth">AddCondiments</span>();
+}
+
+<span class="kw">public class</span> <span class="typ">Tea</span> : <span class="typ">HotDrink</span>
+{
+    <span class="kw">protected override void</span> <span class="mth">Brew</span>()           => Console.<span class="mth">WriteLine</span>(<span class="str">"Steeping tea..."</span>);
+    <span class="kw">protected override void</span> <span class="mth">AddCondiments</span>() => Console.<span class="mth">WriteLine</span>(<span class="str">"Adding lemon."</span>);
+}
+
+<span class="kw">public class</span> <span class="typ">Coffee</span> : <span class="typ">HotDrink</span>
+{
+    <span class="kw">protected override void</span> <span class="mth">Brew</span>()           => Console.<span class="mth">WriteLine</span>(<span class="str">"Dripping coffee..."</span>);
+    <span class="kw">protected override void</span> <span class="mth">AddCondiments</span>() => Console.<span class="mth">WriteLine</span>(<span class="str">"Adding milk and sugar."</span>);
+}
+
+<span class="kw">new</span> <span class="typ">Tea</span>().<span class="mth">Prepare</span>();    <span class="cmt">// Boil → Steep → Pour → Lemon</span>
+<span class="kw">new</span> <span class="typ">Coffee</span>().<span class="mth">Prepare</span>(); <span class="cmt">// Boil → Drip  → Pour → Milk+Sugar</span>
+
+<span class="cmt">// In Blackjack → Play() is sealed: Deal → CheckBJ → PlayerTurns</span>
+<span class="cmt">// → DealerTurn → Settle. MultiDeckBlackjack only overrides CreateDeck().</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">Blackjack.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Card & Deck ───────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">Suit</span>  { Hearts, Diamonds, Clubs, Spades }
+<span class="kw">public enum</span> <span class="en">Rank</span>  { Two=2,Three,Four,Five,Six,Seven,Eight,Nine,Ten,Jack,Queen,King,Ace }
+
+<span class="kw">public record</span> <span class="typ">Card</span>(<span class="en">Suit</span> Suit, <span class="en">Rank</span> Rank)
+{
+    <span class="cmt">// Face value — Ace handled in Hand.Value</span>
+    <span class="kw">public int</span> <span class="prop">Value</span> => Rank <span class="kw">switch</span>
+    {
+        <span class="en">Rank</span>.Jack or <span class="en">Rank</span>.Queen or <span class="en">Rank</span>.King => 10,
+        <span class="en">Rank</span>.Ace                               => 11,
+        _                                      => (<span class="kw">int</span>)Rank
+    };
+    <span class="kw">public override string</span> <span class="mth">ToString</span>() => $<span class="str">"{Rank} of {Suit}"</span>;
+}
+
+<span class="kw">public class</span> <span class="typ">Deck</span>
+{
+    <span class="kw">private readonly</span> Stack&lt;<span class="typ">Card</span>&gt; _cards;
+
+    <span class="kw">public</span> <span class="mth">Deck</span>(<span class="kw">int</span> numDecks = 1)
+    {
+        <span class="kw">var</span> cards = <span class="kw">new</span> List&lt;<span class="typ">Card</span>&gt;();
+        <span class="kw">for</span> (<span class="kw">int</span> d = 0; d < numDecks; d++)
+            <span class="kw">foreach</span> (<span class="en">Suit</span> s <span class="kw">in</span> Enum.<span class="mth">GetValues</span>&lt;<span class="en">Suit</span>&gt;())
+                <span class="kw">foreach</span> (<span class="en">Rank</span> r <span class="kw">in</span> Enum.<span class="mth">GetValues</span>&lt;<span class="en">Rank</span>&gt;())
+                    cards.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">Card</span>(s, r));
+
+        <span class="cmt">// Shuffle using Fisher-Yates</span>
+        <span class="kw">var</span> rng = <span class="kw">new</span> Random();
+        <span class="kw">for</span> (<span class="kw">int</span> i = cards.<span class="prop">Count</span> - 1; i > 0; i--)
+        {
+            <span class="kw">int</span> j = rng.<span class="mth">Next</span>(i + 1);
+            (cards[i], cards[j]) = (cards[j], cards[i]);
+        }
+        _cards = <span class="kw">new</span> Stack&lt;<span class="typ">Card</span>&gt;(cards);
+    }
+
+    <span class="kw">public</span> <span class="typ">Card</span> <span class="mth">Draw</span>() => _cards.<span class="mth">Pop</span>();
+    <span class="kw">public int</span>  <span class="prop">Remaining</span> => _cards.<span class="prop">Count</span>;
+}
+
+<span class="sec-comment">// ── Hand ──────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Hand</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Card</span>&gt; _cards = <span class="kw">new</span>();
+
+    <span class="kw">public void</span> <span class="mth">Add</span>(<span class="typ">Card</span> card) => _cards.<span class="mth">Add</span>(card);
+    <span class="kw">public void</span> <span class="mth">Clear</span>()       => _cards.<span class="mth">Clear</span>();
+
+    <span class="cmt">// Ace = 11, reduced to 1 while bust — the standard algorithm</span>
+    <span class="kw">public int</span> <span class="prop">Value</span>
+    {
+        <span class="kw">get</span>
+        {
+            <span class="kw">int</span> total = _cards.<span class="mth">Sum</span>(c => c.<span class="prop">Value</span>);
+            <span class="kw">int</span> aces  = _cards.<span class="mth">Count</span>(c => c.<span class="prop">Rank</span> == <span class="en">Rank</span>.Ace);
+            <span class="kw">while</span> (total > 21 && aces > 0) { total -= 10; aces--; }
+            <span class="kw">return</span> total;
+        }
+    }
+
+    <span class="kw">public bool</span> <span class="prop">IsBust</span>      => <span class="prop">Value</span> > 21;
+    <span class="kw">public bool</span> <span class="prop">IsBlackjack</span> => _cards.<span class="prop">Count</span> == 2 && <span class="prop">Value</span> == 21;
+
+    <span class="kw">public override string</span> <span class="mth">ToString</span>() =>
+        <span class="kw">string</span>.<span class="mth">Join</span>(<span class="str">", "</span>, _cards) + $<span class="str">" (Value: {Value})"</span>;
+}
+
+<span class="sec-comment">// ── Participants ──────────────────────────────────────</span>
+<span class="kw">public abstract class</span> <span class="typ">Participant</span>
+{
+    <span class="kw">public string</span> <span class="prop">Name</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Hand</span>   <span class="prop">Hand</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">protected</span> <span class="mth">Participant</span>(<span class="kw">string</span> name) => <span class="prop">Name</span> = name;
+    <span class="kw">public abstract bool</span> <span class="mth">ShouldHit</span>(<span class="typ">Hand</span> dealerHand);
+}
+
+<span class="kw">public class</span> <span class="typ">Player</span> : <span class="typ">Participant</span>
+{
+    <span class="kw">public decimal</span> <span class="prop">Chips</span>  { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public decimal</span> <span class="prop">Bet</span>    { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Player</span>(<span class="kw">string</span> name, <span class="kw">decimal</span> chips) : <span class="kw">base</span>(name) => <span class="prop">Chips</span> = chips;
+
+    <span class="kw">public void</span> <span class="mth">PlaceBet</span>(<span class="kw">decimal</span> amount)
+    {
+        <span class="kw">if</span> (amount > <span class="prop">Chips</span>) <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>(<span class="str">"Insufficient chips."</span>);
+        <span class="prop">Bet</span>   = amount;
+        <span class="prop">Chips</span> -= amount;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Win</span>(<span class="kw">decimal</span> multiplier = 1m) => <span class="prop">Chips</span> += <span class="prop">Bet</span> * (1 + multiplier);
+    <span class="kw">public void</span> <span class="mth">Push</span>()                        => <span class="prop">Chips</span> += <span class="prop">Bet</span>; <span class="cmt">// return bet</span>
+
+    <span class="cmt">// Human player hits if value is low — simplified (real: ask user)</span>
+    <span class="kw">public override bool</span> <span class="mth">ShouldHit</span>(<span class="typ">Hand</span> d) => <span class="prop">Hand</span>.<span class="prop">Value</span> < 17;
+}
+
+<span class="kw">public class</span> <span class="typ">Dealer</span> : <span class="typ">Participant</span>
+{
+    <span class="kw">public</span> <span class="mth">Dealer</span>() : <span class="kw">base</span>(<span class="str">"Dealer"</span>) { }
+
+    <span class="cmt">// Standard casino rule: dealer hits on soft 16 or less, stands on 17+</span>
+    <span class="kw">public override bool</span> <span class="mth">ShouldHit</span>(<span class="typ">Hand</span> _) => <span class="prop">Hand</span>.<span class="prop">Value</span> < 17;
+}
+
+<span class="sec-comment">// ── Blackjack Game (Template Method) ─────────────────</span>
+<span class="kw">public class</span> <span class="typ">BlackjackGame</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Player</span>&gt; _players;
+    <span class="kw">private readonly</span> <span class="typ">Dealer</span>       _dealer = <span class="kw">new</span>();
+    <span class="kw">private</span>          <span class="typ">Deck</span>          _deck;
+
+    <span class="kw">public</span> <span class="mth">BlackjackGame</span>(List&lt;<span class="typ">Player</span>&gt; players, <span class="kw">int</span> numDecks = 1)
+    {
+        _players = players;
+        _deck    = <span class="kw">new</span> <span class="typ">Deck</span>(numDecks);
+    }
+
+    <span class="cmt">// Template Method — the fixed game skeleton</span>
+    <span class="kw">public sealed void</span> <span class="mth">Play</span>()
+    {
+        <span class="mth">TakeBets</span>();
+        <span class="mth">DealInitialCards</span>();
+        <span class="kw">if</span> (!<span class="mth">CheckBlackjack</span>())
+        {
+            <span class="mth">PlayPlayerTurns</span>();
+            <span class="mth">PlayDealerTurn</span>();
+        }
+        <span class="mth">SettleResults</span>();
+        <span class="mth">ResetHands</span>();
+    }
+
+    <span class="kw">private void</span> <span class="mth">TakeBets</span>()
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> _players)
+        {
+            Console.<span class="mth">Write</span>($<span class="str">"{p.Name} (£{p.Chips} chips) — bet: "</span>);
+            p.<span class="mth">PlaceBet</span>(10m); <span class="cmt">// fixed £10 for simplicity</span>
+        }
+    }
+
+    <span class="kw">private void</span> <span class="mth">DealInitialCards</span>()
+    {
+        <span class="cmt">// Deal 2 cards to each player and dealer</span>
+        <span class="kw">for</span> (<span class="kw">int</span> i = 0; i < 2; i++)
+        {
+            <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> _players) p.<span class="prop">Hand</span>.<span class="mth">Add</span>(_deck.<span class="mth">Draw</span>());
+            _dealer.<span class="prop">Hand</span>.<span class="mth">Add</span>(_deck.<span class="mth">Draw</span>());
+        }
+        <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> _players)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: {p.Hand}"</span>);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"Dealer shows: {_dealer.Hand}"</span>);
+    }
+
+    <span class="cmt">// Returns true if someone has blackjack (skip player turns)</span>
+    <span class="kw">private bool</span> <span class="mth">CheckBlackjack</span>()
+    {
+        <span class="kw">bool</span> dealerBJ = _dealer.<span class="prop">Hand</span>.<span class="prop">IsBlackjack</span>;
+        <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> _players)
+        {
+            <span class="kw">if</span> (p.<span class="prop">Hand</span>.<span class="prop">IsBlackjack</span> && dealerBJ) { Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Push (both BJ)"</span>); p.<span class="mth">Push</span>(); }
+            <span class="kw">else if</span> (p.<span class="prop">Hand</span>.<span class="prop">IsBlackjack</span>)           { Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Blackjack! 3:2"</span>); p.<span class="mth">Win</span>(1.5m); }
+            <span class="kw">else if</span> (dealerBJ)                        Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Dealer Blackjack — you lose."</span>);
+        }
+        <span class="kw">return</span> dealerBJ || _players.<span class="mth">Any</span>(p => p.<span class="prop">Hand</span>.<span class="prop">IsBlackjack</span>);
+    }
+
+    <span class="kw">private void</span> <span class="mth">PlayPlayerTurns</span>()
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> _players)
+        {
+            Console.<span class="mth">WriteLine</span>($<span class="str">"\n{p.Name}'s turn:"</span>);
+            <span class="kw">while</span> (!p.<span class="prop">Hand</span>.<span class="prop">IsBust</span> && p.<span class="mth">ShouldHit</span>(_dealer.<span class="prop">Hand</span>))
+            {
+                <span class="kw">var</span> card = _deck.<span class="mth">Draw</span>();
+                p.<span class="prop">Hand</span>.<span class="mth">Add</span>(card);
+                Console.<span class="mth">WriteLine</span>($<span class="str">"  Hit → {card}. Hand: {p.Hand}"</span>);
+            }
+            <span class="kw">if</span> (p.<span class="prop">Hand</span>.<span class="prop">IsBust</span>) Console.<span class="mth">WriteLine</span>($<span class="str">"  {p.Name} busts!"</span>);
+        }
+    }
+
+    <span class="kw">private void</span> <span class="mth">PlayDealerTurn</span>()
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\nDealer's turn. Hand: {_dealer.Hand}"</span>);
+        <span class="kw">while</span>(_dealer.<span class="mth">ShouldHit</span>(_dealer.<span class="prop">Hand</span>))
+        {
+            <span class="kw">var</span> card = _deck.<span class="mth">Draw</span>();
+            _dealer.<span class="prop">Hand</span>.<span class="mth">Add</span>(card);
+            Console.<span class="mth">WriteLine</span>($<span class="str">"  Dealer hits → {card}. Hand: {_dealer.Hand}"</span>);
+        }
+    }
+
+    <span class="kw">private void</span> <span class="mth">SettleResults</span>()
+    {
+        <span class="kw">int</span> dealerVal = _dealer.<span class="prop">Hand</span>.<span class="prop">Value</span>;
+        <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> _players)
+        {
+            <span class="kw">if</span>      (p.<span class="prop">Hand</span>.<span class="prop">IsBust</span>)           Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Bust — lose."</span>);
+            <span class="kw">else if</span> (_dealer.<span class="prop">Hand</span>.<span class="prop">IsBust</span>)     { Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Dealer bust — win! Chips: £{p.Chips}"</span>); p.<span class="mth">Win</span>(); }
+            <span class="kw">else if</span> (p.<span class="prop">Hand</span>.<span class="prop">Value</span> > dealerVal) { Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Win! Chips: £{p.Chips}"</span>); p.<span class="mth">Win</span>(); }
+            <span class="kw">else if</span> (p.<span class="prop">Hand</span>.<span class="prop">Value</span> < dealerVal)   Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Lose."</span>);
+            <span class="kw">else</span>                               { Console.<span class="mth">WriteLine</span>($<span class="str">"{p.Name}: Push."</span>); p.<span class="mth">Push</span>(); }
+        }
+    }
+
+    <span class="kw">private void</span> <span class="mth">ResetHands</span>()
+    {
+        _players.<span class="mth">ForEach</span>(p => p.<span class="prop">Hand</span>.<span class="mth">Clear</span>());
+        _dealer.<span class="prop">Hand</span>.<span class="mth">Clear</span>();
+    }
+}
+
+<span class="sec-comment">// ── Usage ─────────────────────────────────────────────</span>
+<span class="kw">var</span> players = <span class="kw">new</span> List&lt;<span class="typ">Player</span>&gt; {
+    <span class="kw">new</span>(<span class="str">"Alice"</span>, 100m),
+    <span class="kw">new</span>(<span class="str">"Bob"</span>,   200m)
+};
+<span class="kw">var</span> game = <span class="kw">new</span> <span class="typ">BlackjackGame</span>(players, numDecks: 2);
+game.<span class="mth">Play</span>();  <span class="cmt">// Deal → Check BJ → Player turns → Dealer → Settle</span>
+game.<span class="mth">Play</span>();  <span class="cmt">// Second hand — same flow</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     09. LIBRARY MANAGEMENT SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="library">
+  <div class="sys-header">
+    <div class="sys-num">09</div>
+    <div class="sys-meta">
+      <div class="sys-title">Library Management System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Observer — Notifications</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Factory — Search</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Strategy — Fine Calculation</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Observer pattern: members on a waitlist get notified when a book is returned</li>
+          <li><code>BookItem</code> = a physical copy; <code>Book</code> = the title with metadata</li>
+          <li><code>Loan</code> records who borrowed which copy and when — this drives fine calculation</li>
+          <li>Search uses Strategy — can swap between ISBN, author, or title search</li>
+          <li><code>Library</code> is the Singleton catalogue and loan manager</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Book</strong> — ISBN, title, author, genre</li>
+          <li><strong>BookItem</strong> — physical copy: barcode, status, rack location</li>
+          <li><strong>Member</strong> — name, ID, active loans</li>
+          <li><strong>Loan</strong> — member + bookItem + dates + fine</li>
+          <li><strong>Library</strong> — catalogue, checkout, return, search</li>
+          <li><strong>INotificationService</strong> — email/SMS strategy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you handle a book being returned when others are waiting?</span>
+    <span style="font-size:12px;color:#a09060">→ Observer pattern. Book has a waitlist queue of Members. On return, book notifies the first member in the queue. That member's reservation is activated. Notification goes via INotificationService (email/SMS strategy).</span>
+    <span class="q">Q: What's the difference between Book and BookItem?</span>
+    <span style="font-size:12px;color:#a09060">→ Book is the catalogue entry (one per title). BookItem is a physical copy with a barcode. A library can have 5 copies (BookItems) of one Book. Loan is always against a BookItem, not a Book.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Observer — waitlist notifications</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — fine calculation</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Factory — search strategies</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--green)">
+    <div class="primer-header" style="background:rgba(61,220,132,0.06);border-bottom-color:rgba(61,220,132,0.15)">
+      <span class="primer-label" style="color:var(--green)">📖 Pattern Primer</span>
+      <span class="primer-name">Observer Pattern — subscribe to events, get notified automatically</span>
+    </div>
+    <div class="primer-desc">One object (Subject/Publisher) maintains a list of dependents (Observers/Subscribers). When the subject's state changes, it notifies all observers. They don't poll — they get pushed. In .NET this maps neatly to events, but knowing the raw pattern is what interviewers want.</div>
+<pre>
+<span class="kw">public interface</span> <span class="iface">IObserver</span>&lt;<span class="typ">T</span>&gt;
+{
+    <span class="kw">void</span> <span class="mth">OnNext</span>(<span class="typ">T</span> value);
+}
+
+<span class="kw">public class</span> <span class="typ">StockTicker</span>  <span class="cmt">// Subject</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="iface">IObserver</span>&lt;<span class="kw">decimal</span>&gt;&gt; _observers = <span class="kw">new</span>();
+    <span class="kw">private decimal</span> _price;
+
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(<span class="iface">IObserver</span>&lt;<span class="kw">decimal</span>&gt; o)   => _observers.<span class="mth">Add</span>(o);
+    <span class="kw">public void</span> <span class="mth">Unsubscribe</span>(<span class="iface">IObserver</span>&lt;<span class="kw">decimal</span>&gt; o) => _observers.<span class="mth">Remove</span>(o);
+
+    <span class="kw">public decimal</span> <span class="prop">Price</span>
+    {
+        <span class="kw">set</span>
+        {
+            _price = value;
+            <span class="kw">foreach</span> (<span class="kw">var</span> o <span class="kw">in</span> _observers) o.<span class="mth">OnNext</span>(_price); <span class="cmt">// notify all</span>
+        }
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">PriceAlert</span> : <span class="iface">IObserver</span>&lt;<span class="kw">decimal</span>&gt;
+{
+    <span class="kw">private readonly</span> <span class="kw">string</span> _name;
+    <span class="kw">public</span> <span class="mth">PriceAlert</span>(<span class="kw">string</span> name) => _name = name;
+    <span class="kw">public void</span> <span class="mth">OnNext</span>(<span class="kw">decimal</span> price) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"{_name} notified: price is now £{price}"</span>);
+}
+
+<span class="kw">var</span> ticker = <span class="kw">new</span> <span class="typ">StockTicker</span>();
+ticker.<span class="mth">Subscribe</span>(<span class="kw">new</span> <span class="typ">PriceAlert</span>(<span class="str">"Alice"</span>));
+ticker.<span class="mth">Subscribe</span>(<span class="kw">new</span> <span class="typ">PriceAlert</span>(<span class="str">"Bob"</span>));
+ticker.<span class="prop">Price</span> = 150m;  <span class="cmt">// Alice + Bob both notified automatically</span>
+ticker.<span class="prop">Price</span> = 160m;  <span class="cmt">// both notified again</span>
+
+<span class="cmt">// In Library → Book is the Subject. Waiting members are Observers.</span>
+<span class="cmt">// When a BookItem is returned, Book.Notify() fires — first in queue gets the slot.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">LibraryManagement.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">BookStatus</span>   { Available, Borrowed, Reserved, Lost }
+<span class="kw">public enum</span> <span class="en">MemberStatus</span> { Active, Suspended, Expired }
+
+<span class="sec-comment">// ── Notification (Observer interface) ─────────────────</span>
+<span class="kw">public interface</span> <span class="iface">INotifiable</span>
+{
+    <span class="kw">void</span> <span class="mth">Notify</span>(<span class="kw">string</span> message);
+}
+
+<span class="kw">public interface</span> <span class="iface">INotificationService</span>
+{
+    <span class="kw">void</span> <span class="mth">Send</span>(<span class="iface">INotifiable</span> recipient, <span class="kw">string</span> message);
+}
+
+<span class="kw">public class</span> <span class="typ">EmailNotification</span> : <span class="iface">INotificationService</span>
+{
+    <span class="kw">public void</span> <span class="mth">Send</span>(<span class="iface">INotifiable</span> r, <span class="kw">string</span> msg) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"📧 EMAIL → {msg}"</span>);
+}
+
+<span class="sec-comment">// ── Fine Strategy ─────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IFineStrategy</span>
+{
+    <span class="kw">decimal</span> <span class="mth">Calculate</span>(DateTime dueDate, DateTime returnDate);
+}
+
+<span class="kw">public class</span> <span class="typ">DailyFine</span> : <span class="iface">IFineStrategy</span>
+{
+    <span class="kw">private readonly</span> <span class="kw">decimal</span> _ratePerDay;
+    <span class="kw">public</span> <span class="mth">DailyFine</span>(<span class="kw">decimal</span> rate = 0.25m) => _ratePerDay = rate;
+
+    <span class="kw">public decimal</span> <span class="mth">Calculate</span>(DateTime due, DateTime returned)
+    {
+        <span class="kw">int</span> overdue = (<span class="kw">int</span>)(returned - due).<span class="prop">TotalDays</span>;
+        <span class="kw">return</span> overdue > 0 ? overdue * _ratePerDay : 0m;
+    }
+}
+
+<span class="sec-comment">// ── Book & BookItem ───────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Book</span>
+{
+    <span class="kw">public string</span> <span class="prop">ISBN</span>   { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Title</span>  { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Author</span> { <span class="kw">get</span>; }
+
+    <span class="cmt">// Waitlist — Observer collection</span>
+    <span class="kw">private readonly</span> Queue&lt;<span class="typ">Member</span>&gt; _waitlist = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Book</span>(<span class="kw">string</span> isbn, <span class="kw">string</span> title, <span class="kw">string</span> author)
+        => (<span class="prop">ISBN</span>, <span class="prop">Title</span>, <span class="prop">Author</span>) = (isbn, title, author);
+
+    <span class="kw">public void</span> <span class="mth">AddToWaitlist</span>(<span class="typ">Member</span> m) => _waitlist.<span class="mth">Enqueue</span>(m);
+
+    <span class="kw">public void</span> <span class="mth">NotifyNextInQueue</span>(<span class="iface">INotificationService</span> svc)
+    {
+        <span class="kw">if</span> (_waitlist.<span class="prop">Count</span> == 0) <span class="kw">return</span>;
+        <span class="kw">var</span> next = _waitlist.<span class="mth">Dequeue</span>();
+        svc.<span class="mth">Send</span>(next, $<span class="str">"'{Title}' is now available for you to borrow!"</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">BookItem</span>
+{
+    <span class="kw">public string</span>     <span class="prop">Barcode</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Book</span>       <span class="prop">Book</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">BookStatus</span> <span class="prop">Status</span>  { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">BookStatus</span>.Available;
+
+    <span class="kw">public</span> <span class="mth">BookItem</span>(<span class="kw">string</span> barcode, <span class="typ">Book</span> book)
+        => (<span class="prop">Barcode</span>, <span class="prop">Book</span>) = (barcode, book);
+}
+
+<span class="sec-comment">// ── Member ────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Member</span> : <span class="iface">INotifiable</span>
+{
+    <span class="kw">public string</span>       <span class="prop">MemberId</span>   { <span class="kw">get</span>; }
+    <span class="kw">public string</span>       <span class="prop">Name</span>       { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">MemberStatus</span> <span class="prop">Status</span>     { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">MemberStatus</span>.Active;
+    <span class="kw">public</span> List&lt;<span class="typ">Loan</span>&gt;   <span class="prop">ActiveLoans</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Member</span>(<span class="kw">string</span> id, <span class="kw">string</span> name) => (<span class="prop">MemberId</span>, <span class="prop">Name</span>) = (id, name);
+
+    <span class="kw">public void</span> <span class="mth">Notify</span>(<span class="kw">string</span> msg) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"[Notification for {Name}]: {msg}"</span>);
+}
+
+<span class="sec-comment">// ── Loan ──────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Loan</span>
+{
+    <span class="kw">public</span> <span class="typ">Member</span>   <span class="prop">Member</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">BookItem</span> <span class="prop">BookItem</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> DateTime <span class="prop">BorrowedOn</span> { <span class="kw">get</span>; } = DateTime.<span class="prop">Today</span>;
+    <span class="kw">public</span> DateTime <span class="prop">DueDate</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> DateTime? <span class="prop">ReturnedOn</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public decimal</span>   <span class="prop">Fine</span>       { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Loan</span>(<span class="typ">Member</span> member, <span class="typ">BookItem</span> item, <span class="kw">int</span> loanDays = 14)
+    {
+        <span class="prop">Member</span>   = member;
+        <span class="prop">BookItem</span> = item;
+        <span class="prop">DueDate</span>  = DateTime.<span class="prop">Today</span>.<span class="mth">AddDays</span>(loanDays);
+    }
+}
+
+<span class="sec-comment">// ── Library Singleton ─────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Library</span>
+{
+    <span class="kw">private static readonly</span> Lazy&lt;<span class="typ">Library</span>&gt; _inst = <span class="kw">new</span>(() => <span class="kw">new</span> <span class="typ">Library</span>());
+    <span class="kw">public static</span> <span class="typ">Library</span> <span class="prop">Instance</span> => _inst.<span class="prop">Value</span>;
+
+    <span class="kw">private readonly</span> Dictionary&lt;<span class="kw">string</span>, <span class="typ">Book</span>&gt;     _catalogue = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> Dictionary&lt;<span class="kw">string</span>, <span class="typ">BookItem</span>&gt; _items     = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> Dictionary&lt;<span class="kw">string</span>, <span class="typ">Member</span>&gt;   _members   = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IFineStrategy</span>               _fine      = <span class="kw">new</span> <span class="typ">DailyFine</span>();
+    <span class="kw">private readonly</span> <span class="iface">INotificationService</span>         _notify    = <span class="kw">new</span> <span class="typ">EmailNotification</span>();
+
+    <span class="kw">private</span> <span class="mth">Library</span>() {}
+
+    <span class="kw">public void</span> <span class="mth">AddBook</span>(<span class="typ">Book</span> book) => _catalogue[book.<span class="prop">ISBN</span>] = book;
+
+    <span class="kw">public void</span> <span class="mth">AddBookItem</span>(<span class="typ">BookItem</span> item) => _items[item.<span class="prop">Barcode</span>] = item;
+
+    <span class="kw">public void</span> <span class="mth">RegisterMember</span>(<span class="typ">Member</span> m) => _members[m.<span class="prop">MemberId</span>] = m;
+
+    <span class="kw">public</span> <span class="typ">Loan</span>? <span class="mth">Checkout</span>(<span class="kw">string</span> memberId, <span class="kw">string</span> isbn)
+    {
+        <span class="kw">if</span> (!_members.<span class="mth">TryGetValue</span>(memberId, <span class="kw">out var</span> member) ||
+             member.<span class="prop">Status</span> != <span class="en">MemberStatus</span>.Active)
+        { Console.<span class="mth">WriteLine</span>(<span class="str">"Member not active."</span>); <span class="kw">return null</span>; }
+
+        <span class="cmt">// Find any available copy of this book</span>
+        <span class="kw">var</span> item = _items.<span class="prop">Values</span>
+            .<span class="mth">FirstOrDefault</span>(i => i.<span class="prop">Book</span>.<span class="prop">ISBN</span> == isbn && i.<span class="prop">Status</span> == <span class="en">BookStatus</span>.Available);
+
+        <span class="kw">if</span> (item == <span class="kw">null</span>)
+        {
+            Console.<span class="mth">WriteLine</span>($<span class="str">"No copies available. Added {member.Name} to waitlist."</span>);
+            _catalogue[isbn].<span class="mth">AddToWaitlist</span>(member);
+            <span class="kw">return null</span>;
+        }
+
+        item.<span class="prop">Status</span> = <span class="en">BookStatus</span>.Borrowed;
+        <span class="kw">var</span> loan   = <span class="kw">new</span> <span class="typ">Loan</span>(member, item);
+        member.<span class="prop">ActiveLoans</span>.<span class="mth">Add</span>(loan);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ {member.Name} borrowed '{item.Book.Title}'. Due: {loan.DueDate:dd MMM}"</span>);
+        <span class="kw">return</span> loan;
+    }
+
+    <span class="kw">public decimal</span> <span class="mth">Return</span>(<span class="typ">Loan</span> loan)
+    {
+        loan.<span class="prop">ReturnedOn</span> = DateTime.<span class="prop">Today</span>;
+        <span class="kw">decimal</span> fine    = _fine.<span class="mth">Calculate</span>(loan.<span class="prop">DueDate</span>, DateTime.<span class="prop">Today</span>);
+        loan.<span class="prop">Fine</span>       = fine;
+
+        loan.<span class="prop">BookItem</span>.<span class="prop">Status</span> = <span class="en">BookStatus</span>.Available;
+        loan.<span class="prop">Member</span>.<span class="prop">ActiveLoans</span>.<span class="mth">Remove</span>(loan);
+
+        <span class="kw">if</span> (fine > 0)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"📕 Returned with £{fine} fine."</span>);
+        <span class="kw">else</span>
+            Console.<span class="mth">WriteLine</span>($<span class="str">"📗 Returned on time."</span>);
+
+        <span class="cmt">// Observer: notify the next member on the waitlist</span>
+        loan.<span class="prop">BookItem</span>.<span class="prop">Book</span>.<span class="mth">NotifyNextInQueue</span>(_notify);
+        <span class="kw">return</span> fine;
+    }
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Book</span>&gt; <span class="mth">Search</span>(<span class="kw">string</span> query) =>
+        _catalogue.<span class="prop">Values</span>.<span class="mth">Where</span>(b =>
+            b.<span class="prop">Title</span>.<span class="mth">Contains</span>(query, StringComparison.OrdinalIgnoreCase) ||
+            b.<span class="prop">Author</span>.<span class="mth">Contains</span>(query, StringComparison.OrdinalIgnoreCase) ||
+            b.<span class="prop">ISBN</span> == query);
+}
+
+<span class="sec-comment">// ── Usage ─────────────────────────────────────────────</span>
+<span class="kw">var</span> lib = <span class="typ">Library</span>.<span class="prop">Instance</span>;
+
+<span class="kw">var</span> book = <span class="kw">new</span> <span class="typ">Book</span>(<span class="str">"978-0-06-112008-4"</span>, <span class="str">"To Kill a Mockingbird"</span>, <span class="str">"Harper Lee"</span>);
+lib.<span class="mth">AddBook</span>(book);
+lib.<span class="mth">AddBookItem</span>(<span class="kw">new</span> <span class="typ">BookItem</span>(<span class="str">"BC-001"</span>, book));
+
+<span class="kw">var</span> alice = <span class="kw">new</span> <span class="typ">Member</span>(<span class="str">"M001"</span>, <span class="str">"Alice"</span>);
+<span class="kw">var</span> bob   = <span class="kw">new</span> <span class="typ">Member</span>(<span class="str">"M002"</span>, <span class="str">"Bob"</span>);
+lib.<span class="mth">RegisterMember</span>(alice);
+lib.<span class="mth">RegisterMember</span>(bob);
+
+<span class="kw">var</span> loan = lib.<span class="mth">Checkout</span>(<span class="str">"M001"</span>, book.<span class="prop">ISBN</span>);  <span class="cmt">// Alice borrows</span>
+lib.<span class="mth">Checkout</span>(<span class="str">"M002"</span>, book.<span class="prop">ISBN</span>);             <span class="cmt">// Bob → waitlist</span>
+<span class="kw">if</span> (loan != <span class="kw">null</span>) lib.<span class="mth">Return</span>(loan);            <span class="cmt">// Alice returns → Bob notified</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     10. JIGSAW PUZZLE
+════════════════════════════════════════ -->
+<section class="system" id="jigsaw">
+  <div class="sys-header">
+    <div class="sys-num">10</div>
+    <div class="sys-meta">
+      <div class="sys-title">Jigsaw Puzzle</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--teal);border-color:rgba(78,205,196,.3)">Factory — Piece Generation</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Builder — Puzzle Setup</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Observer — Completion</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Command — Place/Undo</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--teal)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Pieces have 4 edges — each edge has a type and polarity (tab/blank)</li>
+          <li>Two pieces fit if their shared edges are compatible (tab ↔ blank)</li>
+          <li>Board tracks placed pieces in a 2D grid indexed by position</li>
+          <li>Builder constructs the puzzle configuration (size, image, piece count)</li>
+          <li>Observer fires a completion event when all pieces are placed</li>
+          <li>Command pattern enables undo of placed pieces</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>PieceEdge</strong> — shape type + polarity (Tab/Blank)</li>
+          <li><strong>Piece</strong> — 4 edges, position, placed status</li>
+          <li><strong>PuzzleBoard</strong> — grid, validates placements</li>
+          <li><strong>Puzzle</strong> — full system, piece pool, completion tracking</li>
+          <li><strong>PuzzleBuilder</strong> — fluent configuration</li>
+          <li><strong>PlacePieceCommand</strong> — Command with Undo</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you determine if two pieces fit together?</span>
+    <span style="font-size:12px;color:#a09060">→ Each edge has a ShapeId and a Polarity (Tab or Blank). Two pieces fit on a shared border if their touching edges have the same ShapeId but opposite Polarity. This is checked when validating a placement against its neighbours.</span>
+    <span class="q">Q: What does the Builder pattern give you here?</span>
+    <span style="font-size:12px;color:#a09060">→ Creating a puzzle has several optional parameters: size, number of pieces, image, difficulty level. Builder chains these fluently — <code>new PuzzleBuilder().WithSize(10,10).WithImage("sunset.jpg").Build()</code> — without a giant constructor.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--teal)">Factory — piece creation</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Builder — puzzle config</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Observer — completion event</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Command — place + undo</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--blue)">
+    <div class="primer-header" style="background:rgba(77,159,255,0.06);border-bottom-color:rgba(77,159,255,0.15)">
+      <span class="primer-label" style="color:var(--blue)">📖 Pattern Primer</span>
+      <span class="primer-name">Builder Pattern — construct complex objects step by step</span>
+    </div>
+    <div class="primer-desc">When an object needs many optional configuration parameters, a constructor becomes unwieldy. Builder lets you chain readable setup calls and call Build() at the end — no telescoping constructors, no null-filled parameter lists.</div>
+<pre>
+<span class="cmt">// Without Builder: hard to read, easy to mis-order args</span>
+<span class="kw">var</span> query = <span class="kw">new</span> <span class="typ">SqlQuery</span>(<span class="str">"users"</span>, <span class="str">"name,email"</span>, <span class="str">"age > 18"</span>, <span class="str">"name ASC"</span>, <span class="num">10</span>);
+
+<span class="cmt">// ✅ With Builder: self-documenting and flexible</span>
+<span class="kw">public class</span> <span class="typ">SqlQuery</span>
+{
+    <span class="kw">public string</span> <span class="prop">Table</span>   { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="str">""</span>;
+    <span class="kw">public string</span> <span class="prop">Columns</span> { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="str">"*"</span>;
+    <span class="kw">public string</span> <span class="prop">Where</span>   { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="str">""</span>;
+    <span class="kw">public string</span> <span class="prop">OrderBy</span> { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="str">""</span>;
+    <span class="kw">public int</span>    <span class="prop">Limit</span>   { <span class="kw">get</span>; <span class="kw">private set</span>; } = 100;
+
+    <span class="kw">public class</span> <span class="typ">Builder</span>
+    {
+        <span class="kw">private readonly</span> <span class="typ">SqlQuery</span> _q = <span class="kw">new</span>();
+
+        <span class="kw">public</span> <span class="typ">Builder</span> <span class="mth">From</span>(<span class="kw">string</span> t)    { _q.<span class="prop">Table</span>   = t; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="typ">Builder</span> <span class="mth">Select</span>(<span class="kw">string</span> c)  { _q.<span class="prop">Columns</span> = c; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="typ">Builder</span> <span class="mth">Where</span>(<span class="kw">string</span> w)   { _q.<span class="prop">Where</span>   = w; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="typ">Builder</span> <span class="mth">OrderBy</span>(<span class="kw">string</span> o) { _q.<span class="prop">OrderBy</span> = o; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="typ">Builder</span> <span class="mth">Limit</span>(<span class="kw">int</span> n)      { _q.<span class="prop">Limit</span>   = n; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="typ">SqlQuery</span> <span class="mth">Build</span>()          => _q;
+    }
+}
+
+<span class="kw">var</span> q = <span class="kw">new</span> <span class="typ">SqlQuery</span>.<span class="typ">Builder</span>()
+    .<span class="mth">From</span>(<span class="str">"users"</span>)
+    .<span class="mth">Select</span>(<span class="str">"name, email"</span>)
+    .<span class="mth">Where</span>(<span class="str">"age > 18"</span>)
+    .<span class="mth">OrderBy</span>(<span class="str">"name ASC"</span>)
+    .<span class="mth">Limit</span>(10)
+    .<span class="mth">Build</span>();
+
+<span class="cmt">// In Jigsaw → PuzzleBuilder().WithSize(10,10).WithImage("photo.jpg").Build()</span>
+<span class="cmt">// Each option is optional — no 6-argument constructor needed.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">JigsawPuzzle.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Edge Types ────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">Polarity</span>  { Tab, Blank, Flat }    <span class="cmt">// Flat = border edge</span>
+<span class="kw">public enum</span> <span class="en">EdgeSide</span>  { Top, Right, Bottom, Left }
+
+<span class="kw">public record</span> <span class="typ">PieceEdge</span>(<span class="en">EdgeSide</span> Side, <span class="kw">int</span> ShapeId, <span class="en">Polarity</span> Polarity)
+{
+    <span class="cmt">// Two edges are compatible if they share a shape but oppose in polarity</span>
+    <span class="kw">public bool</span> <span class="mth">FitsOpposite</span>(<span class="typ">PieceEdge</span> other) =>
+        <span class="prop">ShapeId</span> == other.<span class="prop">ShapeId</span> &&
+        ((<span class="prop">Polarity</span> == <span class="en">Polarity</span>.Tab   && other.<span class="prop">Polarity</span> == <span class="en">Polarity</span>.Blank) ||
+         (<span class="prop">Polarity</span> == <span class="en">Polarity</span>.Blank && other.<span class="prop">Polarity</span> == <span class="en">Polarity</span>.Tab));
+}
+
+<span class="sec-comment">// ── Piece ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Piece</span>
+{
+    <span class="kw">public int</span>       <span class="prop">Id</span>       { <span class="kw">get</span>; }
+    <span class="kw">public bool</span>      <span class="prop">IsPlaced</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> Dictionary&lt;<span class="en">EdgeSide</span>, <span class="typ">PieceEdge</span>&gt; <span class="prop">Edges</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Piece</span>(<span class="kw">int</span> id) => <span class="prop">Id</span> = id;
+
+    <span class="kw">public</span> <span class="typ">PieceEdge</span> <span class="mth">GetEdge</span>(<span class="en">EdgeSide</span> side) => <span class="prop">Edges</span>[side];
+}
+
+<span class="sec-comment">// ── Puzzle Board ──────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">PuzzleBoard</span>
+{
+    <span class="kw">public int</span> <span class="prop">Rows</span> { <span class="kw">get</span>; }
+    <span class="kw">public int</span> <span class="prop">Cols</span> { <span class="kw">get</span>; }
+    <span class="kw">private readonly</span> <span class="typ">Piece</span>?[,] _grid;
+
+    <span class="kw">public int</span> <span class="prop">PlacedCount</span>  { <span class="kw">get</span>; <span class="kw">private set</span>; }
+    <span class="kw">public int</span> <span class="prop">TotalPieces</span>  => <span class="prop">Rows</span> * <span class="prop">Cols</span>;
+    <span class="kw">public bool</span> <span class="prop">IsComplete</span>  => <span class="prop">PlacedCount</span> == <span class="prop">TotalPieces</span>;
+
+    <span class="kw">public</span> <span class="mth">PuzzleBoard</span>(<span class="kw">int</span> rows, <span class="kw">int</span> cols)
+    {
+        <span class="prop">Rows</span> = rows; <span class="prop">Cols</span> = cols;
+        _grid = <span class="kw">new</span> <span class="typ">Piece</span>[rows, cols];
+    }
+
+    <span class="kw">public bool</span> <span class="mth">TryPlace</span>(<span class="typ">Piece</span> piece, <span class="kw">int</span> row, <span class="kw">int</span> col)
+    {
+        <span class="kw">if</span> (row < 0 || row >= <span class="prop">Rows</span> || col < 0 || col >= <span class="prop">Cols</span>)
+            <span class="kw">return false</span>;
+        <span class="kw">if</span> (_grid[row, col] != <span class="kw">null</span>)
+        { Console.<span class="mth">WriteLine</span>($<span class="str">"Position ({row},{col}) already occupied."</span>); <span class="kw">return false</span>; }
+
+        <span class="kw">if</span> (!<span class="mth">ValidateNeighbours</span>(piece, row, col))
+        { Console.<span class="mth">WriteLine</span>($<span class="str">"Piece {piece.Id} doesn't fit at ({row},{col})."</span>); <span class="kw">return false</span>; }
+
+        _grid[row, col] = piece;
+        piece.<span class="prop">IsPlaced</span> = <span class="kw">true</span>;
+        <span class="prop">PlacedCount</span>++;
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">public bool</span> <span class="mth">RemovePiece</span>(<span class="kw">int</span> row, <span class="kw">int</span> col)
+    {
+        <span class="kw">var</span> piece = _grid[row, col];
+        <span class="kw">if</span> (piece == <span class="kw">null</span>) <span class="kw">return false</span>;
+        _grid[row, col]  = <span class="kw">null</span>;
+        piece.<span class="prop">IsPlaced</span>  = <span class="kw">false</span>;
+        <span class="prop">PlacedCount</span>--;
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">private bool</span> <span class="mth">ValidateNeighbours</span>(<span class="typ">Piece</span> piece, <span class="kw">int</span> row, <span class="kw">int</span> col)
+    {
+        <span class="cmt">// Check top neighbour</span>
+        <span class="kw">if</span> (row > 0 && _grid[row-1, col] != <span class="kw">null</span>)
+        {
+            <span class="kw">var</span> nb = _grid[row-1, col]!;
+            <span class="kw">if</span> (!piece.<span class="mth">GetEdge</span>(<span class="en">EdgeSide</span>.Top).<span class="mth">FitsOpposite</span>(nb.<span class="mth">GetEdge</span>(<span class="en">EdgeSide</span>.Bottom)))
+                <span class="kw">return false</span>;
+        }
+        <span class="cmt">// Check left neighbour</span>
+        <span class="kw">if</span> (col > 0 && _grid[row, col-1] != <span class="kw">null</span>)
+        {
+            <span class="kw">var</span> nb = _grid[row, col-1]!;
+            <span class="kw">if</span> (!piece.<span class="mth">GetEdge</span>(<span class="en">EdgeSide</span>.Left).<span class="mth">FitsOpposite</span>(nb.<span class="mth">GetEdge</span>(<span class="en">EdgeSide</span>.Right)))
+                <span class="kw">return false</span>;
+        }
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Print</span>()
+    {
+        <span class="kw">for</span> (<span class="kw">int</span> r = 0; r < <span class="prop">Rows</span>; r++)
+        {
+            <span class="kw">for</span> (<span class="kw">int</span> c = 0; c < <span class="prop">Cols</span>; c++)
+                Console.<span class="mth">Write</span>(_grid[r,c] == <span class="kw">null</span> ? <span class="str">"[ ]"</span> : $<span class="str">"[{_grid[r,c]!.Id,2}]"</span>);
+            Console.<span class="mth">WriteLine</span>();
+        }
+    }
+}
+
+<span class="sec-comment">// ── Command — Place Piece with Undo ───────────────────</span>
+<span class="kw">public interface</span> <span class="iface">ICommand</span>
+{
+    <span class="kw">bool</span> <span class="mth">Execute</span>();
+    <span class="kw">void</span> <span class="mth">Undo</span>();
+}
+
+<span class="kw">public class</span> <span class="typ">PlacePieceCommand</span> : <span class="iface">ICommand</span>
+{
+    <span class="kw">private readonly</span> <span class="typ">PuzzleBoard</span> _board;
+    <span class="kw">private readonly</span> <span class="typ">Piece</span>       _piece;
+    <span class="kw">private readonly</span> <span class="kw">int</span>         _row, _col;
+
+    <span class="kw">public</span> <span class="mth">PlacePieceCommand</span>(<span class="typ">PuzzleBoard</span> board, <span class="typ">Piece</span> piece, <span class="kw">int</span> row, <span class="kw">int</span> col)
+        => (_board, _piece, _row, _col) = (board, piece, row, col);
+
+    <span class="kw">public bool</span> <span class="mth">Execute</span>() => _board.<span class="mth">TryPlace</span>(_piece, _row, _col);
+    <span class="kw">public void</span> <span class="mth">Undo</span>()    => _board.<span class="mth">RemovePiece</span>(_row, _col);
+}
+
+<span class="sec-comment">// ── Puzzle Builder ────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">PuzzleBuilder</span>
+{
+    <span class="kw">private int</span>    _rows  = 4;
+    <span class="kw">private int</span>    _cols  = 4;
+    <span class="kw">private string</span> _image = <span class="str">"default.jpg"</span>;
+
+    <span class="kw">public</span> <span class="typ">PuzzleBuilder</span> <span class="mth">WithSize</span>(<span class="kw">int</span> rows, <span class="kw">int</span> cols)
+        { _rows = rows; _cols = cols; <span class="kw">return this</span>; }
+
+    <span class="kw">public</span> <span class="typ">PuzzleBuilder</span> <span class="mth">WithImage</span>(<span class="kw">string</span> image)
+        { _image = image; <span class="kw">return this</span>; }
+
+    <span class="kw">public</span> <span class="typ">Puzzle</span> <span class="mth">Build</span>()
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"Building {_rows}×{_cols} puzzle from '{_image}'"</span>);
+        <span class="kw">return new</span> <span class="typ">Puzzle</span>(<span class="kw">new</span> <span class="typ">PuzzleBoard</span>(_rows, _cols), _rows * _cols);
+    }
+}
+
+<span class="sec-comment">// ── Puzzle — ties everything together ─────────────────</span>
+<span class="kw">public class</span> <span class="typ">Puzzle</span>
+{
+    <span class="kw">public</span> <span class="typ">PuzzleBoard</span>  <span class="prop">Board</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">Piece</span>&gt;  <span class="prop">Pieces</span> { <span class="kw">get</span>; }
+
+    <span class="kw">private readonly</span> Stack&lt;<span class="iface">ICommand</span>&gt; _history = <span class="kw">new</span>();
+
+    <span class="cmt">// Observer: fire when puzzle is complete</span>
+    <span class="kw">public event</span> Action? <span class="prop">OnCompleted</span>;
+
+    <span class="kw">public</span> <span class="mth">Puzzle</span>(<span class="typ">PuzzleBoard</span> board, <span class="kw">int</span> pieceCount)
+    {
+        <span class="prop">Board</span>  = board;
+        <span class="prop">Pieces</span> = <span class="mth">GeneratePieces</span>(pieceCount, board.<span class="prop">Rows</span>, board.<span class="prop">Cols</span>);
+    }
+
+    <span class="kw">public bool</span> <span class="mth">PlacePiece</span>(<span class="typ">Piece</span> piece, <span class="kw">int</span> row, <span class="kw">int</span> col)
+    {
+        <span class="kw">var</span> cmd = <span class="kw">new</span> <span class="typ">PlacePieceCommand</span>(<span class="prop">Board</span>, piece, row, col);
+        <span class="kw">if</span> (!cmd.<span class="mth">Execute</span>()) <span class="kw">return false</span>;
+
+        _history.<span class="mth">Push</span>(cmd);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Placed piece {piece.Id} at ({row},{col}). Progress: {Board.PlacedCount}/{Board.TotalPieces}"</span>);
+
+        <span class="kw">if</span> (<span class="prop">Board</span>.<span class="prop">IsComplete</span>)
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"🎉 Puzzle complete!"</span>);
+            <span class="prop">OnCompleted</span>?.Invoke();
+        }
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mth">UndoLastPlace</span>()
+    {
+        <span class="kw">if</span> (_history.<span class="prop">Count</span> > 0)
+            _history.<span class="mth">Pop</span>().<span class="mth">Undo</span>();
+    }
+
+    <span class="cmt">// Factory: generate pieces with compatible edge shapes</span>
+    <span class="kw">private static</span> List&lt;<span class="typ">Piece</span>&gt; <span class="mth">GeneratePieces</span>(<span class="kw">int</span> count, <span class="kw">int</span> rows, <span class="kw">int</span> cols)
+    {
+        <span class="kw">var</span> pieces = <span class="kw">new</span> List&lt;<span class="typ">Piece</span>&gt;();
+        <span class="kw">var</span> rng    = <span class="kw">new</span> Random(42); <span class="cmt">// seed for reproducibility</span>
+        <span class="kw">int</span> shapeCounter = 1;
+
+        <span class="cmt">// Build horizontal and vertical edge maps so adjacent pieces match</span>
+        <span class="kw">var</span> hEdges = <span class="kw">new</span> <span class="kw">int</span>[rows + 1, cols]; <span class="cmt">// horizontal borders</span>
+        <span class="kw">var</span> vEdges = <span class="kw">new</span> <span class="kw">int</span>[rows, cols + 1]; <span class="cmt">// vertical borders</span>
+
+        <span class="kw">for</span> (<span class="kw">int</span> r = 0; r <= rows; r++)
+            <span class="kw">for</span> (<span class="kw">int</span> c = 0; c < cols; c++)
+                hEdges[r, c] = shapeCounter++;
+
+        <span class="kw">for</span> (<span class="kw">int</span> r = 0; r < rows; r++)
+            <span class="kw">for</span> (<span class="kw">int</span> c = 0; c <= cols; c++)
+                vEdges[r, c] = shapeCounter++;
+
+        <span class="kw">int</span> id = 1;
+        <span class="kw">for</span> (<span class="kw">int</span> r = 0; r < rows; r++)
+        {
+            <span class="kw">for</span> (<span class="kw">int</span> c = 0; c < cols; c++)
+            {
+                <span class="kw">var</span> piece = <span class="kw">new</span> <span class="typ">Piece</span>(id++);
+
+                <span class="cmt">// Top edge: Flat if border row, otherwise Tab/Blank paired with neighbour above</span>
+                piece.<span class="prop">Edges</span>[<span class="en">EdgeSide</span>.Top]    = <span class="kw">new</span> <span class="typ">PieceEdge</span>(<span class="en">EdgeSide</span>.Top,    hEdges[r, c],   r == 0        ? <span class="en">Polarity</span>.Flat : <span class="en">Polarity</span>.Blank);
+                piece.<span class="prop">Edges</span>[<span class="en">EdgeSide</span>.Bottom] = <span class="kw">new</span> <span class="typ">PieceEdge</span>(<span class="en">EdgeSide</span>.Bottom, hEdges[r+1, c], r == rows - 1 ? <span class="en">Polarity</span>.Flat : <span class="en">Polarity</span>.Tab);
+                piece.<span class="prop">Edges</span>[<span class="en">EdgeSide</span>.Left]   = <span class="kw">new</span> <span class="typ">PieceEdge</span>(<span class="en">EdgeSide</span>.Left,   vEdges[r, c],   c == 0        ? <span class="en">Polarity</span>.Flat : <span class="en">Polarity</span>.Blank);
+                piece.<span class="prop">Edges</span>[<span class="en">EdgeSide</span>.Right]  = <span class="kw">new</span> <span class="typ">PieceEdge</span>(<span class="en">EdgeSide</span>.Right,  vEdges[r, c+1], c == cols - 1 ? <span class="en">Polarity</span>.Flat : <span class="en">Polarity</span>.Tab);
+
+                pieces.<span class="mth">Add</span>(piece);
+            }
+        }
+        <span class="kw">return</span> pieces;
+    }
+}
+
+<span class="sec-comment">// ── Usage ─────────────────────────────────────────────</span>
+<span class="kw">var</span> puzzle = <span class="kw">new</span> <span class="typ">PuzzleBuilder</span>()
+    .<span class="mth">WithSize</span>(2, 2)
+    .<span class="mth">WithImage</span>(<span class="str">"sunset.jpg"</span>)
+    .<span class="mth">Build</span>();
+
+puzzle.<span class="prop">OnCompleted</span> += () => Console.<span class="mth">WriteLine</span>(<span class="str">"🏆 Congratulations!"</span>);
+
+<span class="kw">var</span> pieces = puzzle.<span class="prop">Pieces</span>;
+puzzle.<span class="mth">PlacePiece</span>(pieces[0], 0, 0); <span class="cmt">// top-left</span>
+puzzle.<span class="mth">PlacePiece</span>(pieces[1], 0, 1); <span class="cmt">// top-right</span>
+puzzle.<span class="mth">PlacePiece</span>(pieces[2], 1, 0); <span class="cmt">// bottom-left</span>
+puzzle.<span class="mth">PlacePiece</span>(pieces[3], 1, 1); <span class="cmt">// bottom-right → fires OnCompleted</span>
+puzzle.<span class="prop">Board</span>.<span class="mth">Print</span>();
+
+puzzle.<span class="mth">UndoLastPlace</span>();               <span class="cmt">// remove piece 4 — back to 3 placed</span>
+puzzle.<span class="prop">Board</span>.<span class="mth">Print</span>();
+</pre>
+  </div>
+</section>
+
+</main>
+</div><!-- end layout -->
+
+<script>
+const sections = document.querySelectorAll('.system');
+const sbItems  = document.querySelectorAll('.sb-item[href^="#"]');
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sbItems.forEach(i => i.classList.remove('active'));
+      const id = e.target.id;
+      const active = document.querySelector(`.sb-item[href="#${id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.25 });
+
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

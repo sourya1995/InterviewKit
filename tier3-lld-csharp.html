@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier 3 LLD — C# Code · Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Clash+Display:wght@400;600;700&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0c10;
+  --surface:  #13131a;
+  --surface2: #1a1a24;
+  --surface3: #21212e;
+  --border:   #252535;
+  --border2:  #2e2e42;
+
+  --green:  #3ddc84;
+  --blue:   #4d9fff;
+  --amber:  #ffc341;
+  --pink:   #ff6b9d;
+  --purple: #b794f4;
+  --teal:   #4ecdc4;
+  --red:    #ff6b6b;
+  --orange: #ff9a3c;
+
+  --text:   #e2e8f8;
+  --muted:  #606080;
+  --muted2: #3a3a55;
+
+  --s-kw:      #c792ea;
+  --s-type:    #82aaff;
+  --s-str:     #c3e88d;
+  --s-cmt:     #546e7a;
+  --s-num:     #f78c6c;
+  --s-method:  #82aaff;
+  --s-prop:    #ffcb6b;
+  --s-iface:   #addb67;
+  --s-enum:    #f78c6c;
+  --s-plain:   #d4d4d4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Epilogue', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 48px 56px 40px;
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--orange), var(--pink), var(--purple), transparent);
+}
+.h-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 14px;
+}
+h1 {
+  font-family: 'Clash Display', 'JetBrains Mono', monospace;
+  font-size: clamp(30px, 4.5vw, 54px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+h1 em { font-style: normal; color: var(--orange); }
+.h-sub {
+  margin-top: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  max-width: 580px;
+  line-height: 1.8;
+}
+.h-pills { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; }
+.hpill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 13px;
+  border-radius: 2px;
+  border: 1px solid;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+}
+.hpill:hover { opacity: .75; }
+.p-g { color:var(--green);  border-color:rgba(61,220,132,.3);  background:rgba(61,220,132,.06); }
+.p-b { color:var(--blue);   border-color:rgba(77,159,255,.3);  background:rgba(77,159,255,.06); }
+.p-a { color:var(--amber);  border-color:rgba(255,195,65,.3);  background:rgba(255,195,65,.06); }
+.p-p { color:var(--purple); border-color:rgba(183,148,244,.3); background:rgba(183,148,244,.06);}
+.p-t { color:var(--teal);   border-color:rgba(78,205,196,.3);  background:rgba(78,205,196,.06); }
+.p-o { color:var(--orange); border-color:rgba(255,154,60,.3);  background:rgba(255,154,60,.06); }
+.p-r { color:var(--red);    border-color:rgba(255,107,107,.3); background:rgba(255,107,107,.06);}
+
+.layout { display: flex; min-height: calc(100vh - 200px); }
+
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.sidebar-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background .15s;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+.sb-item:hover { background: var(--surface2); }
+.sb-item.active { background: var(--surface2); border-left-color: var(--orange); }
+
+.sb-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  width: 18px;
+}
+.sb-name {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+}
+.sb-tier {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--orange);
+  background: rgba(255,154,60,.08);
+  border: 1px solid rgba(255,154,60,.2);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+.sb-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 20px;
+}
+
+.main { flex: 1; padding: 0 48px 80px; max-width: 960px; }
+
+.system {
+  padding-top: 60px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.system:last-child { border-bottom: none; }
+
+.sys-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.sys-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  padding-top: 6px;
+}
+.sys-meta { flex: 1; }
+.sys-title {
+  font-family: 'Clash Display', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+.sys-tags { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.sys-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 9px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+
+.exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+@media(max-width:700px){ .exp-grid { grid-template-columns:1fr; } }
+
+.exp-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+.exp-card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.exp-card-body {
+  font-size: 13px;
+  color: #8090b0;
+  line-height: 1.65;
+}
+.exp-card-body li {
+  list-style: none;
+  padding-left: 14px;
+  position: relative;
+  margin-bottom: 4px;
+}
+.exp-card-body li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--muted2);
+}
+
+.interview-box {
+  background: rgba(255,195,65,.04);
+  border: 1px solid rgba(255,195,65,.18);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 4px 4px 0;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: #a09060;
+  line-height: 1.7;
+}
+.interview-box strong { color: var(--amber); }
+.interview-box .q {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #c0a060;
+  margin-top: 6px;
+  display: block;
+}
+
+.code-wrap {
+  background: #0a0a10;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.code-header {
+  background: var(--surface3);
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.code-dots { display:flex; gap:6px; }
+.code-dot { width:10px; height:10px; border-radius:50%; }
+.dot-r { background:#ff5f56; }
+.dot-y { background:#ffbd2e; }
+.dot-g { background:#27c93f; }
+.code-filename {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.code-lang {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+pre {
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--s-plain);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.kw     { color: var(--s-kw); }
+.typ    { color: var(--s-type); }
+.str    { color: var(--s-str); }
+.cmt    { color: var(--s-cmt); font-style: italic; }
+.num    { color: var(--s-num); }
+.mth    { color: var(--s-method); }
+.prop   { color: var(--s-prop); }
+.iface  { color: var(--s-iface); }
+.en     { color: var(--s-enum); }
+.sec-comment {
+  color: var(--muted2);
+  font-style: italic;
+  display: block;
+  margin: 4px 0 2px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 12px;
+}
+.sec-comment:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+.pattern-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.pattern-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.pat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+
+.primer {
+  background: #0d1117;
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--orange);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.primer-header {
+  background: rgba(255,154,60,0.06);
+  border-bottom: 1px solid rgba(255,154,60,0.15);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.primer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.primer-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #a0c0a0;
+  margin-left: auto;
+}
+.primer-desc {
+  padding: 10px 18px 4px;
+  font-size: 12.5px;
+  color: #607060;
+  font-style: italic;
+  line-height: 1.6;
+}
+.primer pre {
+  padding: 14px 20px 18px;
+  font-size: 12px;
+  line-height: 1.8;
+  background: transparent;
+}
+
+@media(max-width: 900px) {
+  .sidebar { display: none; }
+  .main { padding: 0 20px 60px; }
+  header { padding: 36px 20px 28px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-eyebrow">// C# LLD Interview Prep · Tier 3 · 7 Systems</div>
+  <h1>Tier 3 — <em>Complex</em><br>LLD in C#</h1>
+  <p class="h-sub">Production-grade designs. Multiple patterns per system.<br>
+  Each includes a <strong style="color:var(--orange)">pattern primer</strong>, key design decisions, and full C# code.</p>
+  <div class="h-pills">
+    <a class="hpill p-o" href="#elevator">Elevator System</a>
+    <a class="hpill p-g" href="#scheduler">Meeting Scheduler</a>
+    <a class="hpill p-b" href="#carrental">Car Rental</a>
+    <a class="hpill p-p" href="#hotel">Hotel Management</a>
+    <a class="hpill p-a" href="#restaurant">Restaurant</a>
+    <a class="hpill p-t" href="#locker">Amazon Locker</a>
+    <a class="hpill p-r" href="#splitwise">Splitwise</a>
+  </div>
+</header>
+
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-label">Systems</div>
+  <a class="sb-item active" href="#elevator">
+    <div class="sb-num">01</div>
+    <div class="sb-name">Elevator System</div>
+    <div class="sb-tier">T3</div>
+  </a>
+  <a class="sb-item" href="#scheduler">
+    <div class="sb-num">02</div>
+    <div class="sb-name">Meeting Scheduler</div>
+    <div class="sb-tier">T3</div>
+  </a>
+  <a class="sb-item" href="#carrental">
+    <div class="sb-num">03</div>
+    <div class="sb-name">Car Rental System</div>
+    <div class="sb-tier">T3</div>
+  </a>
+  <a class="sb-item" href="#hotel">
+    <div class="sb-num">04</div>
+    <div class="sb-name">Hotel Management</div>
+    <div class="sb-tier">T3</div>
+  </a>
+  <a class="sb-item" href="#restaurant">
+    <div class="sb-num">05</div>
+    <div class="sb-name">Restaurant Mgmt</div>
+    <div class="sb-tier">T3</div>
+  </a>
+  <a class="sb-item" href="#locker">
+    <div class="sb-num">06</div>
+    <div class="sb-name">Amazon Locker</div>
+    <div class="sb-tier">T3</div>
+  </a>
+  <a class="sb-item" href="#splitwise">
+    <div class="sb-num">07</div>
+    <div class="sb-name">Splitwise</div>
+    <div class="sb-tier">T3</div>
+  </a>
+</nav>
+
+<main class="main">
+
+<!-- ════════════════════════════════════════
+     1. ELEVATOR SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="elevator">
+  <div class="sys-header">
+    <div class="sys-num">01</div>
+    <div class="sys-meta">
+      <div class="sys-title">Elevator System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--orange);border-color:rgba(255,154,60,.3)">State Pattern</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Strategy (Scheduling)</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Observer</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--orange)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Elevator state (Idle/Moving/DoorsOpen) modelled with State pattern — no if/else chains</li>
+          <li>SCAN (elevator) algorithm: serve requests in direction of travel first</li>
+          <li><code>ElevatorController</code> picks the best elevator for each request</li>
+          <li>Requests are queued per direction; serviced as elevator passes the floor</li>
+          <li>Observer notifies display panels of floor changes</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Elevator</strong> — state machine, sorted request queue</li>
+          <li><strong>ElevatorController</strong> — dispatches requests, picks best car</li>
+          <li><strong>IElevatorState</strong> — Idle, MovingUp, MovingDown, DoorsOpen</li>
+          <li><strong>Request</strong> — floor + direction value object</li>
+          <li><strong>ISchedulingStrategy</strong> — SCAN or nearest-car</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How does the SCAN algorithm work?</span>
+    <span style="font-size:12px;color:#a09060">→ Elevator travels in one direction, services all pending floors in that direction, then reverses. Like a disk head sweep — minimizes travel distance.</span>
+    <span class="q">Q: How do you pick which elevator to assign a request to?</span>
+    <span style="font-size:12px;color:#a09060">→ Score each elevator: idle elevators closest to requested floor win. Moving elevators score well if the floor is in their path. Moving-away elevators score worst.</span>
+    <span class="q">Q: How do you handle emergency/overload?</span>
+    <span style="font-size:12px;color:#a09060">→ Separate emergency state that bypasses the queue. Overload detected via weight sensor event — doors reopen, request is rejected.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(255,154,60,.08);border:1px solid rgba(255,154,60,.2);color:var(--orange)">State — elevator lifecycle</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — SCAN scheduling</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Observer — floor display</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--orange)">
+    <div class="primer-header">
+      <span class="primer-label">📖 Pattern Primer</span>
+      <span class="primer-name">State Pattern — object changes behaviour based on internal state</span>
+    </div>
+    <div class="primer-desc">Instead of giant if/else chains checking a status field, extract each state into its own class that implements a shared interface. The object delegates behaviour to the current state object.</div>
+<pre>
+<span class="kw">public interface</span> <span class="iface">ITrafficLightState</span>
+{
+    <span class="kw">void</span> <span class="mth">Handle</span>(<span class="typ">TrafficLight</span> light);
+    <span class="kw">string</span> <span class="prop">Color</span> { <span class="kw">get</span>; }
+}
+
+<span class="kw">public class</span> <span class="typ">GreenState</span> : <span class="iface">ITrafficLightState</span>
+{
+    <span class="kw">public string</span> <span class="prop">Color</span> => <span class="str">"Green"</span>;
+    <span class="kw">public void</span> <span class="mth">Handle</span>(<span class="typ">TrafficLight</span> light) => light.<span class="mth">SetState</span>(<span class="kw">new</span> <span class="typ">YellowState</span>());
+}
+<span class="kw">public class</span> <span class="typ">YellowState</span> : <span class="iface">ITrafficLightState</span>
+{
+    <span class="kw">public string</span> <span class="prop">Color</span> => <span class="str">"Yellow"</span>;
+    <span class="kw">public void</span> <span class="mth">Handle</span>(<span class="typ">TrafficLight</span> light) => light.<span class="mth">SetState</span>(<span class="kw">new</span> <span class="typ">RedState</span>());
+}
+<span class="kw">public class</span> <span class="typ">TrafficLight</span>
+{
+    <span class="kw">private</span> <span class="iface">ITrafficLightState</span> _state = <span class="kw">new</span> <span class="typ">GreenState</span>();
+    <span class="kw">public void</span> <span class="mth">SetState</span>(<span class="iface">ITrafficLightState</span> s) => _state = s;
+    <span class="kw">public void</span> <span class="mth">Change</span>() => _state.<span class="mth">Handle</span>(<span class="kw">this</span>);
+    <span class="kw">public string</span> <span class="prop">Current</span> => _state.<span class="prop">Color</span>;
+}
+<span class="cmt">// In Elevator → each IElevatorState (Idle, MovingUp, DoorsOpen)</span>
+<span class="cmt">// decides what happens on RequestFloor() / ArrivedAt() events.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">ElevatorSystem.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">Direction</span> { Up, Down, Idle }
+<span class="kw">public enum</span> <span class="en">DoorStatus</span> { Open, Closed }
+
+<span class="sec-comment">// ── Request (value object) ─────────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">ElevatorRequest</span>(<span class="kw">int</span> Floor, <span class="en">Direction</span> Direction);
+
+<span class="sec-comment">// ── State Interface ────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IElevatorState</span>
+{
+    <span class="kw">void</span> <span class="mth">AddRequest</span>(<span class="typ">Elevator</span> elevator, <span class="kw">int</span> floor);
+    <span class="kw">void</span> <span class="mth">Step</span>(<span class="typ">Elevator</span> elevator);       <span class="cmt">// called each "tick"</span>
+    <span class="en">Direction</span> <span class="prop">Direction</span> { <span class="kw">get</span>; }
+}
+
+<span class="sec-comment">// ── Idle State ────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">IdleState</span> : <span class="iface">IElevatorState</span>
+{
+    <span class="kw">public</span> <span class="en">Direction</span> <span class="prop">Direction</span> => <span class="en">Direction</span>.Idle;
+
+    <span class="kw">public void</span> <span class="mth">AddRequest</span>(<span class="typ">Elevator</span> e, <span class="kw">int</span> floor)
+    {
+        e.<span class="prop">UpQueue</span>.<span class="mth">Add</span>(floor);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"[Elevator {e.Id}] Waking up for floor {floor}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Step</span>(<span class="typ">Elevator</span> e)
+    {
+        <span class="kw">if</span> (e.<span class="prop">UpQueue</span>.<span class="prop">Count</span> == 0 && e.<span class="prop">DownQueue</span>.<span class="prop">Count</span> == 0) <span class="kw">return</span>;
+
+        <span class="kw">int</span> next = e.<span class="prop">UpQueue</span>.<span class="prop">Count</span> > 0 ? e.<span class="prop">UpQueue</span>.<span class="mth">Min</span>() : e.<span class="prop">DownQueue</span>.<span class="mth">Max</span>();
+        e.<span class="mth">TransitionTo</span>(next > e.<span class="prop">CurrentFloor</span>
+            ? <span class="kw">new</span> <span class="typ">MovingUpState</span>()
+            : <span class="kw">new</span> <span class="typ">MovingDownState</span>());
+    }
+}
+
+<span class="sec-comment">// ── Moving Up State ───────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">MovingUpState</span> : <span class="iface">IElevatorState</span>
+{
+    <span class="kw">public</span> <span class="en">Direction</span> <span class="prop">Direction</span> => <span class="en">Direction</span>.Up;
+
+    <span class="kw">public void</span> <span class="mth">AddRequest</span>(<span class="typ">Elevator</span> e, <span class="kw">int</span> floor)
+    {
+        <span class="kw">if</span> (floor >= e.<span class="prop">CurrentFloor</span>) e.<span class="prop">UpQueue</span>.<span class="mth">Add</span>(floor);
+        <span class="kw">else</span>                           e.<span class="prop">DownQueue</span>.<span class="mth">Add</span>(floor);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Step</span>(<span class="typ">Elevator</span> e)
+    {
+        e.<span class="prop">CurrentFloor</span>++;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"[Elevator {e.Id}] ↑ Floor {e.CurrentFloor}"</span>);
+        e.<span class="mth">NotifyObservers</span>();
+
+        <span class="kw">if</span> (e.<span class="prop">UpQueue</span>.<span class="mth">Contains</span>(e.<span class="prop">CurrentFloor</span>))
+        {
+            e.<span class="prop">UpQueue</span>.<span class="mth">Remove</span>(e.<span class="prop">CurrentFloor</span>);
+            e.<span class="mth">TransitionTo</span>(<span class="kw">new</span> <span class="typ">DoorsOpenState</span>());
+        }
+        <span class="kw">else if</span> (e.<span class="prop">UpQueue</span>.<span class="prop">Count</span> == 0)
+        {
+            e.<span class="mth">TransitionTo</span>(e.<span class="prop">DownQueue</span>.<span class="prop">Count</span> > 0
+                ? <span class="kw">new</span> <span class="typ">MovingDownState</span>()
+                : <span class="kw">new</span> <span class="typ">IdleState</span>());
+        }
+    }
+}
+
+<span class="sec-comment">// ── Moving Down State ─────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">MovingDownState</span> : <span class="iface">IElevatorState</span>
+{
+    <span class="kw">public</span> <span class="en">Direction</span> <span class="prop">Direction</span> => <span class="en">Direction</span>.Down;
+
+    <span class="kw">public void</span> <span class="mth">AddRequest</span>(<span class="typ">Elevator</span> e, <span class="kw">int</span> floor)
+    {
+        <span class="kw">if</span> (floor <= e.<span class="prop">CurrentFloor</span>) e.<span class="prop">DownQueue</span>.<span class="mth">Add</span>(floor);
+        <span class="kw">else</span>                           e.<span class="prop">UpQueue</span>.<span class="mth">Add</span>(floor);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Step</span>(<span class="typ">Elevator</span> e)
+    {
+        e.<span class="prop">CurrentFloor</span>--;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"[Elevator {e.Id}] ↓ Floor {e.CurrentFloor}"</span>);
+        e.<span class="mth">NotifyObservers</span>();
+
+        <span class="kw">if</span> (e.<span class="prop">DownQueue</span>.<span class="mth">Contains</span>(e.<span class="prop">CurrentFloor</span>))
+        {
+            e.<span class="prop">DownQueue</span>.<span class="mth">Remove</span>(e.<span class="prop">CurrentFloor</span>);
+            e.<span class="mth">TransitionTo</span>(<span class="kw">new</span> <span class="typ">DoorsOpenState</span>());
+        }
+        <span class="kw">else if</span> (e.<span class="prop">DownQueue</span>.<span class="prop">Count</span> == 0)
+        {
+            e.<span class="mth">TransitionTo</span>(e.<span class="prop">UpQueue</span>.<span class="prop">Count</span> > 0
+                ? <span class="kw">new</span> <span class="typ">MovingUpState</span>()
+                : <span class="kw">new</span> <span class="typ">IdleState</span>());
+        }
+    }
+}
+
+<span class="sec-comment">// ── Doors Open State ──────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">DoorsOpenState</span> : <span class="iface">IElevatorState</span>
+{
+    <span class="kw">private int</span> _ticks = 0;
+    <span class="kw">public</span> <span class="en">Direction</span> <span class="prop">Direction</span> => <span class="en">Direction</span>.Idle;
+
+    <span class="kw">public void</span> <span class="mth">AddRequest</span>(<span class="typ">Elevator</span> e, <span class="kw">int</span> floor)
+    {
+        <span class="kw">if</span> (floor >= e.<span class="prop">CurrentFloor</span>) e.<span class="prop">UpQueue</span>.<span class="mth">Add</span>(floor);
+        <span class="kw">else</span>                           e.<span class="prop">DownQueue</span>.<span class="mth">Add</span>(floor);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Step</span>(<span class="typ">Elevator</span> e)
+    {
+        <span class="kw">if</span> (++_ticks < 2) { Console.<span class="mth">WriteLine</span>($<span class="str">"[Elevator {e.Id}] 🚪 Doors open at {e.CurrentFloor}"</span>); <span class="kw">return</span>; }
+        Console.<span class="mth">WriteLine</span>($<span class="str">"[Elevator {e.Id}] 🚪 Doors closing at {e.CurrentFloor}"</span>);
+        e.<span class="mth">TransitionTo</span>(e.<span class="prop">UpQueue</span>.<span class="prop">Count</span> > 0 ? <span class="kw">new</span> <span class="typ">MovingUpState</span>()
+                      : e.<span class="prop">DownQueue</span>.<span class="prop">Count</span> > 0 ? <span class="kw">new</span> <span class="typ">MovingDownState</span>()
+                      : <span class="kw">new</span> <span class="typ">IdleState</span>());
+    }
+}
+
+<span class="sec-comment">// ── Observer Interface ────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IFloorObserver</span>
+{
+    <span class="kw">void</span> <span class="mth">OnFloorChanged</span>(<span class="kw">int</span> elevatorId, <span class="kw">int</span> floor, <span class="en">Direction</span> dir);
+}
+
+<span class="kw">public class</span> <span class="typ">DisplayPanel</span> : <span class="iface">IFloorObserver</span>
+{
+    <span class="kw">public void</span> <span class="mth">OnFloorChanged</span>(<span class="kw">int</span> id, <span class="kw">int</span> floor, <span class="en">Direction</span> dir)
+        => Console.<span class="mth">WriteLine</span>($<span class="str">"  📺 Display: Elevator {id} → Floor {floor} ({dir})"</span>);
+}
+
+<span class="sec-comment">// ── Elevator ──────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Elevator</span>
+{
+    <span class="kw">public int</span>           <span class="prop">Id</span>           { <span class="kw">get</span>; }
+    <span class="kw">public int</span>           <span class="prop">CurrentFloor</span> { <span class="kw">get</span>; <span class="kw">set</span>; } = 1;
+    <span class="kw">public</span> SortedSet&lt;<span class="kw">int</span>&gt; <span class="prop">UpQueue</span>      { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> SortedSet&lt;<span class="kw">int</span>&gt; <span class="prop">DownQueue</span>    { <span class="kw">get</span>; } = <span class="kw">new</span>(Comparer&lt;<span class="kw">int</span>&gt;.<span class="mth">Create</span>((a, b) => b - a));
+
+    <span class="kw">private</span> <span class="iface">IElevatorState</span>         _state     = <span class="kw">new</span> <span class="typ">IdleState</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="iface">IFloorObserver</span>&gt; _observers = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="en">Direction</span> <span class="prop">Direction</span> => _state.<span class="prop">Direction</span>;
+
+    <span class="kw">public</span> <span class="mth">Elevator</span>(<span class="kw">int</span> id) => <span class="prop">Id</span> = id;
+
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(<span class="iface">IFloorObserver</span> obs) => _observers.<span class="mth">Add</span>(obs);
+
+    <span class="kw">public void</span> <span class="mth">NotifyObservers</span>()
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> obs <span class="kw">in</span> _observers)
+            obs.<span class="mth">OnFloorChanged</span>(<span class="prop">Id</span>, <span class="prop">CurrentFloor</span>, _state.<span class="prop">Direction</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">TransitionTo</span>(<span class="iface">IElevatorState</span> newState) => _state = newState;
+
+    <span class="kw">public void</span> <span class="mth">RequestFloor</span>(<span class="kw">int</span> floor) => _state.<span class="mth">AddRequest</span>(<span class="kw">this</span>, floor);
+
+    <span class="kw">public void</span> <span class="mth">Step</span>() => _state.<span class="mth">Step</span>(<span class="kw">this</span>);
+
+    <span class="kw">public int</span> <span class="mth">CostTo</span>(<span class="kw">int</span> floor)
+    {
+        <span class="cmt">// Lower cost = better candidate for assignment</span>
+        <span class="kw">int</span> dist = Math.<span class="mth">Abs</span>(<span class="prop">CurrentFloor</span> - floor);
+        <span class="kw">if</span> (_state.<span class="prop">Direction</span> == <span class="en">Direction</span>.Idle) <span class="kw">return</span> dist;
+
+        <span class="kw">bool</span> inPath = (_state.<span class="prop">Direction</span> == <span class="en">Direction</span>.Up   && floor >= <span class="prop">CurrentFloor</span>)
+                   || (_state.<span class="prop">Direction</span> == <span class="en">Direction</span>.Down && floor <= <span class="prop">CurrentFloor</span>);
+        <span class="kw">return</span> inPath ? dist : dist + 20; <span class="cmt">// penalty for out-of-path</span>
+    }
+}
+
+<span class="sec-comment">// ── Elevator Controller ───────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">ElevatorController</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Elevator</span>&gt; _elevators = <span class="kw">new</span>();
+
+    <span class="kw">public void</span> <span class="mth">AddElevator</span>(<span class="typ">Elevator</span> e) => _elevators.<span class="mth">Add</span>(e);
+
+    <span class="kw">public void</span> <span class="mth">RequestElevator</span>(<span class="kw">int</span> floor, <span class="en">Direction</span> dir)
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🔔 Request: Floor {floor}, Going {dir}"</span>);
+        <span class="kw">var</span> best = _elevators
+            .<span class="mth">OrderBy</span>(e => e.<span class="mth">CostTo</span>(floor))
+            .<span class="mth">First</span>();
+        best.<span class="mth">RequestFloor</span>(floor);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Tick</span>()
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> e <span class="kw">in</span> _elevators)
+            e.<span class="mth">Step</span>();
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> ctrl   = <span class="kw">new</span> <span class="typ">ElevatorController</span>();
+<span class="kw">var</span> e1     = <span class="kw">new</span> <span class="typ">Elevator</span>(1);
+<span class="kw">var</span> e2     = <span class="kw">new</span> <span class="typ">Elevator</span>(2) { <span class="prop">CurrentFloor</span> = 5 };
+<span class="kw">var</span> panel  = <span class="kw">new</span> <span class="typ">DisplayPanel</span>();
+
+e1.<span class="mth">Subscribe</span>(panel);
+e2.<span class="mth">Subscribe</span>(panel);
+ctrl.<span class="mth">AddElevator</span>(e1);
+ctrl.<span class="mth">AddElevator</span>(e2);
+
+ctrl.<span class="mth">RequestElevator</span>(7, <span class="en">Direction</span>.Up);    <span class="cmt">// e2 wins (closer)</span>
+ctrl.<span class="mth">RequestElevator</span>(2, <span class="en">Direction</span>.Down);  <span class="cmt">// e1 wins (idle at 1)</span>
+
+<span class="kw">for</span> (<span class="kw">int</span> i = 0; i < 10; i++) ctrl.<span class="mth">Tick</span>();
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     2. MEETING SCHEDULER
+════════════════════════════════════════ -->
+<section class="system" id="scheduler">
+  <div class="sys-header">
+    <div class="sys-num">02</div>
+    <div class="sys-meta">
+      <div class="sys-title">Meeting Scheduler</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Interval Overlap</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Repository Pattern</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Observer (notifications)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Interval overlap check: two ranges overlap if <code>start1 &lt; end2 &amp;&amp; start2 &lt; end1</code></li>
+          <li>Each user owns a calendar — meetings stored sorted by start time</li>
+          <li>Finding a free slot: merge all busy intervals, scan for gaps</li>
+          <li>Notification sent to all attendees on booking/cancellation</li>
+          <li>Rooms are a separate resource with their own availability</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Meeting</strong> — title, time range, attendees, room</li>
+          <li><strong>User / Calendar</strong> — owns sorted list of meetings</li>
+          <li><strong>Room</strong> — capacity, availability check</li>
+          <li><strong>MeetingScheduler</strong> — book, cancel, findFreeSlot</li>
+          <li><strong>INotificationService</strong> — email/push decoupled via interface</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you find a free slot for N attendees?</span>
+    <span style="font-size:12px;color:#a09060">→ Collect all busy intervals from every attendee. Merge overlapping intervals into one list. Scan for a gap of the required duration between consecutive merged intervals.</span>
+    <span class="q">Q: How do you handle recurring meetings?</span>
+    <span style="font-size:12px;color:#a09060">→ Add a <code>RecurrenceRule</code> (daily/weekly/monthly + endDate). On scheduling, generate all occurrences up to endDate and validate each one individually.</span>
+    <span class="q">Q: How do you prevent double-booking a room?</span>
+    <span style="font-size:12px;color:#a09060">→ Room keeps its own sorted list of bookings. Check overlap before confirming. Lock the room check + booking in a single transaction (or use a mutex in multi-threaded systems).</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Repository — CalendarRepository</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Observer — NotificationService</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Value Object — TimeSlot</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">MeetingScheduler.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── TimeSlot (value object) ───────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">TimeSlot</span>(<span class="typ">DateTime</span> Start, <span class="typ">DateTime</span> End)
+{
+    <span class="kw">public bool</span> <span class="mth">OverlapsWith</span>(<span class="typ">TimeSlot</span> other) =>
+        <span class="prop">Start</span> < other.<span class="prop">End</span> && other.<span class="prop">Start</span> < <span class="prop">End</span>;
+
+    <span class="kw">public</span> <span class="typ">TimeSpan</span> <span class="prop">Duration</span> => <span class="prop">End</span> - <span class="prop">Start</span>;
+}
+
+<span class="sec-comment">// ── Room ──────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Room</span>
+{
+    <span class="kw">public</span> Guid         <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>       <span class="prop">Name</span>     { <span class="kw">get</span>; }
+    <span class="kw">public int</span>          <span class="prop">Capacity</span> { <span class="kw">get</span>; }
+    <span class="kw">private readonly</span> List&lt;<span class="typ">TimeSlot</span>&gt; _bookings = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Room</span>(<span class="kw">string</span> name, <span class="kw">int</span> capacity) => (<span class="prop">Name</span>, <span class="prop">Capacity</span>) = (name, capacity);
+
+    <span class="kw">public bool</span> <span class="mth">IsAvailable</span>(<span class="typ">TimeSlot</span> slot) =>
+        !_bookings.<span class="mth">Any</span>(b => b.<span class="mth">OverlapsWith</span>(slot));
+
+    <span class="kw">public void</span> <span class="mth">Book</span>(<span class="typ">TimeSlot</span> slot)   => _bookings.<span class="mth">Add</span>(slot);
+    <span class="kw">public void</span> <span class="mth">Release</span>(<span class="typ">TimeSlot</span> slot) => _bookings.<span class="mth">Remove</span>(slot);
+}
+
+<span class="sec-comment">// ── User & Calendar ───────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">User</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>    { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Name</span>  { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Email</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Calendar</span> <span class="prop">Calendar</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">User</span>(<span class="kw">string</span> name, <span class="kw">string</span> email) => (<span class="prop">Name</span>, <span class="prop">Email</span>) = (name, email);
+}
+
+<span class="kw">public class</span> <span class="typ">Calendar</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Meeting</span>&gt; _meetings = <span class="kw">new</span>();
+
+    <span class="kw">public bool</span> <span class="mth">IsFreeAt</span>(<span class="typ">TimeSlot</span> slot) =>
+        !_meetings.<span class="mth">Any</span>(m => m.<span class="prop">Slot</span>.<span class="mth">OverlapsWith</span>(slot));
+
+    <span class="kw">public void</span> <span class="mth">AddMeeting</span>(<span class="typ">Meeting</span> m) => _meetings.<span class="mth">Add</span>(m);
+    <span class="kw">public void</span> <span class="mth">RemoveMeeting</span>(Guid id) => _meetings.<span class="mth">RemoveAll</span>(m => m.<span class="prop">Id</span> == id);
+
+    <span class="kw">public</span> IReadOnlyList&lt;<span class="typ">TimeSlot</span>&gt; <span class="mth">GetBusySlots</span>() =>
+        _meetings.<span class="mth">Select</span>(m => m.<span class="prop">Slot</span>).<span class="mth">OrderBy</span>(s => s.<span class="prop">Start</span>).<span class="mth">ToList</span>();
+}
+
+<span class="sec-comment">// ── Meeting ───────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Meeting</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>        { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>        <span class="prop">Title</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">TimeSlot</span>      <span class="prop">Slot</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Room</span>          <span class="prop">Room</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">User</span>          <span class="prop">Organizer</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">User</span>&gt;   <span class="prop">Attendees</span> { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="mth">Meeting</span>(<span class="kw">string</span> title, <span class="typ">TimeSlot</span> slot, <span class="typ">Room</span> room,
+                   <span class="typ">User</span> organizer, List&lt;<span class="typ">User</span>&gt; attendees)
+    {
+        <span class="prop">Title</span>     = title;
+        <span class="prop">Slot</span>      = slot;
+        <span class="prop">Room</span>      = room;
+        <span class="prop">Organizer</span> = organizer;
+        <span class="prop">Attendees</span> = attendees;
+    }
+}
+
+<span class="sec-comment">// ── Notification Service ──────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">INotificationService</span>
+{
+    <span class="kw">void</span> <span class="mth">Notify</span>(<span class="typ">User</span> user, <span class="kw">string</span> message);
+}
+
+<span class="kw">public class</span> <span class="typ">EmailNotificationService</span> : <span class="iface">INotificationService</span>
+{
+    <span class="kw">public void</span> <span class="mth">Notify</span>(<span class="typ">User</span> user, <span class="kw">string</span> message) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"📧 Email to {user.Email}: {message}"</span>);
+}
+
+<span class="sec-comment">// ── Meeting Scheduler (Facade) ────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">MeetingScheduler</span>
+{
+    <span class="kw">private readonly</span> <span class="iface">INotificationService</span>   _notifications;
+    <span class="kw">private readonly</span> Dictionary&lt;Guid, <span class="typ">Meeting</span>&gt; _meetings = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">MeetingScheduler</span>(<span class="iface">INotificationService</span> notifications)
+        => _notifications = notifications;
+
+    <span class="kw">public</span> <span class="typ">Meeting</span>? <span class="mth">Book</span>(<span class="kw">string</span> title, <span class="typ">TimeSlot</span> slot, <span class="typ">Room</span> room,
+                        <span class="typ">User</span> organizer, List&lt;<span class="typ">User</span>&gt; attendees)
+    {
+        <span class="kw">var</span> allAttendees = attendees.<span class="mth">Append</span>(organizer);
+
+        <span class="cmt">// Check all attendees are free</span>
+        <span class="kw">if</span> (allAttendees.<span class="mth">Any</span>(u => !u.<span class="prop">Calendar</span>.<span class="mth">IsFreeAt</span>(slot)))
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Conflict: one or more attendees are busy."</span>);
+            <span class="kw">return null</span>;
+        }
+
+        <span class="cmt">// Check room is free</span>
+        <span class="kw">if</span> (!room.<span class="mth">IsAvailable</span>(slot))
+        {
+            Console.<span class="mth">WriteLine</span>($<span class="str">"❌ Room {room.Name} is already booked."</span>);
+            <span class="kw">return null</span>;
+        }
+
+        <span class="kw">var</span> meeting = <span class="kw">new</span> <span class="typ">Meeting</span>(title, slot, room, organizer, attendees);
+        room.<span class="mth">Book</span>(slot);
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> u <span class="kw">in</span> allAttendees)
+        {
+            u.<span class="prop">Calendar</span>.<span class="mth">AddMeeting</span>(meeting);
+            _notifications.<span class="mth">Notify</span>(u, $<span class="str">"Meeting '{title}' scheduled at {slot.Start:HH:mm}"</span>);
+        }
+
+        _meetings[meeting.<span class="prop">Id</span>] = meeting;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Booked: {title} in {room.Name}"</span>);
+        <span class="kw">return</span> meeting;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Cancel</span>(Guid meetingId)
+    {
+        <span class="kw">if</span> (!_meetings.<span class="mth">TryGetValue</span>(meetingId, <span class="kw">out var</span> m)) <span class="kw">return</span>;
+
+        m.<span class="prop">Room</span>.<span class="mth">Release</span>(m.<span class="prop">Slot</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> u <span class="kw">in</span> m.<span class="prop">Attendees</span>.<span class="mth">Append</span>(m.<span class="prop">Organizer</span>))
+        {
+            u.<span class="prop">Calendar</span>.<span class="mth">RemoveMeeting</span>(meetingId);
+            _notifications.<span class="mth">Notify</span>(u, $<span class="str">"Meeting '{m.Title}' has been cancelled."</span>);
+        }
+        _meetings.<span class="mth">Remove</span>(meetingId);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🗑 Cancelled: {m.Title}"</span>);
+    }
+
+    <span class="kw">public</span> <span class="typ">TimeSlot</span>? <span class="mth">FindFreeSlot</span>(List&lt;<span class="typ">User</span>&gt; users, <span class="typ">TimeSpan</span> duration,
+                                    <span class="typ">DateTime</span> searchFrom, <span class="typ">DateTime</span> searchUntil)
+    {
+        <span class="cmt">// Merge all busy intervals</span>
+        <span class="kw">var</span> allBusy = users
+            .<span class="mth">SelectMany</span>(u => u.<span class="prop">Calendar</span>.<span class="mth">GetBusySlots</span>())
+            .<span class="mth">OrderBy</span>(s => s.<span class="prop">Start</span>)
+            .<span class="mth">ToList</span>();
+
+        <span class="kw">var</span> merged = <span class="kw">new</span> List&lt;<span class="typ">TimeSlot</span>&gt;();
+        <span class="kw">foreach</span> (<span class="kw">var</span> slot <span class="kw">in</span> allBusy)
+        {
+            <span class="kw">if</span> (merged.<span class="prop">Count</span> == 0 || merged[^1].<span class="prop">End</span> < slot.<span class="prop">Start</span>)
+                merged.<span class="mth">Add</span>(slot);
+            <span class="kw">else</span>
+                merged[^1] = merged[^1] <span class="kw">with</span> { <span class="prop">End</span> = DateTime.<span class="mth">Max</span>(merged[^1].<span class="prop">End</span>, slot.<span class="prop">End</span>) };
+        }
+
+        <span class="cmt">// Find first gap ≥ duration between searchFrom and searchUntil</span>
+        <span class="kw">var</span> cursor = searchFrom;
+        <span class="kw">foreach</span> (<span class="kw">var</span> busy <span class="kw">in</span> merged)
+        {
+            <span class="kw">if</span> (cursor + duration <= busy.<span class="prop">Start</span>)
+                <span class="kw">return new</span> <span class="typ">TimeSlot</span>(cursor, cursor + duration);
+            cursor = DateTime.<span class="mth">Max</span>(cursor, busy.<span class="prop">End</span>);
+        }
+        <span class="kw">if</span> (cursor + duration <= searchUntil)
+            <span class="kw">return new</span> <span class="typ">TimeSlot</span>(cursor, cursor + duration);
+
+        <span class="kw">return null</span>; <span class="cmt">// no slot found</span>
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> svc    = <span class="kw">new</span> <span class="typ">EmailNotificationService</span>();
+<span class="kw">var</span> sched  = <span class="kw">new</span> <span class="typ">MeetingScheduler</span>(svc);
+
+<span class="kw">var</span> alice  = <span class="kw">new</span> <span class="typ">User</span>(<span class="str">"Alice"</span>, <span class="str">"alice@co.com"</span>);
+<span class="kw">var</span> bob    = <span class="kw">new</span> <span class="typ">User</span>(<span class="str">"Bob"</span>,   <span class="str">"bob@co.com"</span>);
+<span class="kw">var</span> room   = <span class="kw">new</span> <span class="typ">Room</span>(<span class="str">"Conf-A"</span>, capacity: 10);
+
+<span class="kw">var</span> slot1  = <span class="kw">new</span> <span class="typ">TimeSlot</span>(<span class="typ">DateTime</span>.<span class="mth">Today</span>.<span class="mth">AddHours</span>(10),
+                           <span class="typ">DateTime</span>.<span class="mth">Today</span>.<span class="mth">AddHours</span>(11));
+
+<span class="kw">var</span> mtg    = sched.<span class="mth">Book</span>(<span class="str">"Sprint Planning"</span>, slot1, room, alice, <span class="kw">new</span>() { bob });
+sched.<span class="mth">Book</span>(<span class="str">"Conflict Test"</span>, slot1, room, bob, <span class="kw">new</span>());  <span class="cmt">// ❌ room taken</span>
+
+<span class="kw">var</span> freeSlot = sched.<span class="mth">FindFreeSlot</span>(
+    <span class="kw">new</span>() { alice, bob },
+    TimeSpan.<span class="mth">FromMinutes</span>(30),
+    <span class="typ">DateTime</span>.<span class="mth">Today</span>.<span class="mth">AddHours</span>(9),
+    <span class="typ">DateTime</span>.<span class="mth">Today</span>.<span class="mth">AddHours</span>(18));
+
+Console.<span class="mth">WriteLine</span>($<span class="str">"🕐 Free slot: {freeSlot?.Start:HH:mm} – {freeSlot?.End:HH:mm}"</span>);
+sched.<span class="mth">Cancel</span>(mtg!.<span class="prop">Id</span>);
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     3. CAR RENTAL SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="carrental">
+  <div class="sys-header">
+    <div class="sys-num">03</div>
+    <div class="sys-meta">
+      <div class="sys-title">Car Rental System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Strategy (Pricing)</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Factory (Vehicle)</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">State (Reservation)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Vehicle hierarchy: <code>Vehicle → Car, SUV, Truck, Bike</code></li>
+          <li>Pricing Strategy: base rate × days + extras (insurance, GPS)</li>
+          <li>Reservation states: Pending → Confirmed → Active → Completed / Cancelled</li>
+          <li>Inventory checks vehicle availability for date range before booking</li>
+          <li>Late return fee calculated as additional day multiplied by daily rate</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Vehicle</strong> — abstract; Car/SUV/Truck are concrete</li>
+          <li><strong>Reservation</strong> — date range, vehicle, customer, extras</li>
+          <li><strong>IPricingStrategy</strong> — daily, weekly-discount, seasonal</li>
+          <li><strong>RentalStore</strong> — inventory, book, return, search</li>
+          <li><strong>Extra</strong> — GPS, insurance, child-seat (decorator-like)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you search for available cars by type and date?</span>
+    <span style="font-size:12px;color:#a09060">→ Filter inventory by <code>VehicleType</code>. For each vehicle, check no existing reservation overlaps the requested date range. Return the filtered list.</span>
+    <span class="q">Q: How do you calculate price with optional extras?</span>
+    <span style="font-size:12px;color:#a09060">→ Base price from IPricingStrategy. Each Extra has a flat daily cost. Total = base + sum(extra.DailyRate × days). Simple and extensible without touching Vehicle or Reservation.</span>
+    <span class="q">Q: How would you add loyalty points?</span>
+    <span style="font-size:12px;color:#a09060">→ Add <code>Customer.LoyaltyPoints</code>. On reservation complete, award points. Strategy decides how many points per dollar. Redeeming points applies a discount in the pricing step.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — pricing</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Factory — vehicle creation</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">State — reservation lifecycle</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">CarRentalSystem.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">VehicleType</span>       { Car, SUV, Truck, Bike }
+<span class="kw">public enum</span> <span class="en">VehicleStatus</span>     { Available, Rented, Maintenance }
+<span class="kw">public enum</span> <span class="en">ReservationStatus</span> { Pending, Confirmed, Active, Completed, Cancelled }
+
+<span class="sec-comment">// ── Vehicle Hierarchy ─────────────────────────────────</span>
+<span class="kw">public abstract class</span> <span class="typ">Vehicle</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>            { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>        <span class="prop">PlateNumber</span>   { <span class="kw">get</span>; }
+    <span class="kw">public string</span>        <span class="prop">Model</span>         { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">VehicleType</span>   <span class="prop">Type</span>          { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">VehicleStatus</span> <span class="prop">Status</span>        { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">VehicleStatus</span>.Available;
+    <span class="kw">public decimal</span>       <span class="prop">DailyRate</span>     { <span class="kw">get</span>; }
+
+    <span class="kw">protected</span> <span class="mth">Vehicle</span>(<span class="kw">string</span> plate, <span class="kw">string</span> model, <span class="en">VehicleType</span> type, <span class="kw">decimal</span> dailyRate)
+        => (<span class="prop">PlateNumber</span>, <span class="prop">Model</span>, <span class="prop">Type</span>, <span class="prop">DailyRate</span>) = (plate, model, type, dailyRate);
+}
+
+<span class="kw">public class</span> <span class="typ">Car</span>   : <span class="typ">Vehicle</span> { <span class="kw">public</span> <span class="mth">Car</span>  (<span class="kw">string</span> p, <span class="kw">string</span> m) : <span class="kw">base</span>(p, m, <span class="en">VehicleType</span>.Car,   40m) {} }
+<span class="kw">public class</span> <span class="typ">SUV</span>   : <span class="typ">Vehicle</span> { <span class="kw">public</span> <span class="mth">SUV</span>  (<span class="kw">string</span> p, <span class="kw">string</span> m) : <span class="kw">base</span>(p, m, <span class="en">VehicleType</span>.SUV,   70m) {} }
+<span class="kw">public class</span> <span class="typ">Truck</span> : <span class="typ">Vehicle</span> { <span class="kw">public</span> <span class="mth">Truck</span>(<span class="kw">string</span> p, <span class="kw">string</span> m) : <span class="kw">base</span>(p, m, <span class="en">VehicleType</span>.Truck, 90m) {} }
+
+<span class="sec-comment">// ── Extras (add-on costs) ─────────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">Extra</span>(<span class="kw">string</span> Name, <span class="kw">decimal</span> DailyRate);
+
+<span class="kw">public static class</span> <span class="typ">Extras</span>
+{
+    <span class="kw">public static readonly</span> <span class="typ">Extra</span> GPS         = <span class="kw">new</span>(<span class="str">"GPS"</span>,         5m);
+    <span class="kw">public static readonly</span> <span class="typ">Extra</span> Insurance    = <span class="kw">new</span>(<span class="str">"Insurance"</span>,   15m);
+    <span class="kw">public static readonly</span> <span class="typ">Extra</span> ChildSeat    = <span class="kw">new</span>(<span class="str">"Child Seat"</span>,  8m);
+}
+
+<span class="sec-comment">// ── Pricing Strategy ──────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">decimal</span> <span class="mth">Calculate</span>(<span class="typ">Vehicle</span> v, <span class="kw">int</span> days, IEnumerable&lt;<span class="typ">Extra</span>&gt; extras);
+}
+
+<span class="kw">public class</span> <span class="typ">StandardPricing</span> : <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">public decimal</span> <span class="mth">Calculate</span>(<span class="typ">Vehicle</span> v, <span class="kw">int</span> days, IEnumerable&lt;<span class="typ">Extra</span>&gt; extras)
+    {
+        <span class="kw">decimal</span> extrasTotal = extras.<span class="mth">Sum</span>(e => e.<span class="prop">DailyRate</span>) * days;
+        <span class="kw">return</span> v.<span class="prop">DailyRate</span> * days + extrasTotal;
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">WeeklyDiscountPricing</span> : <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">public decimal</span> <span class="mth">Calculate</span>(<span class="typ">Vehicle</span> v, <span class="kw">int</span> days, IEnumerable&lt;<span class="typ">Extra</span>&gt; extras)
+    {
+        <span class="kw">decimal</span> rate  = days >= 7 ? v.<span class="prop">DailyRate</span> * 0.85m : v.<span class="prop">DailyRate</span>;
+        <span class="kw">decimal</span> extra = extras.<span class="mth">Sum</span>(e => e.<span class="prop">DailyRate</span>) * days;
+        <span class="kw">return</span> rate * days + extra;
+    }
+}
+
+<span class="sec-comment">// ── Customer ──────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Customer</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>   { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Name</span> { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">License</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">Customer</span>(<span class="kw">string</span> name, <span class="kw">string</span> license) => (<span class="prop">Name</span>, <span class="prop">License</span>) = (name, license);
+}
+
+<span class="sec-comment">// ── Reservation ───────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Reservation</span>
+{
+    <span class="kw">public</span> Guid               <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="typ">Vehicle</span>            <span class="prop">Vehicle</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Customer</span>           <span class="prop">Customer</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>           <span class="prop">PickUp</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>           <span class="prop">DropOff</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">Extra</span>&gt;        <span class="prop">Extras</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">ReservationStatus</span>  <span class="prop">Status</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">ReservationStatus</span>.Confirmed;
+    <span class="kw">public decimal</span>            <span class="prop">TotalCost</span>{ <span class="kw">get</span>; }
+    <span class="kw">public int</span>                <span class="prop">Days</span>     => (<span class="kw">int</span>)Math.<span class="mth">Ceiling</span>((<span class="prop">DropOff</span> - <span class="prop">PickUp</span>).<span class="prop">TotalDays</span>);
+
+    <span class="kw">public</span> <span class="mth">Reservation</span>(<span class="typ">Vehicle</span> v, <span class="typ">Customer</span> c, <span class="typ">DateTime</span> pickUp,
+                       <span class="typ">DateTime</span> dropOff, List&lt;<span class="typ">Extra</span>&gt; extras, <span class="iface">IPricingStrategy</span> pricing)
+    {
+        <span class="prop">Vehicle</span>  = v;
+        <span class="prop">Customer</span> = c;
+        <span class="prop">PickUp</span>   = pickUp;
+        <span class="prop">DropOff</span>  = dropOff;
+        <span class="prop">Extras</span>   = extras;
+        <span class="prop">TotalCost</span>= pricing.<span class="mth">Calculate</span>(v, <span class="prop">Days</span>, extras);
+    }
+
+    <span class="kw">public bool</span> <span class="mth">OverlapsWith</span>(<span class="typ">DateTime</span> start, <span class="typ">DateTime</span> end) =>
+        <span class="prop">PickUp</span> < end && start < <span class="prop">DropOff</span>;
+}
+
+<span class="sec-comment">// ── Rental Store ──────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">RentalStore</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Vehicle</span>&gt;     _fleet        = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Reservation</span>&gt;  _reservations = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IPricingStrategy</span>  _pricing;
+
+    <span class="kw">public</span> <span class="mth">RentalStore</span>(<span class="iface">IPricingStrategy</span>? pricing = <span class="kw">null</span>)
+        => _pricing = pricing ?? <span class="kw">new</span> <span class="typ">WeeklyDiscountPricing</span>();
+
+    <span class="kw">public void</span> <span class="mth">AddVehicle</span>(<span class="typ">Vehicle</span> v) => _fleet.<span class="mth">Add</span>(v);
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Vehicle</span>&gt; <span class="mth">Search</span>(<span class="en">VehicleType</span> type, <span class="typ">DateTime</span> start, <span class="typ">DateTime</span> end) =>
+        _fleet.<span class="mth">Where</span>(v => v.<span class="prop">Type</span> == type && v.<span class="prop">Status</span> == <span class="en">VehicleStatus</span>.Available &&
+            !_reservations.<span class="mth">Any</span>(r => r.<span class="prop">Vehicle</span> == v && r.<span class="mth">OverlapsWith</span>(start, end)));
+
+    <span class="kw">public</span> <span class="typ">Reservation</span>? <span class="mth">Book</span>(<span class="typ">Customer</span> customer, <span class="typ">Vehicle</span> vehicle,
+                              <span class="typ">DateTime</span> start, <span class="typ">DateTime</span> end, List&lt;<span class="typ">Extra</span>&gt;? extras = <span class="kw">null</span>)
+    {
+        <span class="kw">if</span> (_reservations.<span class="mth">Any</span>(r => r.<span class="prop">Vehicle</span> == vehicle && r.<span class="mth">OverlapsWith</span>(start, end)))
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Vehicle not available for those dates."</span>);
+            <span class="kw">return null</span>;
+        }
+
+        <span class="kw">var</span> res = <span class="kw">new</span> <span class="typ">Reservation</span>(vehicle, customer, start, end, extras ?? <span class="kw">new</span>(), _pricing);
+        _reservations.<span class="mth">Add</span>(res);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Reserved {vehicle.Model} for {customer.Name} — ${res.TotalCost:F2} for {res.Days} days"</span>);
+        <span class="kw">return</span> res;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Return</span>(Guid reservationId, <span class="typ">DateTime</span> actualReturn)
+    {
+        <span class="kw">var</span> res = _reservations.<span class="mth">FirstOrDefault</span>(r => r.<span class="prop">Id</span> == reservationId);
+        <span class="kw">if</span> (res == <span class="kw">null</span>) <span class="kw">return</span>;
+
+        res.<span class="prop">Status</span> = <span class="en">ReservationStatus</span>.Completed;
+        <span class="kw">decimal</span> lateFee = 0m;
+        <span class="kw">if</span> (actualReturn > res.<span class="prop">DropOff</span>)
+        {
+            <span class="kw">int</span> lateDays = (<span class="kw">int</span>)Math.<span class="mth">Ceiling</span>((actualReturn - res.<span class="prop">DropOff</span>).<span class="prop">TotalDays</span>);
+            lateFee = lateDays * res.<span class="prop">Vehicle</span>.<span class="prop">DailyRate</span> * 1.5m; <span class="cmt">// 1.5× for late</span>
+            Console.<span class="mth">WriteLine</span>($<span class="str">"⚠️  Late by {lateDays} day(s). Late fee: ${lateFee:F2}"</span>);
+        }
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🚗 {res.Vehicle.Model} returned. Total charged: ${res.TotalCost + lateFee:F2}"</span>);
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> store = <span class="kw">new</span> <span class="typ">RentalStore</span>();
+store.<span class="mth">AddVehicle</span>(<span class="kw">new</span> <span class="typ">Car</span>  (<span class="str">"KA-01-AB-1234"</span>, <span class="str">"Toyota Corolla"</span>));
+store.<span class="mth">AddVehicle</span>(<span class="kw">new</span> <span class="typ">SUV</span>  (<span class="str">"KA-02-CD-5678"</span>, <span class="str">"Honda CR-V"</span>));
+store.<span class="mth">AddVehicle</span>(<span class="kw">new</span> <span class="typ">Truck</span>(<span class="str">"KA-03-EF-9012"</span>, <span class="str">"Ford F-150"</span>));
+
+<span class="kw">var</span> cust  = <span class="kw">new</span> <span class="typ">Customer</span>(<span class="str">"Rahul Sharma"</span>, <span class="str">"DL-1234"</span>);
+<span class="kw">var</span> start = <span class="typ">DateTime</span>.<span class="mth">Today</span>;
+<span class="kw">var</span> end   = start.<span class="mth">AddDays</span>(8);
+
+<span class="kw">var</span> available = store.<span class="mth">Search</span>(<span class="en">VehicleType</span>.Car, start, end).<span class="mth">ToList</span>();
+Console.<span class="mth">WriteLine</span>($<span class="str">"Found {available.Count} car(s)"</span>);
+
+<span class="kw">var</span> reservation = store.<span class="mth">Book</span>(cust, available[0], start, end,
+    <span class="kw">new</span>() { <span class="typ">Extras</span>.GPS, <span class="typ">Extras</span>.Insurance });
+
+store.<span class="mth">Return</span>(reservation!.<span class="prop">Id</span>, end.<span class="mth">AddDays</span>(2)); <span class="cmt">// returned 2 days late</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     4. HOTEL MANAGEMENT SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="hotel">
+  <div class="sys-header">
+    <div class="sys-num">04</div>
+    <div class="sys-meta">
+      <div class="sys-title">Hotel Management System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Strategy (Pricing)</span>
+        <span class="sys-tag" style="color:var(--teal);border-color:rgba(78,205,196,.3)">State (Room)</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Observer (Housekeeping)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--purple)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Room status machine: Available → Booked → CheckedIn → Cleaning → Available</li>
+          <li>Housekeeping notified via Observer on checkout</li>
+          <li>Pricing strategy selectable per booking: standard, weekend-rate, seasonal</li>
+          <li>Bill computed at checkout — adds room nights + service charges</li>
+          <li>Room hierarchy: Room → SingleRoom, DoubleRoom, Suite</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--teal)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Room</strong> — type, status, price, floor</li>
+          <li><strong>Booking</strong> — check-in/out dates, guest, room</li>
+          <li><strong>Guest</strong> — name, ID, contact</li>
+          <li><strong>Hotel</strong> — inventory, search, book, check-in, check-out</li>
+          <li><strong>IHousekeepingObserver</strong> — schedules cleaning after checkout</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you handle concurrent room bookings?</span>
+    <span style="font-size:12px;color:#a09060">→ Wrap the search-and-book step in a lock. Or use optimistic locking: add a <code>Version</code> field to Room; if version changed between read and update, retry. In DB systems, use SELECT FOR UPDATE.</span>
+    <span class="q">Q: How do you generate an itemised bill?</span>
+    <span style="font-size:12px;color:#a09060">→ Bill = list of line items. Room nights are the base line. Each service request (room service, laundry) adds a line. Total is the sum. Print as a receipt on checkout.</span>
+    <span class="q">Q: How do you support early check-in or late check-out?</span>
+    <span style="font-size:12px;color:#a09060">→ Treat as extra service with a flat surcharge. Check room availability for the overlap period before allowing it.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Strategy — pricing rules</span>
+    <span class="pat" style="background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--teal)">State — room lifecycle</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Observer — housekeeping</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">HotelManagement.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">RoomType</span>   { Single, Double, Suite, Penthouse }
+<span class="kw">public enum</span> <span class="en">RoomStatus</span> { Available, Booked, OccupiedClean, OccupiedDirty, Cleaning, OutOfService }
+
+<span class="sec-comment">// ── Room ──────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Room</span>
+{
+    <span class="kw">public int</span>        <span class="prop">Number</span>   { <span class="kw">get</span>; }
+    <span class="kw">public int</span>        <span class="prop">Floor</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">RoomType</span>   <span class="prop">Type</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">RoomStatus</span> <span class="prop">Status</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">RoomStatus</span>.Available;
+    <span class="kw">public decimal</span>    <span class="prop">NightRate</span>{ <span class="kw">get</span>; }
+    <span class="kw">public bool</span>       <span class="prop">HasView</span>  { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="mth">Room</span>(<span class="kw">int</span> number, <span class="kw">int</span> floor, <span class="en">RoomType</span> type, <span class="kw">decimal</span> nightRate, <span class="kw">bool</span> hasView = <span class="kw">false</span>)
+        => (<span class="prop">Number</span>, <span class="prop">Floor</span>, <span class="prop">Type</span>, <span class="prop">NightRate</span>, <span class="prop">HasView</span>) = (number, floor, type, nightRate, hasView);
+}
+
+<span class="sec-comment">// ── Guest ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Guest</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>      { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Name</span>    { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Contact</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">Guest</span>(<span class="kw">string</span> name, <span class="kw">string</span> contact) => (<span class="prop">Name</span>, <span class="prop">Contact</span>) = (name, contact);
+}
+
+<span class="sec-comment">// ── Booking ───────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Booking</span>
+{
+    <span class="kw">public</span> Guid         <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="typ">Room</span>         <span class="prop">Room</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Guest</span>        <span class="prop">Guest</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>     <span class="prop">CheckIn</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>     <span class="prop">CheckOut</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">BillItem</span>&gt; <span class="prop">Bill</span>   { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public int</span> <span class="prop">Nights</span> => (<span class="kw">int</span>)Math.<span class="mth">Ceiling</span>((<span class="prop">CheckOut</span> - <span class="prop">CheckIn</span>).<span class="prop">TotalDays</span>);
+
+    <span class="kw">public</span> <span class="mth">Booking</span>(<span class="typ">Room</span> room, <span class="typ">Guest</span> guest, <span class="typ">DateTime</span> checkIn, <span class="typ">DateTime</span> checkOut)
+        => (<span class="prop">Room</span>, <span class="prop">Guest</span>, <span class="prop">CheckIn</span>, <span class="prop">CheckOut</span>) = (room, guest, checkIn, checkOut);
+
+    <span class="kw">public bool</span> <span class="mth">OverlapsWith</span>(<span class="typ">DateTime</span> s, <span class="typ">DateTime</span> e) =>
+        <span class="prop">CheckIn</span> < e && s < <span class="prop">CheckOut</span>;
+
+    <span class="kw">public decimal</span> <span class="prop">Total</span> => <span class="prop">Bill</span>.<span class="mth">Sum</span>(b => b.<span class="prop">Amount</span>);
+
+    <span class="kw">public void</span> <span class="mth">PrintBill</span>()
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n🧾 Bill for {Guest.Name} — Room {Room.Number}"</span>);
+        Console.<span class="mth">WriteLine</span>(<span class="str">"─────────────────────────────"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> <span class="prop">Bill</span>)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"  {item.Description,-25} ${item.Amount:F2}"</span>);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"  {"Total:",-25} ${Total:F2}"</span>);
+    }
+}
+
+<span class="kw">public record</span> <span class="typ">BillItem</span>(<span class="kw">string</span> Description, <span class="kw">decimal</span> Amount);
+
+<span class="sec-comment">// ── Pricing Strategy ──────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">decimal</span> <span class="mth">GetNightRate</span>(<span class="typ">Room</span> room, <span class="typ">DateTime</span> night);
+}
+
+<span class="kw">public class</span> <span class="typ">StandardPricing</span> : <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">public decimal</span> <span class="mth">GetNightRate</span>(<span class="typ">Room</span> room, <span class="typ">DateTime</span> night) => room.<span class="prop">NightRate</span>;
+}
+
+<span class="kw">public class</span> <span class="typ">WeekendPricing</span> : <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">public decimal</span> <span class="mth">GetNightRate</span>(<span class="typ">Room</span> room, <span class="typ">DateTime</span> night)
+    {
+        <span class="kw">bool</span> isWeekend = night.<span class="prop">DayOfWeek</span> is DayOfWeek.Saturday or DayOfWeek.Sunday;
+        <span class="kw">return</span> isWeekend ? room.<span class="prop">NightRate</span> * 1.25m : room.<span class="prop">NightRate</span>;
+    }
+}
+
+<span class="sec-comment">// ── Observer — Housekeeping ───────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IHousekeepingObserver</span>
+{
+    <span class="kw">void</span> <span class="mth">OnRoomVacated</span>(<span class="typ">Room</span> room);
+}
+
+<span class="kw">public class</span> <span class="typ">HousekeepingService</span> : <span class="iface">IHousekeepingObserver</span>
+{
+    <span class="kw">public void</span> <span class="mth">OnRoomVacated</span>(<span class="typ">Room</span> room)
+    {
+        room.<span class="prop">Status</span> = <span class="en">RoomStatus</span>.Cleaning;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🧹 Housekeeping scheduled for Room {room.Number}"</span>);
+        <span class="cmt">// In real system: add to queue, assign staff, mark Available when done</span>
+    }
+}
+
+<span class="sec-comment">// ── Hotel (Facade) ────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Hotel</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Room</span>&gt;    _rooms    = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Booking</span>&gt;  _bookings = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IPricingStrategy</span> _pricing;
+    <span class="kw">private readonly</span> List&lt;<span class="iface">IHousekeepingObserver</span>&gt; _housekeeping = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Hotel</span>(<span class="iface">IPricingStrategy</span>? pricing = <span class="kw">null</span>)
+        => _pricing = pricing ?? <span class="kw">new</span> <span class="typ">WeekendPricing</span>();
+
+    <span class="kw">public void</span> <span class="mth">AddRoom</span>(<span class="typ">Room</span> r)  => _rooms.<span class="mth">Add</span>(r);
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(<span class="iface">IHousekeepingObserver</span> h) => _housekeeping.<span class="mth">Add</span>(h);
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Room</span>&gt; <span class="mth">SearchAvailable</span>(<span class="en">RoomType</span> type, <span class="typ">DateTime</span> ci, <span class="typ">DateTime</span> co) =>
+        _rooms.<span class="mth">Where</span>(r => r.<span class="prop">Type</span> == type && r.<span class="prop">Status</span> == <span class="en">RoomStatus</span>.Available &&
+            !_bookings.<span class="mth">Any</span>(b => b.<span class="prop">Room</span> == r && b.<span class="mth">OverlapsWith</span>(ci, co)));
+
+    <span class="kw">public</span> <span class="typ">Booking</span>? <span class="mth">Book</span>(<span class="typ">Guest</span> guest, <span class="typ">Room</span> room, <span class="typ">DateTime</span> ci, <span class="typ">DateTime</span> co)
+    {
+        <span class="kw">if</span> (_bookings.<span class="mth">Any</span>(b => b.<span class="prop">Room</span> == room && b.<span class="mth">OverlapsWith</span>(ci, co)))
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Room not available for those dates."</span>);
+            <span class="kw">return null</span>;
+        }
+
+        <span class="kw">var</span> booking = <span class="kw">new</span> <span class="typ">Booking</span>(room, guest, ci, co);
+        room.<span class="prop">Status</span> = <span class="en">RoomStatus</span>.Booked;
+        _bookings.<span class="mth">Add</span>(booking);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Room {room.Number} booked for {guest.Name} ({booking.Nights} nights)"</span>);
+        <span class="kw">return</span> booking;
+    }
+
+    <span class="kw">public void</span> <span class="mth">CheckIn</span>(Guid bookingId)
+    {
+        <span class="kw">var</span> b = _bookings.<span class="mth">First</span>(x => x.<span class="prop">Id</span> == bookingId);
+        b.<span class="prop">Room</span>.<span class="prop">Status</span> = <span class="en">RoomStatus</span>.OccupiedClean;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🔑 {b.Guest.Name} checked into Room {b.Room.Number}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">CheckOut</span>(Guid bookingId)
+    {
+        <span class="kw">var</span> b = _bookings.<span class="mth">First</span>(x => x.<span class="prop">Id</span> == bookingId);
+
+        <span class="cmt">// Compute bill night by night using pricing strategy</span>
+        <span class="kw">for</span> (<span class="kw">var</span> night = b.<span class="prop">CheckIn</span>; night < b.<span class="prop">CheckOut</span>; night = night.<span class="mth">AddDays</span>(1))
+        {
+            <span class="kw">decimal</span> rate = _pricing.<span class="mth">GetNightRate</span>(b.<span class="prop">Room</span>, night);
+            b.<span class="prop">Bill</span>.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">BillItem</span>($<span class="str">"Room {b.Room.Number} – {night:ddd dd MMM}"</span>, rate));
+        }
+
+        b.<span class="mth">PrintBill</span>();
+
+        <span class="cmt">// Notify housekeeping</span>
+        <span class="kw">foreach</span> (<span class="kw">var</span> h <span class="kw">in</span> _housekeeping)
+            h.<span class="mth">OnRoomVacated</span>(b.<span class="prop">Room</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">AddServiceCharge</span>(Guid bookingId, <span class="kw">string</span> service, <span class="kw">decimal</span> amount)
+    {
+        <span class="kw">var</span> b = _bookings.<span class="mth">First</span>(x => x.<span class="prop">Id</span> == bookingId);
+        b.<span class="prop">Bill</span>.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">BillItem</span>(service, amount));
+        Console.<span class="mth">WriteLine</span>($<span class="str">"💳 Added charge: {service} — ${amount:F2}"</span>);
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> hotel = <span class="kw">new</span> <span class="typ">Hotel</span>(<span class="kw">new</span> <span class="typ">WeekendPricing</span>());
+hotel.<span class="mth">Subscribe</span>(<span class="kw">new</span> <span class="typ">HousekeepingService</span>());
+
+hotel.<span class="mth">AddRoom</span>(<span class="kw">new</span> <span class="typ">Room</span>(101, 1, <span class="en">RoomType</span>.Single, 80m));
+hotel.<span class="mth">AddRoom</span>(<span class="kw">new</span> <span class="typ">Room</span>(201, 2, <span class="en">RoomType</span>.Double, 150m));
+hotel.<span class="mth">AddRoom</span>(<span class="kw">new</span> <span class="typ">Room</span>(301, 3, <span class="en">RoomType</span>.Suite,  350m, hasView: <span class="kw">true</span>));
+
+<span class="kw">var</span> guest   = <span class="kw">new</span> <span class="typ">Guest</span>(<span class="str">"Priya Patel"</span>, <span class="str">"9988776655"</span>);
+<span class="kw">var</span> ci      = <span class="typ">DateTime</span>.<span class="mth">Today</span>;
+<span class="kw">var</span> co      = ci.<span class="mth">AddDays</span>(3);
+
+<span class="kw">var</span> rooms   = hotel.<span class="mth">SearchAvailable</span>(<span class="en">RoomType</span>.Double, ci, co).<span class="mth">ToList</span>();
+<span class="kw">var</span> booking = hotel.<span class="mth">Book</span>(guest, rooms[0], ci, co)!;
+
+hotel.<span class="mth">CheckIn</span>(booking.<span class="prop">Id</span>);
+hotel.<span class="mth">AddServiceCharge</span>(booking.<span class="prop">Id</span>, <span class="str">"Room Service – Dinner"</span>, 45m);
+hotel.<span class="mth">CheckOut</span>(booking.<span class="prop">Id</span>);
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     5. RESTAURANT MANAGEMENT SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="restaurant">
+  <div class="sys-header">
+    <div class="sys-num">05</div>
+    <div class="sys-meta">
+      <div class="sys-title">Restaurant Management System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--teal);border-color:rgba(78,205,196,.3)">State (Order)</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Observer (Kitchen)</span>
+        <span class="sys-tag" style="color:var(--red);border-color:rgba(255,107,107,.3)">Strategy (Billing)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--teal)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Order state machine: Placed → Confirmed → Preparing → Ready → Served → Paid</li>
+          <li>Kitchen display notified via Observer when order is placed</li>
+          <li>Menu item hierarchy: Starter, Main, Dessert, Beverage</li>
+          <li>Bill includes items + tax + optional discount strategy</li>
+          <li>Table tracks seated guests and current order</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--amber)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>MenuItem</strong> — name, price, category, available flag</li>
+          <li><strong>Order</strong> — table, items, status, timestamps</li>
+          <li><strong>Table</strong> — number, capacity, current order</li>
+          <li><strong>Restaurant</strong> — seat, takeOrder, updateStatus, bill</li>
+          <li><strong>IBillingStrategy</strong> — standard, happy-hour, member discount</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How does the kitchen display work?</span>
+    <span style="font-size:12px;color:#a09060">→ KitchenDisplay implements IOrderObserver. When Restaurant.PlaceOrder() is called, it fires OnOrderPlaced(order) to all observers. Kitchen sees new tickets appear immediately.</span>
+    <span class="q">Q: How do you handle split bills?</span>
+    <span style="font-size:12px;color:#a09060">→ Assign each order item a <code>GuestSeat</code>. SplitBill groups items by seat and generates one sub-bill per person. Shared items (e.g., starters) are divided equally.</span>
+    <span class="q">Q: How do you manage out-of-stock items?</span>
+    <span style="font-size:12px;color:#a09060">→ MenuItem has an <code>IsAvailable</code> flag. Set to false when stock runs out. Ordering an unavailable item throws <code>MenuItemUnavailableException</code>. Kitchen notifies Restaurant to push update to menu.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--teal)">State — order lifecycle</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Observer — kitchen display</span>
+    <span class="pat" style="background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:var(--red)">Strategy — billing</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">RestaurantSystem.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">FoodCategory</span>  { Starter, Main, Dessert, Beverage }
+<span class="kw">public enum</span> <span class="en">OrderStatus</span>   { Placed, Confirmed, Preparing, Ready, Served, Paid, Cancelled }
+<span class="kw">public enum</span> <span class="en">TableStatus</span>   { Available, Occupied, Reserved }
+
+<span class="sec-comment">// ── Menu Item ─────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">MenuItem</span>
+{
+    <span class="kw">public</span> Guid           <span class="prop">Id</span>          { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>         <span class="prop">Name</span>        { <span class="kw">get</span>; }
+    <span class="kw">public decimal</span>        <span class="prop">Price</span>       { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">FoodCategory</span>   <span class="prop">Category</span>   { <span class="kw">get</span>; }
+    <span class="kw">public bool</span>           <span class="prop">IsAvailable</span>{ <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">true</span>;
+
+    <span class="kw">public</span> <span class="mth">MenuItem</span>(<span class="kw">string</span> name, <span class="kw">decimal</span> price, <span class="en">FoodCategory</span> cat)
+        => (<span class="prop">Name</span>, <span class="prop">Price</span>, <span class="prop">Category</span>) = (name, price, cat);
+}
+
+<span class="sec-comment">// ── Order Item ────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">OrderItem</span>
+{
+    <span class="kw">public</span> <span class="typ">MenuItem</span> <span class="prop">Item</span>     { <span class="kw">get</span>; }
+    <span class="kw">public int</span>       <span class="prop">Quantity</span> { <span class="kw">get</span>; }
+    <span class="kw">public string</span>    <span class="prop">Notes</span>    { <span class="kw">get</span>; }   <span class="cmt">// e.g. "no onions"</span>
+    <span class="kw">public decimal</span>   <span class="prop">Subtotal</span> => <span class="prop">Item</span>.<span class="prop">Price</span> * <span class="prop">Quantity</span>;
+
+    <span class="kw">public</span> <span class="mth">OrderItem</span>(<span class="typ">MenuItem</span> item, <span class="kw">int</span> qty, <span class="kw">string</span> notes = <span class="str">""</span>)
+        => (<span class="prop">Item</span>, <span class="prop">Quantity</span>, <span class="prop">Notes</span>) = (item, qty, notes);
+}
+
+<span class="sec-comment">// ── Order ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Order</span>
+{
+    <span class="kw">public</span> Guid              <span class="prop">Id</span>      { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public int</span>               <span class="prop">TableNo</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">OrderStatus</span>       <span class="prop">Status</span>  { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">OrderStatus</span>.Placed;
+    <span class="kw">public</span> List&lt;<span class="typ">OrderItem</span>&gt;  <span class="prop">Items</span>   { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="typ">DateTime</span>          <span class="prop">PlacedAt</span>{ <span class="kw">get</span>; } = <span class="typ">DateTime</span>.<span class="prop">Now</span>;
+
+    <span class="kw">public</span> <span class="mth">Order</span>(<span class="kw">int</span> tableNo) => <span class="prop">TableNo</span> = tableNo;
+
+    <span class="kw">public void</span> <span class="mth">AddItem</span>(<span class="typ">MenuItem</span> item, <span class="kw">int</span> qty, <span class="kw">string</span> notes = <span class="str">""</span>)
+    {
+        <span class="kw">if</span> (!item.<span class="prop">IsAvailable</span>) <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>($<span class="str">"{item.Name} is not available."</span>);
+        <span class="prop">Items</span>.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">OrderItem</span>(item, qty, notes));
+    }
+
+    <span class="kw">public decimal</span> <span class="prop">Subtotal</span> => <span class="prop">Items</span>.<span class="mth">Sum</span>(i => i.<span class="prop">Subtotal</span>);
+}
+
+<span class="sec-comment">// ── Table ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Table</span>
+{
+    <span class="kw">public int</span>          <span class="prop">Number</span>   { <span class="kw">get</span>; }
+    <span class="kw">public int</span>          <span class="prop">Capacity</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">TableStatus</span>  <span class="prop">Status</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">TableStatus</span>.Available;
+    <span class="kw">public</span> <span class="typ">Order</span>?       <span class="prop">CurrentOrder</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Table</span>(<span class="kw">int</span> number, <span class="kw">int</span> capacity) => (<span class="prop">Number</span>, <span class="prop">Capacity</span>) = (number, capacity);
+}
+
+<span class="sec-comment">// ── Observer — Kitchen ────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IOrderObserver</span>
+{
+    <span class="kw">void</span> <span class="mth">OnOrderPlaced</span>(<span class="typ">Order</span> order);
+    <span class="kw">void</span> <span class="mth">OnStatusChanged</span>(<span class="typ">Order</span> order);
+}
+
+<span class="kw">public class</span> <span class="typ">KitchenDisplay</span> : <span class="iface">IOrderObserver</span>
+{
+    <span class="kw">public void</span> <span class="mth">OnOrderPlaced</span>(<span class="typ">Order</span> o)
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🍳 Kitchen: New order for Table {o.TableNo}"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> i <span class="kw">in</span> o.<span class="prop">Items</span>)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"   • {i.Quantity}× {i.Item.Name}{(i.Notes != "" ? $" ({i.Notes})" : "")}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">OnStatusChanged</span>(<span class="typ">Order</span> o) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"📺 Kitchen: Order #{o.Id.ToString()[..8]} → {o.Status}"</span>);
+}
+
+<span class="sec-comment">// ── Billing Strategy ──────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IBillingStrategy</span>
+{
+    <span class="kw">decimal</span> <span class="mth">ComputeTotal</span>(<span class="typ">Order</span> order);
+}
+
+<span class="kw">public class</span> <span class="typ">StandardBilling</span> : <span class="iface">IBillingStrategy</span>
+{
+    <span class="kw">private const decimal</span> TaxRate = 0.18m;
+    <span class="kw">public decimal</span> <span class="mth">ComputeTotal</span>(<span class="typ">Order</span> o)
+    {
+        <span class="kw">decimal</span> subtotal = o.<span class="prop">Subtotal</span>;
+        <span class="kw">decimal</span> tax      = subtotal * TaxRate;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"  Subtotal: ${subtotal:F2}  Tax(18%): ${tax:F2}"</span>);
+        <span class="kw">return</span> subtotal + tax;
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">HappyHourBilling</span> : <span class="iface">IBillingStrategy</span>
+{
+    <span class="kw">public decimal</span> <span class="mth">ComputeTotal</span>(<span class="typ">Order</span> o)
+    {
+        <span class="kw">decimal</span> subtotal = o.<span class="prop">Subtotal</span> * 0.80m; <span class="cmt">// 20% off</span>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"  🎉 Happy Hour 20% off! Subtotal: ${subtotal:F2}"</span>);
+        <span class="kw">return</span> subtotal * 1.18m;
+    }
+}
+
+<span class="sec-comment">// ── Restaurant (Facade) ───────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Restaurant</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Table</span>&gt;           _tables   = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="typ">MenuItem</span>&gt;        _menu     = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="iface">IOrderObserver</span>&gt;  _observers= <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IBillingStrategy</span>      _billing;
+
+    <span class="kw">public</span> <span class="mth">Restaurant</span>(<span class="iface">IBillingStrategy</span>? billing = <span class="kw">null</span>)
+        => _billing = billing ?? <span class="kw">new</span> <span class="typ">StandardBilling</span>();
+
+    <span class="kw">public void</span> <span class="mth">AddTable</span>(<span class="typ">Table</span> t)         => _tables.<span class="mth">Add</span>(t);
+    <span class="kw">public void</span> <span class="mth">AddMenuItem</span>(<span class="typ">MenuItem</span> m)   => _menu.<span class="mth">Add</span>(m);
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(<span class="iface">IOrderObserver</span> o)=> _observers.<span class="mth">Add</span>(o);
+
+    <span class="kw">public</span> <span class="typ">Table</span>? <span class="mth">SeatGuests</span>(<span class="kw">int</span> partySize)
+    {
+        <span class="kw">var</span> table = _tables.<span class="mth">FirstOrDefault</span>(t =>
+            t.<span class="prop">Status</span> == <span class="en">TableStatus</span>.Available && t.<span class="prop">Capacity</span> >= partySize);
+        <span class="kw">if</span> (table != <span class="kw">null</span>)
+        {
+            table.<span class="prop">Status</span> = <span class="en">TableStatus</span>.Occupied;
+            Console.<span class="mth">WriteLine</span>($<span class="str">"🪑 Seated party of {partySize} at Table {table.Number}"</span>);
+        }
+        <span class="kw">else</span> Console.<span class="mth">WriteLine</span>(<span class="str">"❌ No suitable table available."</span>);
+        <span class="kw">return</span> table;
+    }
+
+    <span class="kw">public</span> <span class="typ">Order</span> <span class="mth">TakeOrder</span>(<span class="typ">Table</span> table)
+    {
+        <span class="kw">var</span> order = <span class="kw">new</span> <span class="typ">Order</span>(table.<span class="prop">Number</span>);
+        table.<span class="prop">CurrentOrder</span> = order;
+        <span class="kw">return</span> order;
+    }
+
+    <span class="kw">public void</span> <span class="mth">PlaceOrder</span>(<span class="typ">Order</span> order)
+    {
+        order.<span class="prop">Status</span> = <span class="en">OrderStatus</span>.Confirmed;
+        <span class="kw">foreach</span> (<span class="kw">var</span> obs <span class="kw">in</span> _observers) obs.<span class="mth">OnOrderPlaced</span>(order);
+    }
+
+    <span class="kw">public void</span> <span class="mth">UpdateStatus</span>(<span class="typ">Order</span> order, <span class="en">OrderStatus</span> status)
+    {
+        order.<span class="prop">Status</span> = status;
+        <span class="kw">foreach</span> (<span class="kw">var</span> obs <span class="kw">in</span> _observers) obs.<span class="mth">OnStatusChanged</span>(order);
+    }
+
+    <span class="kw">public void</span> <span class="mth">BillTable</span>(<span class="typ">Table</span> table)
+    {
+        <span class="kw">var</span> order = table.<span class="prop">CurrentOrder</span>;
+        <span class="kw">if</span> (order == <span class="kw">null</span>) <span class="kw">return</span>;
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n🧾 Bill for Table {table.Number}"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> order.<span class="prop">Items</span>)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"  {item.Item.Name,-20} x{item.Quantity}  ${item.Subtotal:F2}"</span>);
+
+        <span class="kw">decimal</span> total = _billing.<span class="mth">ComputeTotal</span>(order);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"  {"TOTAL",-20}       ${total:F2}"</span>);
+
+        order.<span class="prop">Status</span> = <span class="en">OrderStatus</span>.Paid;
+        table.<span class="prop">Status</span> = <span class="en">TableStatus</span>.Available;
+        table.<span class="prop">CurrentOrder</span> = <span class="kw">null</span>;
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> rest = <span class="kw">new</span> <span class="typ">Restaurant</span>(<span class="kw">new</span> <span class="typ">StandardBilling</span>());
+rest.<span class="mth">Subscribe</span>(<span class="kw">new</span> <span class="typ">KitchenDisplay</span>());
+
+rest.<span class="mth">AddTable</span>(<span class="kw">new</span> <span class="typ">Table</span>(1, 4));
+rest.<span class="mth">AddTable</span>(<span class="kw">new</span> <span class="typ">Table</span>(2, 6));
+
+<span class="kw">var</span> paneer  = <span class="kw">new</span> <span class="typ">MenuItem</span>(<span class="str">"Paneer Tikka"</span>,  280m, <span class="en">FoodCategory</span>.Starter);
+<span class="kw">var</span> biryani = <span class="kw">new</span> <span class="typ">MenuItem</span>(<span class="str">"Veg Biryani"</span>,   350m, <span class="en">FoodCategory</span>.Main);
+<span class="kw">var</span> lassi   = <span class="kw">new</span> <span class="typ">MenuItem</span>(<span class="str">"Sweet Lassi"</span>,   80m,  <span class="en">FoodCategory</span>.Beverage);
+
+<span class="kw">var</span> table   = rest.<span class="mth">SeatGuests</span>(3)!;
+<span class="kw">var</span> order   = rest.<span class="mth">TakeOrder</span>(table);
+
+order.<span class="mth">AddItem</span>(paneer,  2, <span class="str">"extra chutney"</span>);
+order.<span class="mth">AddItem</span>(biryani, 3);
+order.<span class="mth">AddItem</span>(lassi,   3);
+
+rest.<span class="mth">PlaceOrder</span>(order);
+rest.<span class="mth">UpdateStatus</span>(order, <span class="en">OrderStatus</span>.Preparing);
+rest.<span class="mth">UpdateStatus</span>(order, <span class="en">OrderStatus</span>.Served);
+rest.<span class="mth">BillTable</span>(table);
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     6. AMAZON LOCKER SERVICE
+════════════════════════════════════════ -->
+<section class="system" id="locker">
+  <div class="sys-header">
+    <div class="sys-num">06</div>
+    <div class="sys-meta">
+      <div class="sys-title">Amazon Locker Service</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Strategy (Size Matching)</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Repository</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Observer (Notifications)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Locker sizes: Small, Medium, Large — package assigned to smallest fitting locker</li>
+          <li>OTP generated on delivery; customer must enter OTP to open</li>
+          <li>Expiry: package expires after N days; uncollected packages trigger return flow</li>
+          <li>LockerStation contains multiple Lockers; system has multiple stations</li>
+          <li>Notification sent to customer on delivery and expiry warning</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Locker</strong> — id, size, status, current package</li>
+          <li><strong>LockerStation</strong> — location, list of lockers, assign/release</li>
+          <li><strong>Package</strong> — id, size, OTP, expiry, customer</li>
+          <li><strong>LockerService</strong> — deliverPackage, pickupPackage, expire</li>
+          <li><strong>ILockerNotifier</strong> — SMS/email on delivery/expiry</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you find the best locker for a package?</span>
+    <span style="font-size:12px;color:#a09060">→ Filter available lockers where size ≥ package size. Among those, pick the smallest available size to avoid wasting large lockers on small packages.</span>
+    <span class="q">Q: How do you handle OTP security?</span>
+    <span style="font-size:12px;color:#a09060">→ OTP is a random 6-digit string generated at delivery time. It's hashed before storage. On pickup, entered OTP is hashed and compared. OTP expires when package is collected or expires.</span>
+    <span class="q">Q: How does expiry work?</span>
+    <span style="font-size:12px;color:#a09060">→ A background job (or scheduled task) scans packages daily. Any package where <code>DeliveredAt + RetentionDays &lt; Now</code> is flagged as Expired, locker is freed, and return logistics is triggered.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Strategy — size matching</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Repository — package tracking</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Observer — notifications</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">AmazonLockerService.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ─────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">LockerSize</span>   { Small = 1, Medium = 2, Large = 3 }
+<span class="kw">public enum</span> <span class="en">LockerStatus</span> { Available, Occupied, OutOfService }
+<span class="kw">public enum</span> <span class="en">PackageStatus</span>{ InTransit, Delivered, PickedUp, Expired, Returned }
+
+<span class="sec-comment">// ── Package ───────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Package</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>          { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>        <span class="prop">TrackingId</span>  { <span class="kw">get</span>; }
+    <span class="kw">public string</span>        <span class="prop">CustomerEmail</span>{ <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">LockerSize</span>    <span class="prop">Size</span>        { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">PackageStatus</span> <span class="prop">Status</span>      { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">PackageStatus</span>.InTransit;
+    <span class="kw">public string</span>        <span class="prop">Otp</span>         { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="str">""</span>;
+    <span class="kw">public</span> <span class="typ">DateTime</span>?     <span class="prop">DeliveredAt</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>?     <span class="prop">ExpiresAt</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Package</span>(<span class="kw">string</span> trackingId, <span class="kw">string</span> email, <span class="en">LockerSize</span> size)
+        => (<span class="prop">TrackingId</span>, <span class="prop">CustomerEmail</span>, <span class="prop">Size</span>) = (trackingId, email, size);
+
+    <span class="kw">public void</span> <span class="mth">GenerateOtp</span>()
+        => <span class="prop">Otp</span> = Random.<span class="prop">Shared</span>.<span class="mth">Next</span>(100000, 999999).<span class="mth">ToString</span>();
+
+    <span class="kw">public bool</span> <span class="mth">ValidateOtp</span>(<span class="kw">string</span> entered) => <span class="prop">Otp</span> == entered;
+}
+
+<span class="sec-comment">// ── Locker ────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Locker</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>      { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="en">LockerSize</span>    <span class="prop">Size</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">LockerStatus</span>  <span class="prop">Status</span>  { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">LockerStatus</span>.Available;
+    <span class="kw">public</span> <span class="typ">Package</span>?      <span class="prop">Package</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Locker</span>(<span class="en">LockerSize</span> size) => <span class="prop">Size</span> = size;
+
+    <span class="kw">public bool</span> <span class="prop">IsAvailable</span> => <span class="prop">Status</span> == <span class="en">LockerStatus</span>.Available;
+
+    <span class="kw">public void</span> <span class="mth">Assign</span>(<span class="typ">Package</span> pkg)
+    {
+        <span class="prop">Package</span> = pkg;
+        <span class="prop">Status</span>  = <span class="en">LockerStatus</span>.Occupied;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Release</span>()
+    {
+        <span class="prop">Package</span> = <span class="kw">null</span>;
+        <span class="prop">Status</span>  = <span class="en">LockerStatus</span>.Available;
+    }
+}
+
+<span class="sec-comment">// ── Locker Station ────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">LockerStation</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Address</span>  { <span class="kw">get</span>; }
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Locker</span>&gt; _lockers = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">LockerStation</span>(<span class="kw">string</span> address) => <span class="prop">Address</span> = address;
+
+    <span class="kw">public void</span> <span class="mth">AddLocker</span>(<span class="typ">Locker</span> l) => _lockers.<span class="mth">Add</span>(l);
+
+    <span class="kw">public</span> <span class="typ">Locker</span>? <span class="mth">FindBestLocker</span>(<span class="en">LockerSize</span> minSize) =>
+        _lockers
+            .<span class="mth">Where</span>(l => l.<span class="prop">IsAvailable</span> && l.<span class="prop">Size</span> >= minSize)
+            .<span class="mth">OrderBy</span>(l => l.<span class="prop">Size</span>)   <span class="cmt">// smallest fitting locker first</span>
+            .<span class="mth">FirstOrDefault</span>();
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Locker</span>&gt; <span class="mth">GetExpiredLockers</span>(<span class="typ">DateTime</span> now) =>
+        _lockers.<span class="mth">Where</span>(l => l.<span class="prop">Status</span> == <span class="en">LockerStatus</span>.Occupied &&
+                              l.<span class="prop">Package</span>?.<span class="prop">ExpiresAt</span> < now);
+}
+
+<span class="sec-comment">// ── Notification ──────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">ILockerNotifier</span>
+{
+    <span class="kw">void</span> <span class="mth">NotifyDelivery</span>(<span class="typ">Package</span> pkg, <span class="typ">LockerStation</span> station, <span class="kw">string</span> otp);
+    <span class="kw">void</span> <span class="mth">NotifyExpiry</span>(<span class="typ">Package</span> pkg);
+}
+
+<span class="kw">public class</span> <span class="typ">SmsNotifier</span> : <span class="iface">ILockerNotifier</span>
+{
+    <span class="kw">public void</span> <span class="mth">NotifyDelivery</span>(<span class="typ">Package</span> pkg, <span class="typ">LockerStation</span> station, <span class="kw">string</span> otp)
+        => Console.<span class="mth">WriteLine</span>($<span class="str">"📱 SMS to {pkg.CustomerEmail}: Package {pkg.TrackingId} at {station.Address}. OTP: {otp}"</span>);
+
+    <span class="kw">public void</span> <span class="mth">NotifyExpiry</span>(<span class="typ">Package</span> pkg)
+        => Console.<span class="mth">WriteLine</span>($<span class="str">"⚠️  SMS to {pkg.CustomerEmail}: Package {pkg.TrackingId} has expired and will be returned."</span>);
+}
+
+<span class="sec-comment">// ── Locker Service ────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">LockerService</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">LockerStation</span>&gt;      _stations = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> Dictionary&lt;Guid, (<span class="typ">Package</span>, <span class="typ">Locker</span>, <span class="typ">LockerStation</span>)&gt; _assignments = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">ILockerNotifier</span>         _notifier;
+    <span class="kw">private const int</span>                          RetentionDays = 3;
+
+    <span class="kw">public</span> <span class="mth">LockerService</span>(<span class="iface">ILockerNotifier</span> notifier) => _notifier = notifier;
+
+    <span class="kw">public void</span> <span class="mth">AddStation</span>(<span class="typ">LockerStation</span> s) => _stations.<span class="mth">Add</span>(s);
+
+    <span class="kw">public bool</span> <span class="mth">DeliverPackage</span>(<span class="typ">Package</span> pkg, Guid stationId)
+    {
+        <span class="kw">var</span> station = _stations.<span class="mth">FirstOrDefault</span>(s => s.<span class="prop">Id</span> == stationId);
+        <span class="kw">if</span> (station == <span class="kw">null</span>) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Station not found."</span>); <span class="kw">return false</span>; }
+
+        <span class="kw">var</span> locker = station.<span class="mth">FindBestLocker</span>(pkg.<span class="prop">Size</span>);
+        <span class="kw">if</span> (locker == <span class="kw">null</span>) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ No suitable locker available."</span>); <span class="kw">return false</span>; }
+
+        pkg.<span class="mth">GenerateOtp</span>();
+        pkg.<span class="prop">Status</span>      = <span class="en">PackageStatus</span>.Delivered;
+        pkg.<span class="prop">DeliveredAt</span> = <span class="typ">DateTime</span>.<span class="prop">Now</span>;
+        pkg.<span class="prop">ExpiresAt</span>   = <span class="typ">DateTime</span>.<span class="prop">Now</span>.<span class="mth">AddDays</span>(RetentionDays);
+
+        locker.<span class="mth">Assign</span>(pkg);
+        _assignments[pkg.<span class="prop">Id</span>] = (pkg, locker, station);
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"📦 Package {pkg.TrackingId} placed in {locker.Size} locker at {station.Address}"</span>);
+        _notifier.<span class="mth">NotifyDelivery</span>(pkg, station, pkg.<span class="prop">Otp</span>);
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">public bool</span> <span class="mth">PickupPackage</span>(<span class="kw">string</span> trackingId, <span class="kw">string</span> otp)
+    {
+        <span class="kw">var</span> match = _assignments.<span class="prop">Values</span>
+            .<span class="mth">FirstOrDefault</span>(a => a.<span class="prop">Item1</span>.<span class="prop">TrackingId</span> == trackingId);
+
+        <span class="kw">if</span> (match == <span class="kw">default</span>)
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Package not found."</span>);
+            <span class="kw">return false</span>;
+        }
+
+        <span class="kw">var</span> (pkg, locker, _) = match;
+
+        <span class="kw">if</span> (pkg.<span class="prop">ExpiresAt</span> < <span class="typ">DateTime</span>.<span class="prop">Now</span>)
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Package has expired."</span>);
+            <span class="kw">return false</span>;
+        }
+
+        <span class="kw">if</span> (!pkg.<span class="mth">ValidateOtp</span>(otp))
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Incorrect OTP."</span>);
+            <span class="kw">return false</span>;
+        }
+
+        pkg.<span class="prop">Status</span> = <span class="en">PackageStatus</span>.PickedUp;
+        locker.<span class="mth">Release</span>();
+        _assignments.<span class="mth">Remove</span>(pkg.<span class="prop">Id</span>);
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Package {trackingId} picked up successfully."</span>);
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mth">ProcessExpiredPackages</span>()
+    {
+        <span class="kw">var</span> now     = <span class="typ">DateTime</span>.<span class="prop">Now</span>;
+        <span class="kw">var</span> expired = _assignments.<span class="prop">Values</span>
+            .<span class="mth">Where</span>(a => a.<span class="prop">Item1</span>.<span class="prop">ExpiresAt</span> < now)
+            .<span class="mth">ToList</span>();
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> (pkg, locker, _) <span class="kw">in</span> expired)
+        {
+            pkg.<span class="prop">Status</span> = <span class="en">PackageStatus</span>.Expired;
+            locker.<span class="mth">Release</span>();
+            _assignments.<span class="mth">Remove</span>(pkg.<span class="prop">Id</span>);
+            _notifier.<span class="mth">NotifyExpiry</span>(pkg);
+            Console.<span class="mth">WriteLine</span>($<span class="str">"🔄 Expired package {pkg.TrackingId} removed and queued for return."</span>);
+        }
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> notifier = <span class="kw">new</span> <span class="typ">SmsNotifier</span>();
+<span class="kw">var</span> service  = <span class="kw">new</span> <span class="typ">LockerService</span>(notifier);
+
+<span class="kw">var</span> station = <span class="kw">new</span> <span class="typ">LockerStation</span>(<span class="str">"Koramangala, Bengaluru"</span>);
+station.<span class="mth">AddLocker</span>(<span class="kw">new</span> <span class="typ">Locker</span>(<span class="en">LockerSize</span>.Small));
+station.<span class="mth">AddLocker</span>(<span class="kw">new</span> <span class="typ">Locker</span>(<span class="en">LockerSize</span>.Medium));
+station.<span class="mth">AddLocker</span>(<span class="kw">new</span> <span class="typ">Locker</span>(<span class="en">LockerSize</span>.Large));
+service.<span class="mth">AddStation</span>(station);
+
+<span class="kw">var</span> pkg = <span class="kw">new</span> <span class="typ">Package</span>(<span class="str">"AMZ-789-XYZ"</span>, <span class="str">"user@mail.com"</span>, <span class="en">LockerSize</span>.Small);
+service.<span class="mth">DeliverPackage</span>(pkg, station.<span class="prop">Id</span>);
+
+<span class="cmt">// Simulate customer picking up</span>
+service.<span class="mth">PickupPackage</span>(<span class="str">"AMZ-789-XYZ"</span>, pkg.<span class="prop">Otp</span>);   <span class="cmt">// ✅</span>
+service.<span class="mth">PickupPackage</span>(<span class="str">"AMZ-789-XYZ"</span>, pkg.<span class="prop">Otp</span>);   <span class="cmt">// ❌ not found</span>
+service.<span class="mth">ProcessExpiredPackages</span>();                    <span class="cmt">// scans and clears expired</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     7. SPLITWISE
+════════════════════════════════════════ -->
+<section class="system" id="splitwise">
+  <div class="sys-header">
+    <div class="sys-num">07</div>
+    <div class="sys-meta">
+      <div class="sys-title">Splitwise</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--red);border-color:rgba(255,107,107,.3)">Strategy (Split Type)</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Graph (Debt Simplification)</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Repository</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--red)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Split strategies: Equal, Exact (custom amounts), Percentage</li>
+          <li>Expense creates multiple <code>Debt</code> records (payer ← each participant)</li>
+          <li>Balance map: net amount each user owes/is owed globally</li>
+          <li>Debt simplification: greedy two-pointer on sorted creditors/debtors</li>
+          <li>Groups scope expenses; settlements clear debts between two users</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Expense</strong> — amount, payer, split strategy, participants</li>
+          <li><strong>ISplitStrategy</strong> — Equal, Exact, Percentage</li>
+          <li><strong>Debt</strong> — from user, to user, amount</li>
+          <li><strong>Group</strong> — users, expenses, get balances</li>
+          <li><strong>SplitwiseService</strong> — addExpense, settle, simplifyDebts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How does debt simplification work?</span>
+    <span style="font-size:12px;color:#a09060">→ Build a net-balance map. Sort into creditors (positive) and debtors (negative). Two-pointer: match biggest creditor with biggest debtor. Transfer min(|debt|, |credit|). Shift whichever hits zero. Repeat. Result: minimum transactions.</span>
+    <span class="q">Q: What's the difference between the 3 split types?</span>
+    <span style="font-size:12px;color:#a09060">→ Equal splits evenly (amount / N). Exact lets each person specify what they owe (must sum to total). Percentage assigns each person a % of the total (must sum to 100%). Each is a separate strategy implementation.</span>
+    <span class="q">Q: How do you handle a settlement payment?</span>
+    <span style="font-size:12px;color:#a09060">→ Settlement is an expense where payer = person paying back, split is Exact with the full amount assigned to the payee. It creates a reverse debt that cancels out the existing one in the balance map.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:var(--red)">Strategy — split type</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Greedy — debt minimization</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Repository — expense store</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--red)">
+    <div class="primer-header" style="background:rgba(255,107,107,0.06);border-bottom-color:rgba(255,107,107,0.15)">
+      <span class="primer-label" style="color:var(--red)">📖 Concept Primer</span>
+      <span class="primer-name">Debt Simplification — greedy two-pointer to minimize transactions</span>
+    </div>
+    <div class="primer-desc">Given a set of net balances (positive = owed to you, negative = you owe), find the minimum number of transactions to settle all debts. Greedy: always match the largest creditor with the largest debtor.</div>
+<pre>
+<span class="cmt">// Example: Alice +300, Bob -100, Charlie -200</span>
+<span class="cmt">// Sorted creditors: [Alice +300]</span>
+<span class="cmt">// Sorted debtors:   [Charlie -200, Bob -100]</span>
+<span class="cmt">//</span>
+<span class="cmt">// Step 1: Charlie pays Alice $200 → Alice +100, Charlie 0</span>
+<span class="cmt">// Step 2: Bob pays Alice $100    → Alice 0,    Bob 0</span>
+<span class="cmt">// Result: 2 transactions instead of potentially many more</span>
+
+<span class="kw">static</span> List&lt;(<span class="kw">string</span> From, <span class="kw">string</span> To, <span class="kw">decimal</span> Amount)&gt;
+    <span class="mth">Simplify</span>(Dictionary&lt;<span class="kw">string</span>, <span class="kw">decimal</span>&gt; balances)
+{
+    <span class="kw">var</span> result  = <span class="kw">new</span> List&lt;(<span class="kw">string</span>, <span class="kw">string</span>, <span class="kw">decimal</span>)&gt;();
+    <span class="kw">var</span> pos     = <span class="kw">new</span> SortedList&lt;<span class="kw">decimal</span>, <span class="kw">string</span>&gt;(); <span class="cmt">// creditors</span>
+    <span class="kw">var</span> neg     = <span class="kw">new</span> SortedList&lt;<span class="kw">decimal</span>, <span class="kw">string</span>&gt;(); <span class="cmt">// debtors</span>
+
+    <span class="kw">foreach</span> (<span class="kw">var</span> (name, bal) <span class="kw">in</span> balances)
+    {
+        <span class="kw">if</span> (bal > 0) pos[bal]  = name;
+        <span class="kw">if</span> (bal < 0) neg[-bal] = name;
+    }
+    <span class="cmt">// Two-pointer: match largest creditor with largest debtor</span>
+    <span class="cmt">// Transfer min(credit, debt), advance whichever hits 0</span>
+    <span class="kw">return</span> result;
+}
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">Splitwise.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Split Types ───────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">ISplitStrategy</span>
+{
+    <span class="cmt">// Returns mapping: userId → how much they owe</span>
+    Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; <span class="mth">Split</span>(<span class="kw">decimal</span> totalAmount, List&lt;<span class="typ">User</span>&gt; participants, <span class="kw">object</span>? metadata = <span class="kw">null</span>);
+}
+
+<span class="kw">public class</span> <span class="typ">EqualSplit</span> : <span class="iface">ISplitStrategy</span>
+{
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; <span class="mth">Split</span>(<span class="kw">decimal</span> total, List&lt;<span class="typ">User</span>&gt; participants, <span class="kw">object</span>? _)
+    {
+        <span class="kw">decimal</span> share = Math.<span class="mth">Round</span>(total / participants.<span class="prop">Count</span>, 2);
+        <span class="kw">return</span> participants.<span class="mth">ToDictionary</span>(u => u.<span class="prop">Id</span>, _ => share);
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">ExactSplit</span> : <span class="iface">ISplitStrategy</span>
+{
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; <span class="mth">Split</span>(<span class="kw">decimal</span> total, List&lt;<span class="typ">User</span>&gt; participants, <span class="kw">object</span>? metadata)
+    {
+        <span class="kw">var</span> exactAmounts = (Dictionary&lt;Guid, <span class="kw">decimal</span>&gt;)metadata!;
+        <span class="kw">if</span> (Math.<span class="mth">Abs</span>(exactAmounts.<span class="prop">Values</span>.<span class="mth">Sum</span>() - total) > 0.01m)
+            <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>(<span class="str">"Exact splits must sum to total."</span>);
+        <span class="kw">return</span> exactAmounts;
+    }
+}
+
+<span class="kw">public class</span> <span class="typ">PercentageSplit</span> : <span class="iface">ISplitStrategy</span>
+{
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; <span class="mth">Split</span>(<span class="kw">decimal</span> total, List&lt;<span class="typ">User</span>&gt; participants, <span class="kw">object</span>? metadata)
+    {
+        <span class="kw">var</span> percentages = (Dictionary&lt;Guid, <span class="kw">decimal</span>&gt;)metadata!;
+        <span class="kw">if</span> (Math.<span class="mth">Abs</span>(percentages.<span class="prop">Values</span>.<span class="mth">Sum</span>() - 100m) > 0.01m)
+            <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>(<span class="str">"Percentages must sum to 100."</span>);
+        <span class="kw">return</span> percentages.<span class="mth">ToDictionary</span>(
+            kv => kv.<span class="prop">Key</span>,
+            kv => Math.<span class="mth">Round</span>(total * kv.<span class="prop">Value</span> / 100m, 2));
+    }
+}
+
+<span class="sec-comment">// ── User ──────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">User</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>   { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Name</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">User</span>(<span class="kw">string</span> name) => <span class="prop">Name</span> = name;
+}
+
+<span class="sec-comment">// ── Expense ───────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Expense</span>
+{
+    <span class="kw">public</span> Guid                    <span class="prop">Id</span>          { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>                  <span class="prop">Description</span> { <span class="kw">get</span>; }
+    <span class="kw">public decimal</span>                 <span class="prop">Amount</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">User</span>                    <span class="prop">PaidBy</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">User</span>&gt;              <span class="prop">Participants</span>{ <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="iface">ISplitStrategy</span>          <span class="prop">Strategy</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="kw">object</span>?                 <span class="prop">Metadata</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>                <span class="prop">CreatedAt</span>   { <span class="kw">get</span>; } = <span class="typ">DateTime</span>.<span class="prop">Now</span>;
+
+    <span class="cmt">// Computed: who owes the payer what amount</span>
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; <span class="prop">Splits</span> { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="mth">Expense</span>(<span class="kw">string</span> desc, <span class="kw">decimal</span> amount, <span class="typ">User</span> paidBy,
+                   List&lt;<span class="typ">User</span>&gt; participants, <span class="iface">ISplitStrategy</span> strategy, <span class="kw">object</span>? metadata = <span class="kw">null</span>)
+    {
+        <span class="prop">Description</span>  = desc;
+        <span class="prop">Amount</span>       = amount;
+        <span class="prop">PaidBy</span>       = paidBy;
+        <span class="prop">Participants</span> = participants;
+        <span class="prop">Strategy</span>     = strategy;
+        <span class="prop">Metadata</span>     = metadata;
+        <span class="prop">Splits</span>       = strategy.<span class="mth">Split</span>(amount, participants, metadata);
+    }
+}
+
+<span class="sec-comment">// ── Group ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Group</span>
+{
+    <span class="kw">public</span> Guid         <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>       <span class="prop">Name</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">User</span>&gt;   <span class="prop">Members</span>  { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> List&lt;<span class="typ">Expense</span>&gt; <span class="prop">Expenses</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Group</span>(<span class="kw">string</span> name) => <span class="prop">Name</span> = name;
+
+    <span class="kw">public void</span> <span class="mth">AddMember</span>(<span class="typ">User</span> u)   => <span class="prop">Members</span>.<span class="mth">Add</span>(u);
+    <span class="kw">public void</span> <span class="mth">AddExpense</span>(<span class="typ">Expense</span> e) => <span class="prop">Expenses</span>.<span class="mth">Add</span>(e);
+
+    <span class="cmt">// Net balance per user within the group (positive = owed to you)</span>
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; <span class="mth">GetBalances</span>()
+    {
+        <span class="kw">var</span> balances = <span class="prop">Members</span>.<span class="mth">ToDictionary</span>(u => u.<span class="prop">Id</span>, _ => 0m);
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> exp <span class="kw">in</span> <span class="prop">Expenses</span>)
+        {
+            <span class="kw">foreach</span> (<span class="kw">var</span> (userId, owed) <span class="kw">in</span> exp.<span class="prop">Splits</span>)
+            {
+                <span class="kw">if</span> (userId == exp.<span class="prop">PaidBy</span>.<span class="prop">Id</span>) <span class="kw">continue</span>; <span class="cmt">// payer doesn't owe themselves</span>
+                balances[exp.<span class="prop">PaidBy</span>.<span class="prop">Id</span>] += owed;  <span class="cmt">// payer is owed more</span>
+                balances[userId]          -= owed;  <span class="cmt">// participant owes more</span>
+            }
+        }
+        <span class="kw">return</span> balances;
+    }
+}
+
+<span class="sec-comment">// ── Splitwise Service ─────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">SplitwiseService</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Group</span>&gt; _groups = <span class="kw">new</span>();
+
+    <span class="kw">public void</span> <span class="mth">AddGroup</span>(<span class="typ">Group</span> g) => _groups.<span class="mth">Add</span>(g);
+
+    <span class="kw">public</span> <span class="typ">Expense</span> <span class="mth">AddExpense</span>(<span class="typ">Group</span> group, <span class="kw">string</span> desc, <span class="kw">decimal</span> amount,
+                              <span class="typ">User</span> paidBy, List&lt;<span class="typ">User</span>&gt; participants,
+                              <span class="iface">ISplitStrategy</span> strategy, <span class="kw">object</span>? metadata = <span class="kw">null</span>)
+    {
+        <span class="kw">var</span> expense = <span class="kw">new</span> <span class="typ">Expense</span>(desc, amount, paidBy, participants, strategy, metadata);
+        group.<span class="mth">AddExpense</span>(expense);
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n💰 Expense: {desc} — ${amount:F2} paid by {paidBy.Name}"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> p <span class="kw">in</span> participants)
+        {
+            <span class="kw">if</span> (expense.<span class="prop">Splits</span>.<span class="mth">TryGetValue</span>(p.<span class="prop">Id</span>, <span class="kw">out var</span> share))
+                Console.<span class="mth">WriteLine</span>($<span class="str">"  {p.Name} owes ${share:F2}"</span>);
+        }
+        <span class="kw">return</span> expense;
+    }
+
+    <span class="kw">public void</span> <span class="mth">ShowBalances</span>(<span class="typ">Group</span> group, Dictionary&lt;Guid, <span class="typ">User</span>&gt; userMap)
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n📊 Balances in '{group.Name}':"</span>);
+        <span class="kw">var</span> balances = group.<span class="mth">GetBalances</span>();
+        <span class="kw">foreach</span> (<span class="kw">var</span> (uid, bal) <span class="kw">in</span> balances)
+        {
+            <span class="kw">if</span> (!userMap.<span class="mth">TryGetValue</span>(uid, <span class="kw">out var</span> u)) <span class="kw">continue</span>;
+            <span class="kw">string</span> label = bal > 0 ? $<span class="str">"gets back ${bal:F2}"</span>
+                         : bal < 0 ? $<span class="str">"owes ${-bal:F2}"</span>
+                         : <span class="str">"is settled up"</span>;
+            Console.<span class="mth">WriteLine</span>($<span class="str">"  {u.Name,-12} {label}"</span>);
+        }
+    }
+
+    <span class="cmt">/// Greedy debt simplification — minimum number of transactions</span>
+    <span class="kw">public</span> List&lt;(<span class="typ">User</span> From, <span class="typ">User</span> To, <span class="kw">decimal</span> Amount)&gt; <span class="mth">SimplifyDebts</span>(
+        <span class="typ">Group</span> group, Dictionary&lt;Guid, <span class="typ">User</span>&gt; userMap)
+    {
+        <span class="kw">var</span> balances  = group.<span class="mth">GetBalances</span>();
+        <span class="kw">var</span> creditors = <span class="kw">new</span> SortedList&lt;<span class="kw">decimal</span>, Guid&gt;();
+        <span class="kw">var</span> debtors   = <span class="kw">new</span> SortedList&lt;<span class="kw">decimal</span>, Guid&gt;();
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> (uid, bal) <span class="kw">in</span> balances)
+        {
+            <span class="kw">if</span> (bal >  0.01m) creditors[bal]  = uid;
+            <span class="kw">if</span> (bal < -0.01m) debtors[-bal]   = uid;
+        }
+
+        <span class="kw">var</span> result   = <span class="kw">new</span> List&lt;(<span class="typ">User</span>, <span class="typ">User</span>, <span class="kw">decimal</span>)&gt;();
+        <span class="kw">var</span> cList    = creditors.<span class="mth">ToList</span>();
+        <span class="kw">var</span> dList    = debtors.<span class="mth">ToList</span>();
+        <span class="kw">int</span> ci = cList.<span class="prop">Count</span> - 1, di = dList.<span class="prop">Count</span> - 1;
+
+        <span class="kw">while</span> (ci >= 0 && di >= 0)
+        {
+            <span class="kw">decimal</span> credit = cList[ci].<span class="prop">Key</span>;
+            <span class="kw">decimal</span> debt   = dList[di].<span class="prop">Key</span>;
+            <span class="kw">decimal</span> settle = Math.<span class="mth">Min</span>(credit, debt);
+
+            result.<span class="mth">Add</span>((userMap[dList[di].<span class="prop">Value</span>], userMap[cList[ci].<span class="prop">Value</span>], settle));
+
+            cList[ci] = <span class="kw">new</span>(credit - settle, cList[ci].<span class="prop">Value</span>);
+            dList[di] = <span class="kw">new</span>(debt   - settle, dList[di].<span class="prop">Value</span>);
+
+            <span class="kw">if</span> (cList[ci].<span class="prop">Key</span> < 0.01m) ci--;
+            <span class="kw">if</span> (dList[di].<span class="prop">Key</span> < 0.01m) di--;
+        }
+
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n✨ Simplified transactions for '{group.Name}':"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> (from, to, amt) <span class="kw">in</span> result)
+            Console.<span class="mth">WriteLine</span>($<span class="str">"  {from.Name} → {to.Name}: ${amt:F2}"</span>);
+
+        <span class="kw">return</span> result;
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ─────────────────────────────────────</span>
+<span class="kw">var</span> alice = <span class="kw">new</span> <span class="typ">User</span>(<span class="str">"Alice"</span>);
+<span class="kw">var</span> bob   = <span class="kw">new</span> <span class="typ">User</span>(<span class="str">"Bob"</span>);
+<span class="kw">var</span> carol = <span class="kw">new</span> <span class="typ">User</span>(<span class="str">"Carol"</span>);
+
+<span class="kw">var</span> userMap = <span class="kw">new</span> Dictionary&lt;Guid, <span class="typ">User</span>&gt; {
+    [alice.<span class="prop">Id</span>] = alice, [bob.<span class="prop">Id</span>] = bob, [carol.<span class="prop">Id</span>] = carol
+};
+
+<span class="kw">var</span> group = <span class="kw">new</span> <span class="typ">Group</span>(<span class="str">"Goa Trip"</span>);
+group.<span class="mth">AddMember</span>(alice); group.<span class="mth">AddMember</span>(bob); group.<span class="mth">AddMember</span>(carol);
+
+<span class="kw">var</span> service = <span class="kw">new</span> <span class="typ">SplitwiseService</span>();
+service.<span class="mth">AddGroup</span>(group);
+
+<span class="cmt">// Alice pays ₹900 for hotel — split equally</span>
+service.<span class="mth">AddExpense</span>(group, <span class="str">"Hotel"</span>, 900m, alice,
+    <span class="kw">new</span> List&lt;<span class="typ">User</span>&gt; { alice, bob, carol },
+    <span class="kw">new</span> <span class="typ">EqualSplit</span>());
+
+<span class="cmt">// Bob pays ₹300 for dinner — exact split</span>
+service.<span class="mth">AddExpense</span>(group, <span class="str">"Dinner"</span>, 300m, bob,
+    <span class="kw">new</span> List&lt;<span class="typ">User</span>&gt; { alice, bob, carol },
+    <span class="kw">new</span> <span class="typ">ExactSplit</span>(),
+    <span class="kw">new</span> Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; {
+        [alice.<span class="prop">Id</span>] = 150m, [bob.<span class="prop">Id</span>] = 100m, [carol.<span class="prop">Id</span>] = 50m
+    });
+
+<span class="cmt">// Carol pays ₹600 for activities — percentage split</span>
+service.<span class="mth">AddExpense</span>(group, <span class="str">"Activities"</span>, 600m, carol,
+    <span class="kw">new</span> List&lt;<span class="typ">User</span>&gt; { alice, bob, carol },
+    <span class="kw">new</span> <span class="typ">PercentageSplit</span>(),
+    <span class="kw">new</span> Dictionary&lt;Guid, <span class="kw">decimal</span>&gt; {
+        [alice.<span class="prop">Id</span>] = 50m, [bob.<span class="prop">Id</span>] = 30m, [carol.<span class="prop">Id</span>] = 20m
+    });
+
+service.<span class="mth">ShowBalances</span>(group, userMap);
+service.<span class="mth">SimplifyDebts</span>(group, userMap);
+</pre>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('.system');
+const sbItems  = document.querySelectorAll('.sb-item[href]');
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sbItems.forEach(i => i.classList.remove('active'));
+      const id = e.target.id;
+      const active = document.querySelector(`.sb-item[href="#${id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.2 });
+
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

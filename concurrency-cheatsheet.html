@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>.NET Concurrency Patterns — LLD Cheatsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07080c;
+  --grid: #0d0f15;
+  --surface: #0f1118;
+  --surface2: #151820;
+  --surface3: #1c2030;
+  --border: #1e2235;
+  --border2: #252a3d;
+
+  --teal:  #00e5c8;
+  --blue:  #3d8bff;
+  --amber: #ffb340;
+  --red:   #ff5c5c;
+  --green: #4ddb8a;
+  --purple:#b07aff;
+  --pink:  #ff6eb4;
+
+  --text:  #dde2f0;
+  --muted: #5a6080;
+  --muted2:#3a3f55;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ─── SCANLINE OVERLAY ─── */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events:none;
+  z-index:999;
+}
+
+mono { font-family: 'IBM Plex Mono', monospace; }
+
+/* ─── HEADER ─── */
+header {
+  position: relative;
+  padding: 64px 56px 48px;
+  border-bottom: 1px solid var(--border2);
+  overflow: hidden;
+}
+
+.header-glow {
+  position: absolute;
+  top: -120px; left: -80px;
+  width: 500px; height: 400px;
+  background: radial-gradient(ellipse, rgba(0,229,200,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+.header-glow2 {
+  position: absolute;
+  top: -60px; right: -100px;
+  width: 400px; height: 350px;
+  background: radial-gradient(ellipse, rgba(61,139,255,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.header-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-label::before {
+  content: '';
+  display: inline-block;
+  width: 32px; height: 1px;
+  background: var(--teal);
+}
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 5.5vw, 68px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--text);
+}
+h1 .hl-teal  { color: var(--teal); }
+h1 .hl-blue  { color: var(--blue); }
+
+.header-sub {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 620px;
+  font-family: 'IBM Plex Mono', monospace;
+  line-height: 1.8;
+}
+
+.header-pills {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-top: 28px;
+}
+.hpill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  padding: 5px 14px;
+  border-radius: 2px;
+  border: 1px solid;
+  text-transform: uppercase;
+}
+.hpill-t { border-color: rgba(0,229,200,0.35); color: var(--teal); background: rgba(0,229,200,0.05); }
+.hpill-b { border-color: rgba(61,139,255,0.35); color: var(--blue); background: rgba(61,139,255,0.05); }
+.hpill-a { border-color: rgba(255,179,64,0.35); color: var(--amber); background: rgba(255,179,64,0.05); }
+
+/* ─── NAV TABS ─── */
+.sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(7,8,12,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 56px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sticky-nav::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 20px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+/* ─── CONTAINER ─── */
+.wrap {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 56px 80px;
+}
+
+/* ─── SECTION TITLES ─── */
+.sec-head {
+  padding: 56px 0 32px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 36px;
+}
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.sec-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 3px;
+}
+.badge-teal  { background: rgba(0,229,200,0.1);  border: 1px solid rgba(0,229,200,0.3);  color: var(--teal); }
+.badge-blue  { background: rgba(61,139,255,0.1); border: 1px solid rgba(61,139,255,0.3); color: var(--blue); }
+.badge-amber { background: rgba(255,179,64,0.1); border: 1px solid rgba(255,179,64,0.3); color: var(--amber); }
+.badge-green { background: rgba(77,219,138,0.1); border: 1px solid rgba(77,219,138,0.3); color: var(--green); }
+.badge-purple{ background: rgba(176,122,255,0.1);border: 1px solid rgba(176,122,255,0.3);color: var(--purple); }
+.badge-red   { background: rgba(255,92,92,0.1);  border: 1px solid rgba(255,92,92,0.3);  color: var(--red); }
+.badge-pink  { background: rgba(255,110,180,0.1);border: 1px solid rgba(255,110,180,0.3);color: var(--pink); }
+
+/* ─── PATTERN CARDS ─── */
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.pcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+}
+.pcard:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+}
+
+.pcard-accent {
+  height: 2px;
+  width: 100%;
+}
+
+.pcard-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.pcard-icon {
+  font-size: 20px;
+  width: 38px; height: 38px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pcard-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.pcard-subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+.pcard-body {
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pcard-desc {
+  font-size: 13px;
+  color: #8090b0;
+  line-height: 1.6;
+}
+
+.pcard-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pcard-row-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 2px;
+}
+
+.code-chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  display: inline-block;
+  line-height: 1.5;
+}
+
+.chips-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+
+.chip-teal   { background: rgba(0,229,200,0.08);  border: 1px solid rgba(0,229,200,0.2);  color: #00c8b0; }
+.chip-blue   { background: rgba(61,139,255,0.08); border: 1px solid rgba(61,139,255,0.2); color: #5c9fff; }
+.chip-amber  { background: rgba(255,179,64,0.08); border: 1px solid rgba(255,179,64,0.2); color: #e0a030; }
+.chip-green  { background: rgba(77,219,138,0.08); border: 1px solid rgba(77,219,138,0.2); color: #3dc878; }
+.chip-purple { background: rgba(176,122,255,0.08);border: 1px solid rgba(176,122,255,0.2);color: #a06aee; }
+.chip-red    { background: rgba(255,92,92,0.08);  border: 1px solid rgba(255,92,92,0.2);  color: #ee6060; }
+.chip-pink   { background: rgba(255,110,180,0.08);border: 1px solid rgba(255,110,180,0.2);color: #e060a0; }
+.chip-gray   { background: rgba(90,96,128,0.12);  border: 1px solid rgba(90,96,128,0.25); color: var(--muted); }
+
+.when-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.when-list li {
+  font-size: 12.5px;
+  color: #7080a0;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+.when-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  font-size: 9px;
+  top: 3px;
+}
+
+/* danger / safe badges */
+.warn { color: var(--red);   font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+.safe { color: var(--green); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+
+/* ─── PRIMITIVES TABLE ─── */
+.prim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.prim-table th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border2);
+  text-align: left;
+  background: var(--surface2);
+}
+.prim-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.prim-table tr:last-child td { border-bottom: none; }
+.prim-table tr:hover td { background: var(--surface2); }
+
+.prim-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--teal);
+  white-space: nowrap;
+}
+.prim-desc { color: #7080a0; font-size: 12.5px; }
+.prim-use  { color: #6080a0; font-size: 12px; font-style: italic; }
+
+/* ─── SYSTEM → CONCURRENCY MAP ─── */
+.sys-conc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+  gap: 16px;
+}
+
+.sc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.sc-card:hover { border-color: var(--border2); }
+
+.sc-head {
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sc-icon { font-size: 18px; }
+.sc-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sc-body {
+  padding: 12px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sc-row { display: flex; flex-direction: column; gap: 5px; }
+.sc-row-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+.sc-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+/* ─── ANTI-PATTERNS ─── */
+.ap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.ap-card {
+  background: var(--surface);
+  border: 1px solid rgba(255,92,92,0.15);
+  border-radius: 4px;
+  padding: 18px 20px;
+}
+
+.ap-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ap-title::before { content: '⚠'; font-size: 12px; }
+
+.ap-desc { font-size: 12.5px; color: #8090a8; line-height: 1.6; margin-bottom: 10px; }
+
+.ap-fix {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  background: rgba(77,219,138,0.06);
+  border: 1px solid rgba(77,219,138,0.15);
+  border-radius: 3px;
+  padding: 8px 12px;
+  line-height: 1.6;
+}
+.ap-fix::before { content: '✓ FIX: '; opacity: 0.6; }
+
+/* ─── QUICK REF MATRIX ─── */
+.matrix-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 800px;
+}
+.matrix-table th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border2);
+  background: var(--surface2);
+  text-align: left;
+  white-space: nowrap;
+}
+.matrix-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.matrix-table tr:last-child td { border-bottom: none; }
+.matrix-table tr:hover td { background: var(--surface2); }
+
+.mx-type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  color: var(--teal);
+  white-space: nowrap;
+}
+.mx-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+.dot-yes { background: var(--green); }
+.dot-no  { background: var(--muted2); }
+.dot-cond{ background: var(--amber); }
+
+td .tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+/* ─── CODE BLOCKS ─── */
+.code-block {
+  background: #080c14;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #8098c0;
+  overflow-x: auto;
+}
+.code-block .kw  { color: #5c9fff; }
+.code-block .typ { color: var(--teal); }
+.code-block .str { color: var(--green); }
+.code-block .cmt { color: #3d4a60; font-style: italic; }
+.code-block .num { color: var(--amber); }
+
+/* ─── ANIM ─── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width: 800px) {
+  header, .wrap { padding-left: 20px; padding-right: 20px; }
+  .sticky-nav { padding: 0 20px; }
+  .pattern-grid, .sys-conc-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  background: rgba(0,229,200,0.04);
+  border: 1px solid rgba(0,229,200,0.15);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 4px 4px 0;
+  padding: 14px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #70a098;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+.callout strong { color: var(--teal); }
+
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, var(--border2), transparent);
+  margin: 8px 0 24px;
+}
+
+/* ─── TPL THREAD POOL ─── */
+.tpl-visual {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px;
+  background: #080c14;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.tpl-thread {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 5px 10px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+.tpl-busy { border-color: rgba(0,229,200,0.4); background: rgba(0,229,200,0.08); color: var(--teal); }
+.tpl-idle { border-color: var(--muted2); background: transparent; color: var(--muted2); }
+.tpl-label { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted2); width:100%; padding: 4px 0 0; }
+
+/* search */
+.search-input {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  padding: 10px 16px 10px 40px;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='%233a3f55' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+}
+.search-input:focus { border-color: var(--teal); }
+.search-input::placeholder { color: var(--muted2); }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-glow"></div>
+  <div class="header-glow2"></div>
+  <div class="header-label">// .NET Concurrency — LLD Interview Reference</div>
+  <h1><span class="hl-teal">Concurrency</span><br>Patterns<span class="hl-blue">.</span></h1>
+  <p class="header-sub">
+    Patterns · Primitives · .NET data structures<br>
+    mapped to every LLD system — for interview & production.
+  </p>
+  <div class="header-pills">
+    <div class="hpill hpill-t">Thread Safety</div>
+    <div class="hpill hpill-b">async / await</div>
+    <div class="hpill hpill-a">System.Collections.Concurrent</div>
+    <div class="hpill hpill-t">TPL Dataflow</div>
+    <div class="hpill hpill-b">Channels</div>
+  </div>
+</header>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <a class="nav-tab active" href="#primitives">Primitives</a>
+  <a class="nav-tab" href="#patterns">Patterns</a>
+  <a class="nav-tab" href="#datastructures">Data Structures</a>
+  <a class="nav-tab" href="#async">Async Model</a>
+  <a class="nav-tab" href="#systems">Systems Map</a>
+  <a class="nav-tab" href="#antipatterns">Anti-Patterns</a>
+  <a class="nav-tab" href="#matrix">Quick Matrix</a>
+</nav>
+
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — SYNCHRONIZATION PRIMITIVES
+═══════════════════════════════════════════ -->
+<div id="primitives">
+  <div class="sec-head">
+    <div class="sec-title" style="color:var(--teal)">Synchronization Primitives</div>
+    <div class="sec-badge badge-teal">Core Building Blocks</div>
+  </div>
+
+  <div class="callout">
+    <strong>Rule of thumb:</strong> prefer higher-level constructs (Channel, SemaphoreSlim, ConcurrentQueue) over raw lock/Monitor unless you need fine-grained control. Every primitive below has a cost — choose the lightest one that is correct.
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="prim-table">
+      <thead>
+        <tr>
+          <th>Primitive</th>
+          <th>Namespace / Class</th>
+          <th>Cross-Process?</th>
+          <th>Best For</th>
+          <th>Gotcha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="prim-name">lock / Monitor</span></td>
+          <td><span class="code-chip chip-gray">Monitor.Enter/Exit</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Simple exclusive access to shared state</td>
+          <td class="prim-use warn">Deadlock if lock ordering inconsistent</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">SemaphoreSlim</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Throttle concurrent access to N slots; async-friendly</td>
+          <td class="prim-use warn">Remember to Release() in finally</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">Semaphore</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td class="prim-use">Cross-process resource pool</td>
+          <td class="prim-use warn">Heavier than SemaphoreSlim; no async</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">Mutex</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td class="prim-use">Single-instance enforcement across processes</td>
+          <td class="prim-use warn">Must be owned by same thread that releases</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">ReaderWriterLockSlim</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Many readers, rare writers (catalog, config)</td>
+          <td class="prim-use warn">No async support; upgrade deadlocks possible</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">ManualResetEventSlim</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Signal all waiting threads at once (broadcast)</td>
+          <td class="prim-use">Must manually Reset()</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">AutoResetEvent</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td class="prim-use">Signal exactly one waiting thread</td>
+          <td class="prim-use">Auto-resets; cross-process capable</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">CountdownEvent</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Wait for N operations to complete (fan-out)</td>
+          <td class="prim-use">Count must reach zero; cannot reuse easily</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">Barrier</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Synchronize N threads at phase boundaries</td>
+          <td class="prim-use">Participant count fixed at creation</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">SpinLock</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Ultra-short critical sections (μs range)</td>
+          <td class="prim-use warn">Burns CPU if contention is high</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">Volatile / Interlocked</span></td>
+          <td><span class="code-chip chip-gray">System.Threading</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Lock-free atomic counter / flag / CAS operations</td>
+          <td class="prim-use">Only for simple types; no compound atomics</td>
+        </tr>
+        <tr>
+          <td><span class="prim-name">AsyncLock (custom)</span></td>
+          <td><span class="code-chip chip-gray">SemaphoreSlim(1,1)</span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td class="prim-use">Async-compatible mutex (await inside lock)</td>
+          <td class="prim-use warn">lock{} keyword cannot await — use this instead</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — CONCURRENCY PATTERNS
+═══════════════════════════════════════════ -->
+<div id="patterns">
+  <div class="sec-head">
+    <div class="sec-title" style="color:var(--blue)">Concurrency Patterns</div>
+    <div class="sec-badge badge-blue">14 Patterns</div>
+  </div>
+
+  <div class="pattern-grid">
+
+    <!-- 1. PRODUCER-CONSUMER -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--teal),var(--blue))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(0,229,200,0.08);border:1px solid rgba(0,229,200,0.2);color:var(--teal)">P→C</div>
+        <div>
+          <div class="pcard-title">Producer / Consumer</div>
+          <div class="pcard-subtitle">Decoupled pipeline via shared buffer</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Producers enqueue work; consumers dequeue and process independently. The buffer absorbs bursts and decouples throughput rates.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-teal">Channel&lt;T&gt;</span>
+            <span class="code-chip chip-blue">BlockingCollection&lt;T&gt;</span>
+            <span class="code-chip chip-amber">ConcurrentQueue&lt;T&gt;</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Kafka message ingestion pipeline</li>
+            <li>Order processing queue (Amazon Shopping)</li>
+            <li>Log entry buffering (Logging System)</li>
+            <li>Ride request dispatch (Ride Sharing)</li>
+          </ul>
+        </div>
+        <div class="code-block">
+<span class="kw">var</span> channel = Channel.CreateBounded&lt;<span class="typ">Order</span>&gt;(<span class="num">1000</span>);
+<span class="cmt">// Producer</span>
+<span class="kw">await</span> channel.Writer.WriteAsync(order);
+<span class="cmt">// Consumer</span>
+<span class="kw">await foreach</span> (<span class="kw">var</span> o <span class="kw">in</span> channel.Reader.ReadAllAsync()) { }
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. THREAD POOL -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--blue),var(--purple))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(61,139,255,0.08);border:1px solid rgba(61,139,255,0.2);color:var(--blue)">TPL</div>
+        <div>
+          <div class="pcard-title">Thread Pool</div>
+          <div class="pcard-subtitle">Reuse threads — avoid creation overhead</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Maintain a pool of reusable worker threads. Submit work items; the pool schedules them onto available threads. .NET's CLR thread pool backs Task.Run.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-blue">Task.Run()</span>
+            <span class="code-chip chip-blue">ThreadPool.QueueUserWorkItem</span>
+            <span class="code-chip chip-purple">Parallel.ForEach</span>
+          </div>
+        </div>
+        <div class="tpl-visual">
+          <div class="tpl-thread tpl-busy">T-01 BUSY</div>
+          <div class="tpl-thread tpl-busy">T-02 BUSY</div>
+          <div class="tpl-thread tpl-idle">T-03 IDLE</div>
+          <div class="tpl-thread tpl-idle">T-04 IDLE</div>
+          <div class="tpl-thread tpl-busy">T-05 BUSY</div>
+          <div class="tpl-thread tpl-idle">T-06 IDLE</div>
+          <div class="tpl-label">CLR ThreadPool — auto-scales min/max workers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. READER-WRITER LOCK -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--amber),var(--red))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(255,179,64,0.08);border:1px solid rgba(255,179,64,0.2);color:var(--amber)">R/W</div>
+        <div>
+          <div class="pcard-title">Reader-Writer Lock</div>
+          <div class="pcard-subtitle">Shared reads, exclusive writes</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Allow concurrent reads but serialise writes. Optimal when reads far outnumber writes — avoids unnecessary exclusive locking on read paths.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-amber">ReaderWriterLockSlim</span>
+            <span class="code-chip chip-gray">ImmutableDictionary + Interlocked.Exchange</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Library catalog — many searchers, rare updates</li>
+            <li>Stock price cache — frequent reads, periodic writes</li>
+            <li>ATM session store — read often, write on transaction</li>
+          </ul>
+        </div>
+        <div class="code-block">
+<span class="kw">var</span> rwls = <span class="kw">new</span> <span class="typ">ReaderWriterLockSlim</span>();
+rwls.EnterReadLock();
+<span class="kw">try</span> { <span class="cmt">/* read */</span> }
+<span class="kw">finally</span> { rwls.ExitReadLock(); }
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ACTOR MODEL -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--purple),var(--pink))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(176,122,255,0.08);border:1px solid rgba(176,122,255,0.2);color:var(--purple)">ACT</div>
+        <div>
+          <div class="pcard-title">Actor Model</div>
+          <div class="pcard-subtitle">Isolated state + message-passing</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Each actor has private state and a mailbox. No shared memory — actors communicate only via async messages. Eliminates lock contention entirely.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-purple">Microsoft Orleans (Virtual Actors)</span>
+            <span class="code-chip chip-purple">Akka.NET</span>
+            <span class="code-chip chip-blue">TPL Dataflow ActionBlock</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Elevator controller — each elevator is an actor</li>
+            <li>Chess game — each game session is isolated</li>
+            <li>Ride sharing — driver/rider state actors</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. PIPELINE -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--green),var(--teal))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(77,219,138,0.08);border:1px solid rgba(77,219,138,0.2);color:var(--green)">PIPE</div>
+        <div>
+          <div class="pcard-title">Pipeline (Dataflow)</div>
+          <div class="pcard-subtitle">Staged concurrent processing chain</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Chain of processing stages where each stage consumes output of the previous. Stages run concurrently; bounded buffers between stages provide backpressure.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-green">TPL Dataflow (TransformBlock)</span>
+            <span class="code-chip chip-teal">System.Threading.Channels</span>
+            <span class="code-chip chip-blue">IAsyncEnumerable pipeline</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Kafka: Fetch → Deserialise → Process → Commit</li>
+            <li>Order: Validate → Reserve → Charge → Notify</li>
+            <li>Image upload: Decode → Resize → Store → CDN</li>
+          </ul>
+        </div>
+        <div class="code-block">
+<span class="kw">var</span> fetch    = <span class="kw">new</span> <span class="typ">TransformBlock</span>&lt;<span class="typ">Req</span>,<span class="typ">Msg</span>&gt;(...);
+<span class="kw">var</span> process  = <span class="kw">new</span> <span class="typ">TransformBlock</span>&lt;<span class="typ">Msg</span>,<span class="typ">Result</span>&gt;(...);
+<span class="kw">var</span> store     = <span class="kw">new</span> <span class="typ">ActionBlock</span>&lt;<span class="typ">Result</span>&gt;(...);
+fetch.LinkTo(process); process.LinkTo(store);
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. FORK-JOIN -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--amber),var(--green))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(255,179,64,0.08);border:1px solid rgba(255,179,64,0.2);color:var(--amber)">F|J</div>
+        <div>
+          <div class="pcard-title">Fork / Join</div>
+          <div class="pcard-subtitle">Divide work, run in parallel, aggregate results</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Split a task into independent subtasks (fork), execute concurrently, then combine results (join). Classic map-reduce shape.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-amber">Task.WhenAll()</span>
+            <span class="code-chip chip-amber">Parallel.ForEach</span>
+            <span class="code-chip chip-amber">PLINQ (.AsParallel())</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Airline: search multiple GDS providers in parallel</li>
+            <li>Amazon: fetch price, stock, reviews concurrently</li>
+            <li>Splitwise: compute balances for all group members</li>
+          </ul>
+        </div>
+        <div class="code-block">
+<span class="kw">var</span> results = <span class="kw">await</span> Task.WhenAll(
+    FetchPriceAsync(id),
+    FetchStockAsync(id),
+    FetchReviewsAsync(id));
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. ASYNC-AWAIT / PROMISE -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--blue),var(--teal))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(61,139,255,0.08);border:1px solid rgba(61,139,255,0.2);color:var(--blue)">⟳</div>
+        <div>
+          <div class="pcard-title">Async / Await (TAP)</div>
+          <div class="pcard-subtitle">Task-based Asynchronous Pattern</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Non-blocking I/O without explicit thread management. The compiler rewrites async methods into state machines. Thread is released during awaits, improving scalability.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Key rules</div>
+          <ul class="when-list">
+            <li>Async all the way — never .Result / .Wait() on async code</li>
+            <li>Use ConfigureAwait(false) in library code</li>
+            <li>CancellationToken should propagate through the entire call chain</li>
+            <li>ValueTask for hot paths that often complete synchronously</li>
+          </ul>
+        </div>
+        <div class="code-block">
+<span class="cmt">// ✗ sync-over-async — deadlock risk</span>
+<span class="kw">var</span> result = GetDataAsync().Result;
+<span class="cmt">// ✓ proper async chain</span>
+<span class="kw">var</span> result = <span class="kw">await</span> GetDataAsync(ct);
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. LOCK-FREE / CAS -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--red),var(--amber))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(255,92,92,0.08);border:1px solid rgba(255,92,92,0.2);color:var(--red)">CAS</div>
+        <div>
+          <div class="pcard-title">Lock-Free / CAS</div>
+          <div class="pcard-subtitle">Optimistic concurrency via Compare-And-Swap</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Read → compute → CAS atomically. If CAS fails (another thread changed the value), retry. No blocking, no deadlocks — but ABA problem can occur.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-red">Interlocked.CompareExchange</span>
+            <span class="code-chip chip-red">Interlocked.Increment/Add</span>
+            <span class="code-chip chip-amber">Volatile.Read/Write</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Parking lot: atomic spot counter</li>
+            <li>ATM: account balance CAS update</li>
+            <li>Redis: key expiry tick counter</li>
+          </ul>
+        </div>
+        <div class="code-block">
+<span class="cmt">// Atomic increment — no lock needed</span>
+Interlocked.Increment(<span class="kw">ref</span> _availableSpots);
+<span class="cmt">// CAS — update only if value still expected</span>
+Interlocked.CompareExchange(<span class="kw">ref</span> _bal, newBal, expected);
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. SEMAPHORE / THROTTLE -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--purple),var(--blue))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(176,122,255,0.08);border:1px solid rgba(176,122,255,0.2);color:var(--purple)">SEM</div>
+        <div>
+          <div class="pcard-title">Semaphore / Throttle</div>
+          <div class="pcard-subtitle">Limit concurrent access to N</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Cap the number of concurrent operations to protect downstream systems, enforce rate limits, or model finite resource pools (DB connections, API quotas).</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-purple">SemaphoreSlim(N, N)</span>
+            <span class="code-chip chip-purple">RateLimiter (.NET 7+)</span>
+            <span class="code-chip chip-blue">Polly — Bulkhead policy</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Amazon Locker: N lockers = N concurrent assignments</li>
+            <li>Movie Booking: max 10 concurrent seat-hold transactions</li>
+            <li>Stock Brokerage: throttle external market data calls</li>
+          </ul>
+        </div>
+        <div class="code-block">
+<span class="kw">var</span> _sem = <span class="kw">new</span> <span class="typ">SemaphoreSlim</span>(<span class="num">10</span>, <span class="num">10</span>);
+<span class="kw">await</span> _sem.WaitAsync(ct);
+<span class="kw">try</span> { <span class="kw">await</span> AssignLockerAsync(); }
+<span class="kw">finally</span> { _sem.Release(); }
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. SCHEDULER / DISPATCHER -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--green),var(--blue))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(77,219,138,0.08);border:1px solid rgba(77,219,138,0.2);color:var(--green)">SCH</div>
+        <div>
+          <div class="pcard-title">Scheduler / Work Dispatcher</div>
+          <div class="pcard-subtitle">Assign & prioritise work across workers</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Central dispatcher assigns tasks to workers based on priority, affinity, or load. Workers pull from a priority queue or dedicated queues.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-green">PriorityQueue&lt;T,P&gt;</span>
+            <span class="code-chip chip-green">ConcurrentPriorityQueue (custom)</span>
+            <span class="code-chip chip-blue">TaskScheduler subclass</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Elevator: LOOK/SCAN scheduling algorithm</li>
+            <li>Ride sharing: driver assignment dispatcher</li>
+            <li>Meeting scheduler: room conflict resolver</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11. IMMUTABILITY -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--teal),var(--green))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(0,229,200,0.08);border:1px solid rgba(0,229,200,0.2);color:var(--teal)">IMM</div>
+        <div>
+          <div class="pcard-title">Immutability</div>
+          <div class="pcard-subtitle">Eliminate shared mutable state entirely</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Immutable objects can be safely shared across threads with zero synchronisation. Create new versions rather than mutating in place.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-teal">record / readonly struct</span>
+            <span class="code-chip chip-teal">ImmutableDictionary&lt;K,V&gt;</span>
+            <span class="code-chip chip-teal">ImmutableList / ImmutableArray</span>
+            <span class="code-chip chip-green">System.Collections.Immutable</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Chess: board state snapshots (undo / replay)</li>
+            <li>Stock brokerage: order book snapshots</li>
+            <li>Config / routing tables read by many threads</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. DOUBLE-CHECKED LOCKING -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--amber),var(--purple))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(255,179,64,0.08);border:1px solid rgba(255,179,64,0.2);color:var(--amber)">DCL</div>
+        <div>
+          <div class="pcard-title">Double-Checked Locking</div>
+          <div class="pcard-subtitle">Lazy thread-safe singleton initialisation</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Check before locking, then check again inside the lock to avoid unnecessary locking on the hot path after initialisation. In .NET, prefer Lazy&lt;T&gt; which handles this correctly.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-amber">Lazy&lt;T&gt;(LazyThreadSafetyMode.ExecutionAndPublication)</span>
+          </div>
+        </div>
+        <div class="code-block">
+<span class="cmt">// Preferred — Lazy&lt;T&gt; handles DCL internally</span>
+<span class="kw">private static readonly</span> <span class="typ">Lazy</span>&lt;<span class="typ">ParkingLot</span>&gt; _inst =
+    <span class="kw">new</span>(() => <span class="kw">new</span> <span class="typ">ParkingLot</span>());
+<span class="kw">public static</span> <span class="typ">ParkingLot</span> Instance => _inst.Value;
+        </div>
+      </div>
+    </div>
+
+    <!-- 13. BACKPRESSURE -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--red),var(--purple))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(255,92,92,0.08);border:1px solid rgba(255,92,92,0.2);color:var(--red)">BP</div>
+        <div>
+          <div class="pcard-title">Backpressure</div>
+          <div class="pcard-subtitle">Slow producers when consumers lag</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">When consumers can't keep up, signal producers to slow down rather than unbounded memory growth. Critical for stream processing systems.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-red">Channel.CreateBounded(capacity)</span>
+            <span class="code-chip chip-red">BoundedChannelFullMode.Wait</span>
+            <span class="code-chip chip-amber">BlockingCollection(boundedCapacity)</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Kafka consumer groups — offset commit lag</li>
+            <li>Logging: drop or block when buffer full</li>
+            <li>Ride sharing: cap queued ride requests</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 14. OPTIMISTIC CONCURRENCY -->
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background: linear-gradient(90deg,var(--green),var(--amber))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(77,219,138,0.08);border:1px solid rgba(77,219,138,0.2);color:var(--green)">OCC</div>
+        <div>
+          <div class="pcard-title">Optimistic Concurrency</div>
+          <div class="pcard-subtitle">Version/timestamp-based conflict detection</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Read data with a version token, compute update, write only if version unchanged (otherwise retry). Avoids locking under low-contention scenarios.</div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">.NET / DB Implementation</div>
+          <div class="chips-row">
+            <span class="code-chip chip-green">EF Core — RowVersion / ConcurrencyToken</span>
+            <span class="code-chip chip-green">Cosmos DB — ETag</span>
+            <span class="code-chip chip-amber">Redis WATCH / MULTI / EXEC</span>
+          </div>
+        </div>
+        <div class="pcard-row">
+          <div class="pcard-row-label">Use when</div>
+          <ul class="when-list">
+            <li>Seat booking — simultaneous seat selection</li>
+            <li>ATM — concurrent balance updates</li>
+            <li>Stock order — concurrent order modifications</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end pattern-grid -->
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — CONCURRENT DATA STRUCTURES
+═══════════════════════════════════════════ -->
+<div id="datastructures">
+  <div class="sec-head">
+    <div class="sec-title" style="color:var(--amber)">.NET Concurrent Data Structures</div>
+    <div class="sec-badge badge-amber">System.Collections.Concurrent</div>
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Thread-Safe?</th>
+          <th>Pattern</th>
+          <th>Throughput</th>
+          <th>Best Use Case</th>
+          <th>Avoid When</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="mx-type">ConcurrentDictionary&lt;K,V&gt;</span></td>
+          <td><span class="safe">✓ Yes</span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">GetOrAdd / AddOrUpdate</span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">High</span></td>
+          <td>Session cache, locker map, order index</td>
+          <td>Compound CAS needed (use Interlocked instead)</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">ConcurrentQueue&lt;T&gt;</span></td>
+          <td><span class="safe">✓ Yes</span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">Enqueue / TryDequeue</span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">High</span></td>
+          <td>Work queues, log buffers, ride request queue</td>
+          <td>Need blocking wait — use Channel or BlockingCollection</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">ConcurrentStack&lt;T&gt;</span></td>
+          <td><span class="safe">✓ Yes</span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">Push / TryPop</span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">High</span></td>
+          <td>Undo stacks (Chess moves), LIFO work stealing</td>
+          <td>FIFO ordering needed</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">ConcurrentBag&lt;T&gt;</span></td>
+          <td><span class="safe">✓ Yes</span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">Add / TryTake</span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">High*</span></td>
+          <td>Object pools, unordered result collection</td>
+          <td>Order matters; single-threaded access (degrades)</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">BlockingCollection&lt;T&gt;</span></td>
+          <td><span class="safe">✓ Yes</span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Add / Take (blocking)</span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Medium</span></td>
+          <td>Classic producer-consumer with blocking semantics</td>
+          <td>Async code — use Channel&lt;T&gt; instead</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">Channel&lt;T&gt;</span></td>
+          <td><span class="safe">✓ Yes</span></td>
+          <td><span class="code-chip chip-blue" style="font-size:10px">WriteAsync / ReadAllAsync</span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">Very High</span></td>
+          <td>Async pipelines, Kafka-style ingestion, message bus</td>
+          <td>Sync-only code (use BlockingCollection)</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">ImmutableDictionary&lt;K,V&gt;</span></td>
+          <td><span class="safe">✓ Always safe</span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">SetItem → new instance</span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Low-Med</span></td>
+          <td>Config snapshots, routing tables, chess board state</td>
+          <td>Frequent writes (high allocation cost)</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">ImmutableList&lt;T&gt;</span></td>
+          <td><span class="safe">✓ Always safe</span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">Add → new instance</span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Low-Med</span></td>
+          <td>Move history, event log snapshots</td>
+          <td>High-frequency mutations</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">PriorityQueue&lt;T,P&gt;</span></td>
+          <td><span class="warn">✗ Not safe</span></td>
+          <td><span class="code-chip chip-red" style="font-size:10px">Wrap with lock</span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Med (with lock)</span></td>
+          <td>Elevator scheduling, ride dispatch, job scheduler</td>
+          <td>Concurrent access without wrapper lock</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">Dictionary&lt;K,V&gt; + RWLock</span></td>
+          <td><span class="safe">✓ With RWLS</span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">ReaderWriterLockSlim</span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">High (read-heavy)</span></td>
+          <td>Library catalog, stock price cache</td>
+          <td>Write-heavy workloads</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">SortedSet + lock</span></td>
+          <td><span class="safe">✓ With lock</span></td>
+          <td><span class="code-chip chip-gray" style="font-size:10px">lock{}</span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Medium</span></td>
+          <td>Leaderboards, ordered seat maps, time slot sets</td>
+          <td>High concurrency (use concurrent alternative)</td>
+        </tr>
+        <tr>
+          <td><span class="mx-type">MemoryCache / IMemoryCache</span></td>
+          <td><span class="safe">✓ Yes</span></td>
+          <td><span class="code-chip chip-blue" style="font-size:10px">GetOrCreate</span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">High</span></td>
+          <td>Redis read-through cache, session store, token cache</td>
+          <td>Distributed state (use IDistributedCache)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — ASYNC MODEL DEEP DIVE
+═══════════════════════════════════════════ -->
+<div id="async">
+  <div class="sec-head">
+    <div class="sec-title" style="color:var(--purple)">async/await — The .NET Model</div>
+    <div class="sec-badge badge-purple">TAP + ValueTask + IAsyncEnumerable</div>
+  </div>
+
+  <div class="pattern-grid">
+
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(176,122,255,0.08);border:1px solid rgba(176,122,255,0.2);color:var(--purple)">TAP</div>
+        <div>
+          <div class="pcard-title">Task Asynchronous Pattern</div>
+          <div class="pcard-subtitle">The standard .NET async model</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <ul class="when-list">
+          <li>Return <code>Task</code> for async void-equivalent; <code>Task&lt;T&gt;</code> for results</li>
+          <li>Always accept <code>CancellationToken</code> as last parameter</li>
+          <li>Suffix async methods with <code>Async</code></li>
+          <li>Never use <code>async void</code> except in event handlers</li>
+        </ul>
+        <div class="code-block">
+<span class="kw">public async</span> <span class="typ">Task</span>&lt;<span class="typ">Booking</span>&gt; BookSeatAsync(
+    <span class="typ">int</span> seatId, <span class="typ">CancellationToken</span> ct = <span class="kw">default</span>)
+{
+    <span class="kw">await</span> _sem.WaitAsync(ct);
+    <span class="kw">try</span> { <span class="kw">return await</span> _repo.BookAsync(seatId, ct); }
+    <span class="kw">finally</span> { _sem.Release(); }
+}
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background:linear-gradient(90deg,var(--teal),var(--purple))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(0,229,200,0.08);border:1px solid rgba(0,229,200,0.2);color:var(--teal)">VT</div>
+        <div>
+          <div class="pcard-title">ValueTask&lt;T&gt;</div>
+          <div class="pcard-subtitle">Zero-alloc async for hot paths</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">When a method frequently completes synchronously (cache hit), ValueTask avoids heap allocation of a Task object. Used in Redis, SignalR, ASP.NET Core hot paths.</div>
+        <ul class="when-list">
+          <li>Redis GET — cache hit → synchronous ValueTask return</li>
+          <li>Channel.Reader.ReadAsync — often has data ready</li>
+          <li><span class="warn">⚠ Never await ValueTask twice — not reusable</span></li>
+        </ul>
+        <div class="code-block">
+<span class="kw">public</span> <span class="typ">ValueTask</span>&lt;<span class="typ">string?</span>&gt; GetCachedAsync(<span class="typ">string</span> key)
+    => _cache.TryGetValue(key, <span class="kw">out var</span> v)
+        ? <span class="typ">ValueTask</span>.FromResult(v)   <span class="cmt">// zero alloc</span>
+        : <span class="kw">new</span>(<span class="typ">FetchFromDbAsync</span>(key)); <span class="cmt">// async path</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background:linear-gradient(90deg,var(--green),var(--teal))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(77,219,138,0.08);border:1px solid rgba(77,219,138,0.2);color:var(--green)">IAE</div>
+        <div>
+          <div class="pcard-title">IAsyncEnumerable&lt;T&gt;</div>
+          <div class="pcard-subtitle">Streaming async sequences</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Pull-based async stream. Consumer controls pace (backpressure). Ideal for database cursor reads, Kafka topic streaming, and paginated API results.</div>
+        <ul class="when-list">
+          <li>Cricinfo: stream ball-by-ball commentary</li>
+          <li>Kafka: stream messages from partition</li>
+          <li>File system: stream directory entries</li>
+        </ul>
+        <div class="code-block">
+<span class="kw">public async</span> <span class="typ">IAsyncEnumerable</span>&lt;<span class="typ">Ball</span>&gt; StreamBallsAsync(
+    <span class="typ">int</span> matchId,
+    [<span class="typ">EnumeratorCancellation</span>] <span class="typ">CancellationToken</span> ct)
+{
+    <span class="kw">await foreach</span> (<span class="kw">var</span> b <span class="kw">in</span> _db.GetBallsAsync(matchId, ct))
+        <span class="kw">yield return</span> b;
+}
+        </div>
+      </div>
+    </div>
+
+    <div class="pcard fade-in">
+      <div class="pcard-accent" style="background:linear-gradient(90deg,var(--amber),var(--red))"></div>
+      <div class="pcard-head">
+        <div class="pcard-icon" style="background:rgba(255,179,64,0.08);border:1px solid rgba(255,179,64,0.2);color:var(--amber)">CT</div>
+        <div>
+          <div class="pcard-title">CancellationToken Pattern</div>
+          <div class="pcard-subtitle">Cooperative cancellation through the chain</div>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-desc">Cancellation must be cooperative — pass the token to every async call. Link tokens to create timeouts. Register callbacks for cleanup.</div>
+        <div class="code-block">
+<span class="cmt">// Combine user cancel + timeout</span>
+<span class="kw">using var</span> cts = <span class="typ">CancellationTokenSource</span>
+    .CreateLinkedTokenSource(userCt, timeoutCt);
+
+<span class="kw">using var</span> timeout =
+    <span class="kw">new</span> <span class="typ">CancellationTokenSource</span>(<span class="typ">TimeSpan</span>.FromSeconds(<span class="num">30</span>));
+
+<span class="kw">var</span> linkedCt = <span class="typ">CancellationTokenSource</span>
+    .CreateLinkedTokenSource(userCt, timeout.Token).Token;
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — SYSTEMS CONCURRENCY MAP
+═══════════════════════════════════════════ -->
+<div id="systems">
+  <div class="sec-head">
+    <div class="sec-title" style="color:var(--green)">Systems → Concurrency Map</div>
+    <div class="sec-badge badge-green">29 Systems</div>
+  </div>
+
+  <input type="text" class="search-input" id="sysSearch" placeholder="Search systems..." oninput="filterSys()">
+
+  <div class="sys-conc-grid" id="sysGrid">
+
+    <div class="sc-card" data-sys="Parking Lot">
+      <div class="sc-head">
+        <div class="sc-icon">🚗</div>
+        <div class="sc-name">Parking Lot</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-red">Interlocked — spot counter</span>
+            <span class="code-chip chip-teal">Reader-Writer Lock — floor query</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;int,Spot&gt;</span>
+            <span class="code-chip chip-blue">Interlocked.Decrement(ref _available)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Elevator System">
+      <div class="sc-head">
+        <div class="sc-icon">🛗</div>
+        <div class="sc-name">Elevator System</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-purple">Actor — each elevator</span>
+            <span class="code-chip chip-green">Scheduler — LOOK algorithm</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-green">PriorityQueue&lt;Request,int&gt; + lock</span>
+            <span class="code-chip chip-teal">Channel&lt;ButtonPress&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Library Management System">
+      <div class="sc-head">
+        <div class="sc-icon">📚</div>
+        <div class="sc-name">Library Management</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">Reader-Writer Lock — catalog</span>
+            <span class="code-chip chip-red">Optimistic Concurrency — checkout</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">Dict + ReaderWriterLockSlim</span>
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;ISBN,BookItem&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Amazon Locker Service">
+      <div class="sc-head">
+        <div class="sc-icon">📦</div>
+        <div class="sc-name">Amazon Locker</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-purple">Semaphore — N lockers</span>
+            <span class="code-chip chip-teal">Producer-Consumer — assignment queue</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;string,Locker&gt;</span>
+            <span class="code-chip chip-purple">SemaphoreSlim(N)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Vending Machine">
+      <div class="sc-head">
+        <div class="sc-icon">🥤</div>
+        <div class="sc-name">Vending Machine</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-purple">Semaphore(1) — single user at a time</span>
+            <span class="code-chip chip-red">Lock-Free — inventory counter</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;SlotId,int&gt; (stock)</span>
+            <span class="code-chip chip-blue">Interlocked.Decrement(ref _stock)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Online Blackjack Game">
+      <div class="sc-head">
+        <div class="sc-icon">🃏</div>
+        <div class="sc-name">Online Blackjack</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-purple">Actor — game session isolation</span>
+            <span class="code-chip chip-teal">Immutability — deck state</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ImmutableStack&lt;Card&gt; (deck)</span>
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;Guid,GameSession&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Ride Sharing System">
+      <div class="sc-head">
+        <div class="sc-icon">🚕</div>
+        <div class="sc-name">Ride Sharing</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — ride requests</span>
+            <span class="code-chip chip-green">Fork/Join — multi-driver search</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Channel&lt;RideRequest&gt;</span>
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;DriverId,Location&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Meeting Scheduler">
+      <div class="sc-head">
+        <div class="sc-icon">📅</div>
+        <div class="sc-name">Meeting Scheduler</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-red">Optimistic Concurrency — slot booking</span>
+            <span class="code-chip chip-amber">Reader-Writer Lock — calendar reads</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">SortedSet&lt;TimeSlot&gt; + lock</span>
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;RoomId,Schedule&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Movie Ticket Booking System">
+      <div class="sc-head">
+        <div class="sc-icon">🎬</div>
+        <div class="sc-name">Movie Ticket Booking</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-purple">Semaphore — max concurrent holds</span>
+            <span class="code-chip chip-red">Optimistic Concurrency — seat state</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;SeatId,SeatState&gt;</span>
+            <span class="code-chip chip-purple">SemaphoreSlim(maxConcurrentHolds)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Car Rental System">
+      <div class="sc-head">
+        <div class="sc-icon">🚙</div>
+        <div class="sc-name">Car Rental</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — return queue</span>
+            <span class="code-chip chip-red">Optimistic Concurrency — booking</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;VehicleId,RentalState&gt;</span>
+            <span class="code-chip chip-amber">ConcurrentQueue&lt;ReturnedCar&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="ATM">
+      <div class="sc-head">
+        <div class="sc-icon">🏧</div>
+        <div class="sc-name">ATM</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-purple">Semaphore(1) — single active session</span>
+            <span class="code-chip chip-red">CAS — balance update</span>
+            <span class="code-chip chip-amber">Reader-Writer Lock — account read</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-blue">Interlocked.CompareExchange (balance)</span>
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;CardNum,Account&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Chess Game">
+      <div class="sc-head">
+        <div class="sc-icon">♟️</div>
+        <div class="sc-name">Chess Game</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Immutability — board state</span>
+            <span class="code-chip chip-purple">Actor — game session per match</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ImmutableArray&lt;Piece&gt; (board)</span>
+            <span class="code-chip chip-blue">ConcurrentStack&lt;Move&gt; (undo)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Hotel Management System">
+      <div class="sc-head">
+        <div class="sc-icon">🏨</div>
+        <div class="sc-name">Hotel Management</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — housekeeping queue</span>
+            <span class="code-chip chip-red">Optimistic Concurrency — room booking</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;RoomId,RoomState&gt;</span>
+            <span class="code-chip chip-amber">BlockingCollection&lt;HousekeepingTask&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Amazon Online Shopping System">
+      <div class="sc-head">
+        <div class="sc-icon">🛒</div>
+        <div class="sc-name">Amazon Shopping</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-green">Fork/Join — fetch product details</span>
+            <span class="code-chip chip-teal">Pipeline — Order → Reserve → Charge → Ship</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Channel&lt;OrderEvent&gt; (pipeline)</span>
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;SKU,int&gt; (inventory)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Stack Overflow">
+      <div class="sc-head">
+        <div class="sc-icon">🔶</div>
+        <div class="sc-name">Stack Overflow</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">Reader-Writer Lock — question cache</span>
+            <span class="code-chip chip-teal">Producer-Consumer — notification queue</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-blue">IMemoryCache (thread-safe)</span>
+            <span class="code-chip chip-teal">Channel&lt;Notification&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Restaurant Management System">
+      <div class="sc-head">
+        <div class="sc-icon">🍽️</div>
+        <div class="sc-name">Restaurant Management</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — order → kitchen</span>
+            <span class="code-chip chip-red">Lock-Free — table status counter</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">ConcurrentQueue&lt;KitchenOrder&gt;</span>
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;TableId,OrderState&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Facebook">
+      <div class="sc-head">
+        <div class="sc-icon">📱</div>
+        <div class="sc-name">Facebook</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — newsfeed fan-out</span>
+            <span class="code-chip chip-green">Fork/Join — parallel feed fetch</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Channel&lt;FeedEvent&gt;</span>
+            <span class="code-chip chip-blue">IMemoryCache (timeline cache)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Online Stock Brokerage System">
+      <div class="sc-head">
+        <div class="sc-icon">📈</div>
+        <div class="sc-name">Stock Brokerage</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Pipeline — receive → validate → match → execute</span>
+            <span class="code-chip chip-red">CAS — order book updates</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-green">PriorityQueue (buy/sell sides) + lock</span>
+            <span class="code-chip chip-teal">Channel&lt;Order&gt; (matching pipeline)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Jigsaw Puzzle">
+      <div class="sc-head">
+        <div class="sc-icon">🧩</div>
+        <div class="sc-name">Jigsaw Puzzle</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Immutability — board state snapshots</span>
+            <span class="code-chip chip-purple">Actor — multi-player session</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ImmutableDictionary&lt;PieceId,Position&gt;</span>
+            <span class="code-chip chip-amber">ConcurrentDictionary (placed pieces)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Airline Management System">
+      <div class="sc-head">
+        <div class="sc-icon">✈️</div>
+        <div class="sc-name">Airline Management</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-green">Fork/Join — multi-GDS search</span>
+            <span class="code-chip chip-red">Optimistic Concurrency — seat booking</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;FlightId,SeatMap&gt;</span>
+            <span class="code-chip chip-blue">Task.WhenAll (parallel GDS calls)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="ESPN Cricinfo">
+      <div class="sc-head">
+        <div class="sc-icon">🏏</div>
+        <div class="sc-name">ESPN Cricinfo</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — score ingestion</span>
+            <span class="code-chip chip-blue">IAsyncEnumerable — live stream</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Channel&lt;BallEvent&gt;</span>
+            <span class="code-chip chip-blue">IMemoryCache (scorecard)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="LinkedIn">
+      <div class="sc-head">
+        <div class="sc-icon">💼</div>
+        <div class="sc-name">LinkedIn</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — connection events</span>
+            <span class="code-chip chip-amber">Reader-Writer Lock — profile cache</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-blue">IMemoryCache (profile / graph cache)</span>
+            <span class="code-chip chip-teal">Channel&lt;ConnectionEvent&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Tic Tac Toe">
+      <div class="sc-head">
+        <div class="sc-icon">❌</div>
+        <div class="sc-name">Tic Tac Toe</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Immutability — board state per move</span>
+            <span class="code-chip chip-purple">Actor — online game session</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ImmutableArray&lt;CellState&gt; (3×3)</span>
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;Guid,GameState&gt;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Snake and Food Game">
+      <div class="sc-head">
+        <div class="sc-icon">🐍</div>
+        <div class="sc-name">Snake and Food</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — input → game loop</span>
+            <span class="code-chip chip-green">Scheduler — fixed-interval tick</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Channel&lt;Direction&gt; (input queue)</span>
+            <span class="code-chip chip-amber">LinkedList&lt;Point&gt; + lock (snake body)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="File System">
+      <div class="sc-head">
+        <div class="sc-icon">🗂️</div>
+        <div class="sc-name">File System</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">Reader-Writer Lock — directory tree</span>
+            <span class="code-chip chip-teal">Producer-Consumer — file watcher events</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-amber">Dict + ReaderWriterLockSlim (inode table)</span>
+            <span class="code-chip chip-teal">Channel&lt;FileEvent&gt; (watcher)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Logging System">
+      <div class="sc-head">
+        <div class="sc-icon">📋</div>
+        <div class="sc-name">Logging System</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — log entry buffer</span>
+            <span class="code-chip chip-red">Backpressure — drop/block when full</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Channel&lt;LogEntry&gt; (bounded)</span>
+            <span class="code-chip chip-amber">ConcurrentQueue&lt;LogEntry&gt; (async flush)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Splitwise">
+      <div class="sc-head">
+        <div class="sc-icon">💸</div>
+        <div class="sc-name">Splitwise</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-red">Optimistic Concurrency — balance update</span>
+            <span class="code-chip chip-green">Fork/Join — compute all balances</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;UserId,decimal&gt;</span>
+            <span class="code-chip chip-blue">Interlocked (atomic balance ops)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Redis">
+      <div class="sc-head">
+        <div class="sc-icon">⚡</div>
+        <div class="sc-name">Redis</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Producer-Consumer — command queue</span>
+            <span class="code-chip chip-red">Lock-Free — single-threaded event loop</span>
+            <span class="code-chip chip-purple">Semaphore — connection pool</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">ConcurrentDictionary&lt;string,RedisValue&gt;</span>
+            <span class="code-chip chip-amber">ConcurrentQueue&lt;RedisCommand&gt;</span>
+            <span class="code-chip chip-purple">SemaphoreSlim (connection pool gate)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-card" data-sys="Kafka">
+      <div class="sc-head">
+        <div class="sc-icon">📨</div>
+        <div class="sc-name">Kafka</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-row">
+          <div class="sc-row-label">Pattern</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Pipeline — produce → broker → consume</span>
+            <span class="code-chip chip-red">Backpressure — bounded channel per partition</span>
+            <span class="code-chip chip-green">Fork/Join — parallel partition processing</span>
+          </div>
+        </div>
+        <div class="sc-row">
+          <div class="sc-row-label">Data Structure</div>
+          <div class="sc-chips">
+            <span class="code-chip chip-teal">Channel&lt;Message&gt; per partition (bounded)</span>
+            <span class="code-chip chip-amber">ConcurrentDictionary&lt;PartitionId,Offset&gt;</span>
+            <span class="code-chip chip-purple">SemaphoreSlim (max concurrent consumers)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end sys-conc-grid -->
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — ANTI-PATTERNS
+═══════════════════════════════════════════ -->
+<div id="antipatterns">
+  <div class="sec-head">
+    <div class="sec-title" style="color:var(--red)">Concurrency Anti-Patterns</div>
+    <div class="sec-badge badge-red">What NOT to do</div>
+  </div>
+
+  <div class="ap-grid">
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">Sync-over-Async (.Result / .Wait())</div>
+      <div class="ap-desc">Calling .Result or .Wait() on a Task in async context will deadlock in environments with a SynchronizationContext (ASP.NET Classic, WinForms, WPF). Thread pool thread is blocked while waiting for a continuation that needs the same thread.</div>
+      <div class="ap-fix">Async all the way. If you must bridge, use Task.Run(() => AsyncMethod()).Result in a threadpool context only.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">async void (outside event handlers)</div>
+      <div class="ap-desc">Exceptions from async void methods cannot be caught by the caller and will crash the process. The caller has no way to await completion or observe the result.</div>
+      <div class="ap-fix">Always return Task or Task&lt;T&gt;. Only exception: UI event handlers (Button.Click) where the signature is forced.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">Captured Mutable Closures in Parallel Loops</div>
+      <div class="ap-desc">Capturing a loop variable (e.g. i) in a lambda passed to Parallel.ForEach or Task.Run creates a race — all tasks may see the final value of i.</div>
+      <div class="ap-fix">Copy the variable before capture: var local = i; then use local inside the lambda.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">lock() on public / string / Type objects</div>
+      <div class="ap-desc">Locking on publicly visible objects (this, typeof(T), or string literals) allows outside code to take the same lock, causing unexpected deadlocks.</div>
+      <div class="ap-fix">Always lock on a private readonly object _lock = new(); that no external code can reference.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">Nested / Inconsistent Lock Ordering</div>
+      <div class="ap-desc">Thread A acquires lockX then lockY; Thread B acquires lockY then lockX. Classic deadlock. Very common in Account transfer scenarios (ATM, Splitwise).</div>
+      <div class="ap-fix">Always acquire multiple locks in a globally consistent order (e.g. by ID). Or eliminate nested locking entirely by restructuring.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">Unbounded Parallelism (Task.Run in a loop)</div>
+      <div class="ap-desc">Launching unlimited tasks in a loop floods the thread pool, causes context-switch thrashing, and can starve other work. Common mistake in bulk processing.</div>
+      <div class="ap-fix">Use SemaphoreSlim to cap concurrency, Parallel.ForEachAsync with MaxDegreeOfParallelism, or TPL Dataflow with BoundedCapacity.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">Forgotten ConfigureAwait(false) in Libraries</div>
+      <div class="ap-desc">In library code, awaiting without ConfigureAwait(false) captures the caller's SynchronizationContext. This forces continuations back to the UI/ASP.NET thread, reducing scalability and risking deadlocks.</div>
+      <div class="ap-fix">In all library/infrastructure code, always use .ConfigureAwait(false). In application-layer code it's optional but consistent usage is cleaner.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">ConcurrentDictionary Non-Atomic Compound Ops</div>
+      <div class="ap-desc">Reading then writing to ConcurrentDictionary in two separate calls is NOT atomic. Between your TryGetValue and subsequent update, another thread can modify the value.</div>
+      <div class="ap-fix">Use AddOrUpdate or GetOrAdd with the factory overload. For custom compound logic, use Interlocked.CompareExchange on a reference or lock on the specific key.</div>
+    </div>
+
+    <div class="ap-card fade-in">
+      <div class="ap-title">Thread.Sleep in Production Code</div>
+      <div class="ap-desc">Thread.Sleep blocks the OS thread, wasting thread pool resources. In async code it makes no sense. In tight retry loops it can cause thread pool starvation.</div>
+      <div class="ap-fix">Use await Task.Delay(ms, ct) for async waits. Use Polly for retry logic with exponential back-off and jitter.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — QUICK DECISION MATRIX
+═══════════════════════════════════════════ -->
+<div id="matrix">
+  <div class="sec-head">
+    <div class="sec-title" style="color:var(--pink)">Quick Decision Matrix</div>
+    <div class="sec-badge badge-pink">Choose the right tool</div>
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Sync OK?</th>
+          <th>Async needed?</th>
+          <th>Recommended</th>
+          <th>Why</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Single shared counter (spots, seats)</td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="code-chip chip-red" style="font-size:10px">Interlocked.Increment</span></td>
+          <td style="color:#6070a0;font-size:12px">Lock-free atomic; no contention</td>
+        </tr>
+        <tr>
+          <td>Many readers, rare writers</td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">ReaderWriterLockSlim</span></td>
+          <td style="color:#6070a0;font-size:12px">Concurrent reads; serialised writes</td>
+        </tr>
+        <tr>
+          <td>Async producer → async consumer</td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">Channel&lt;T&gt;</span></td>
+          <td style="color:#6070a0;font-size:12px">Backpressure + async-native API</td>
+        </tr>
+        <tr>
+          <td>Sync producer → sync consumer</td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">BlockingCollection&lt;T&gt;</span></td>
+          <td style="color:#6070a0;font-size:12px">Blocking wait without async overhead</td>
+        </tr>
+        <tr>
+          <td>Limit N concurrent I/O calls</td>
+          <td><span class="dot mx-dot dot-cond"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-purple" style="font-size:10px">SemaphoreSlim(N) + await</span></td>
+          <td style="color:#6070a0;font-size:12px">Async-compatible throttle</td>
+        </tr>
+        <tr>
+          <td>Fan-out N tasks, collect all</td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Task.WhenAll()</span></td>
+          <td style="color:#6070a0;font-size:12px">Parallel execution; single await point</td>
+        </tr>
+        <tr>
+          <td>Fan-out N tasks, first wins</td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Task.WhenAny()</span></td>
+          <td style="color:#6070a0;font-size:12px">Hedged requests, timeout patterns</td>
+        </tr>
+        <tr>
+          <td>Thread-safe key-value store</td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">ConcurrentDictionary&lt;K,V&gt;</span></td>
+          <td style="color:#6070a0;font-size:12px">Lock striping; high throughput</td>
+        </tr>
+        <tr>
+          <td>Immutable shared config / snapshot</td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-teal" style="font-size:10px">ImmutableDictionary + Interlocked.Exchange</span></td>
+          <td style="color:#6070a0;font-size:12px">No locking on readers; atomic swap on write</td>
+        </tr>
+        <tr>
+          <td>Staged processing with backpressure</td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-green" style="font-size:10px">TPL Dataflow pipeline</span></td>
+          <td style="color:#6070a0;font-size:12px">Built-in bounded buffers and linking</td>
+        </tr>
+        <tr>
+          <td>Lazy singleton init</td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="code-chip chip-amber" style="font-size:10px">Lazy&lt;T&gt;</span></td>
+          <td style="color:#6070a0;font-size:12px">DCL handled correctly by runtime</td>
+        </tr>
+        <tr>
+          <td>Cross-process single instance</td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="code-chip chip-purple" style="font-size:10px">Mutex (named)</span></td>
+          <td style="color:#6070a0;font-size:12px">OS-level synchronization primitive</td>
+        </tr>
+        <tr>
+          <td>Streaming large result set async</td>
+          <td><span class="dot mx-dot dot-no"></span></td>
+          <td><span class="dot mx-dot dot-yes"></span></td>
+          <td><span class="code-chip chip-blue" style="font-size:10px">IAsyncEnumerable&lt;T&gt;</span></td>
+          <td style="color:#6070a0;font-size:12px">Pull-based; no buffering full result set</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- end wrap -->
+
+<script>
+// Scroll reveal
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 50);
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.06 });
+document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+// Nav active state
+const sections = ['primitives','patterns','datastructures','async','systems','antipatterns','matrix'];
+const tabs = document.querySelectorAll('.nav-tab');
+window.addEventListener('scroll', () => {
+  let cur = sections[0];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 120) cur = id;
+  });
+  tabs.forEach(t => {
+    t.classList.toggle('active', t.getAttribute('href') === '#' + cur);
+  });
+});
+
+// System search
+function filterSys() {
+  const q = document.getElementById('sysSearch').value.toLowerCase();
+  document.querySelectorAll('.sc-card').forEach(c => {
+    c.style.display = c.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

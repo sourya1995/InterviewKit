@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tier 4 LLD — C# Code · Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Clash+Display:wght@400;600;700&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0c0c10;
+  --surface:  #13131a;
+  --surface2: #1a1a24;
+  --surface3: #21212e;
+  --border:   #252535;
+  --border2:  #2e2e42;
+
+  --green:  #3ddc84;
+  --blue:   #4d9fff;
+  --amber:  #ffc341;
+  --pink:   #ff6b9d;
+  --purple: #b794f4;
+  --teal:   #4ecdc4;
+  --red:    #ff6b6b;
+  --orange: #ff9a3c;
+
+  --text:   #e2e8f8;
+  --muted:  #606080;
+  --muted2: #3a3a55;
+
+  --s-kw:    #c792ea;
+  --s-type:  #82aaff;
+  --s-str:   #c3e88d;
+  --s-cmt:   #546e7a;
+  --s-num:   #f78c6c;
+  --s-prop:  #ffcb6b;
+  --s-iface: #addb67;
+  --s-enum:  #f78c6c;
+  --s-plain: #d4d4d4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { background:var(--bg); color:var(--text); font-family:'Epilogue',sans-serif; font-size:14px; line-height:1.6; }
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 48px 56px 40px;
+  position: relative; overflow: hidden;
+}
+header::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, var(--pink), var(--purple), var(--blue), transparent);
+}
+.h-eyebrow { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--pink); margin-bottom:14px; }
+h1 { font-family:'Clash Display','JetBrains Mono',monospace; font-size:clamp(30px,4.5vw,54px); font-weight:700; line-height:1.05; letter-spacing:-1px; }
+h1 em { font-style:normal; color:var(--pink); }
+.h-sub { margin-top:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:12px; max-width:640px; line-height:1.8; }
+.h-pills { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; }
+.hpill { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1px; padding:5px 13px; border-radius:2px; border:1px solid; text-transform:uppercase; text-decoration:none; transition:opacity .15s; }
+.hpill:hover { opacity:.7; }
+.p-pk { color:var(--pink);   border-color:rgba(255,107,157,.3); background:rgba(255,107,157,.06); }
+.p-p  { color:var(--purple); border-color:rgba(183,148,244,.3); background:rgba(183,148,244,.06); }
+.p-b  { color:var(--blue);   border-color:rgba(77,159,255,.3);  background:rgba(77,159,255,.06);  }
+.p-a  { color:var(--amber);  border-color:rgba(255,195,65,.3);  background:rgba(255,195,65,.06);  }
+.p-t  { color:var(--teal);   border-color:rgba(78,205,196,.3);  background:rgba(78,205,196,.06);  }
+.p-g  { color:var(--green);  border-color:rgba(61,220,132,.3);  background:rgba(61,220,132,.06);  }
+
+.layout { display:flex; min-height:calc(100vh - 200px); }
+
+.sidebar { width:240px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; background:var(--surface); border-right:1px solid var(--border); padding:24px 0; scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+.sidebar-label { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted2); padding:0 20px; margin-bottom:12px; }
+.sb-item { display:flex; align-items:center; gap:10px; padding:10px 20px; cursor:pointer; transition:background .15s; text-decoration:none; border-left:2px solid transparent; }
+.sb-item:hover { background:var(--surface2); }
+.sb-item.active { background:var(--surface2); border-left-color:var(--pink); }
+.sb-num { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); width:18px; }
+.sb-name { font-size:13px; color:var(--text); font-weight:500; }
+.sb-tier { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--pink); background:rgba(255,107,157,.08); border:1px solid rgba(255,107,157,.2); padding:1px 6px; border-radius:2px; }
+.sb-divider { height:1px; background:var(--border); margin:12px 20px; }
+
+.main { flex:1; padding:0 48px 80px; max-width:960px; }
+.system { padding-top:60px; padding-bottom:40px; border-bottom:1px solid var(--border); }
+.system:last-child { border-bottom:none; }
+
+.sys-header { display:flex; align-items:flex-start; gap:16px; margin-bottom:28px; }
+.sys-num { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted2); padding-top:6px; }
+.sys-meta { flex:1; }
+.sys-title { font-family:'Clash Display',monospace; font-size:26px; font-weight:700; line-height:1.1; }
+.sys-tags { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.sys-tag { font-family:'JetBrains Mono',monospace; font-size:10px; padding:2px 9px; border-radius:2px; border:1px solid; }
+
+.exp-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:28px; }
+@media(max-width:700px){ .exp-grid{grid-template-columns:1fr;} }
+.exp-card { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:14px 16px; }
+.exp-card-title { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:8px; }
+.exp-card-body { font-size:13px; color:#8090b0; line-height:1.65; }
+.exp-card-body li { list-style:none; padding-left:14px; position:relative; margin-bottom:4px; }
+.exp-card-body li::before { content:'›'; position:absolute; left:0; color:var(--muted2); }
+
+.interview-box { background:rgba(255,195,65,.04); border:1px solid rgba(255,195,65,.18); border-left:3px solid var(--amber); border-radius:0 4px 4px 0; padding:14px 18px; margin-bottom:24px; font-size:13px; color:#a09060; line-height:1.7; }
+.interview-box strong { color:var(--amber); }
+.interview-box .q { font-family:'JetBrains Mono',monospace; font-size:11px; color:#c0a060; margin-top:6px; display:block; }
+
+.pattern-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; align-items:center; }
+.pattern-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-right:4px; }
+.pat { font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 10px; border-radius:2px; }
+
+.primer { background:#0d1117; border:1px solid var(--border2); border-left:3px solid var(--pink); border-radius:0 4px 4px 0; margin-bottom:20px; overflow:hidden; }
+.primer-header { background:rgba(255,107,157,0.06); border-bottom:1px solid rgba(255,107,157,0.15); padding:10px 18px; display:flex; align-items:center; gap:12px; }
+.primer-label { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--pink); }
+.primer-name { font-family:'JetBrains Mono',monospace; font-size:12px; color:#c0a0b0; margin-left:auto; }
+.primer-desc { padding:10px 18px 4px; font-size:12.5px; color:#706070; font-style:italic; line-height:1.6; }
+.primer pre { padding:14px 20px 18px; font-size:12px; line-height:1.8; background:transparent; overflow-x:auto; }
+
+.code-wrap { background:#0a0a10; border:1px solid var(--border2); border-radius:4px; overflow:hidden; margin-bottom:20px; }
+.code-header { background:var(--surface3); padding:9px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); }
+.code-dots { display:flex; gap:6px; }
+.code-dot { width:10px; height:10px; border-radius:50%; }
+.dot-r { background:#ff5f56; } .dot-y { background:#ffbd2e; } .dot-g { background:#27c93f; }
+.code-filename { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
+.code-lang { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted2); background:var(--surface2); padding:2px 8px; border-radius:2px; }
+
+pre { padding:20px 24px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.85; color:var(--s-plain); scrollbar-width:thin; scrollbar-color:var(--border2) transparent; }
+
+.kw    { color:var(--s-kw); }
+.typ   { color:var(--s-type); }
+.str   { color:var(--s-str); }
+.cmt   { color:var(--s-cmt); font-style:italic; }
+.num   { color:var(--s-num); }
+.mth   { color:var(--s-type); }
+.prop  { color:var(--s-prop); }
+.iface { color:var(--s-iface); }
+.en    { color:var(--s-enum); }
+.sec-comment { color:var(--muted2); font-style:italic; display:block; border-top:1px solid var(--border); padding-top:8px; margin-top:12px; }
+.sec-comment:first-child { border-top:none; margin-top:0; padding-top:0; }
+
+@media(max-width:900px){ .sidebar{display:none;} .main{padding:0 20px 60px;} header{padding:36px 20px 28px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-eyebrow">// C# LLD Interview Prep · Tier 4 · 6 Systems</div>
+  <h1>Tier 4 — <em>Distributed</em><br>LLD in C#</h1>
+  <p class="h-sub">High-concurrency, many entities, distributed concerns.<br>
+  Real-world systems with locking, event streams, actor models, and optimistic concurrency.<br>
+  Each starts with a <strong style="color:var(--pink)">concept primer</strong> then the full interview-ready solution.</p>
+  <div class="h-pills">
+    <a class="hpill p-pk" href="#movieticket">Movie Tickets</a>
+    <a class="hpill p-p"  href="#ridesharing">Ride Sharing</a>
+    <a class="hpill p-b"  href="#airline">Airline Mgmt</a>
+    <a class="hpill p-a"  href="#stackoverflow">Stack Overflow</a>
+    <a class="hpill p-t"  href="#brokerage">Stock Brokerage</a>
+    <a class="hpill p-g"  href="#cricinfo">ESPN Cricinfo</a>
+  </div>
+</header>
+
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-label">Systems</div>
+  <a class="sb-item active" href="#movieticket">
+    <div class="sb-num">01</div>
+    <div class="sb-name">Movie Ticket Booking</div>
+    <div class="sb-tier">T4</div>
+  </a>
+  <a class="sb-item" href="#ridesharing">
+    <div class="sb-num">02</div>
+    <div class="sb-name">Ride Sharing</div>
+    <div class="sb-tier">T4</div>
+  </a>
+  <a class="sb-item" href="#airline">
+    <div class="sb-num">03</div>
+    <div class="sb-name">Airline Management</div>
+    <div class="sb-tier">T4</div>
+  </a>
+  <a class="sb-item" href="#stackoverflow">
+    <div class="sb-num">04</div>
+    <div class="sb-name">Stack Overflow</div>
+    <div class="sb-tier">T4</div>
+  </a>
+  <a class="sb-item" href="#brokerage">
+    <div class="sb-num">05</div>
+    <div class="sb-name">Stock Brokerage</div>
+    <div class="sb-tier">T4</div>
+  </a>
+  <a class="sb-item" href="#cricinfo">
+    <div class="sb-num">06</div>
+    <div class="sb-name">ESPN Cricinfo</div>
+    <div class="sb-tier">T4</div>
+  </a>
+  <div class="sb-divider"></div>
+  <div class="sidebar-label" style="margin-top:4px">Previously</div>
+  <a class="sb-item" style="opacity:.45" href="tier3-lld-csharp.html">
+    <div class="sb-num">←</div>
+    <div class="sb-name">Tier 3 Systems</div>
+  </a>
+</nav>
+
+<main class="main">
+
+<!-- ════════════════════════════════════════
+     01. MOVIE TICKET BOOKING
+════════════════════════════════════════ -->
+<section class="system" id="movieticket">
+  <div class="sys-header">
+    <div class="sys-num">01</div>
+    <div class="sys-meta">
+      <div class="sys-title">Movie Ticket Booking</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--pink);border-color:rgba(255,107,157,.3)">Optimistic Locking</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">State (Seat)</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Strategy (Pricing)</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Command (Booking)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--pink)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Seat status: Available → TempHeld → Booked — timeout releases TempHeld</li>
+          <li>Concurrent seat selection uses <code>lock</code> + version check (optimistic concurrency)</li>
+          <li>Booking has a 10-minute payment window; a timer auto-cancels unpaid bookings</li>
+          <li>Pricing strategy: base rate × seat category multiplier + dynamic demand factor</li>
+          <li>Theatre → Screen → Show → Seat hierarchy keeps concerns separated</li>
+          <li>Payment result confirms or rolls back the booking atomically</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Seat</strong> — row, number, category (Recliner/Premium/Regular), status</li>
+          <li><strong>Show</strong> — movie, screen, date/time, seat map</li>
+          <li><strong>Booking</strong> — user, seats, show, status, expiry timer</li>
+          <li><strong>BookingService</strong> — holdSeats, confirmPayment, cancel</li>
+          <li><strong>IPricingStrategy</strong> — flat, category-based, surge</li>
+          <li><strong>Payment</strong> — gateway abstraction, idempotency key</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you prevent two users booking the same seat simultaneously?</span>
+    <span style="font-size:12px;color:#a09060">→ Seat hold is inside a <code>lock(seat)</code> block. Check status == Available, then atomically set to TempHeld with a timestamp. Only one thread wins; others see TempHeld and fail fast. In distributed systems, use a Redis SETNX lock with TTL.</span>
+    <span class="q">Q: What happens if the user doesn't pay within 10 minutes?</span>
+    <span style="font-size:12px;color:#a09060">→ A <code>Timer</code> fires on booking creation. On expiry, status flips to Cancelled and each seat is reset to Available. In production, a background job scans for expired bookings — more reliable than in-process timers.</span>
+    <span class="q">Q: How do you handle partial seat selection (user wants 3 seats together)?</span>
+    <span style="font-size:12px;color:#a09060">→ FindConsecutiveSeats() scans the seat map row-by-row for N adjacent Available seats. The entire group is held atomically inside a single lock to avoid partial holds.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(255,107,157,.08);border:1px solid rgba(255,107,157,.2);color:var(--pink)">Optimistic locking — seat hold</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">State — seat lifecycle</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — pricing</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Command — booking/cancel</span>
+  </div>
+
+  <div class="primer">
+    <div class="primer-header">
+      <span class="primer-label">📖 Concept Primer</span>
+      <span class="primer-name">Optimistic vs Pessimistic Locking — concurrency without deadlocks</span>
+    </div>
+    <div class="primer-desc">Pessimistic locking blocks everyone while one thread works. Optimistic locking lets everyone try, then validates at commit time — great when conflicts are rare (most ticket bookings).</div>
+<pre>
+<span class="cmt">// ── PESSIMISTIC: lock the resource upfront ─────────────</span>
+<span class="kw">private readonly</span> <span class="kw">object</span> _lock = <span class="kw">new</span>();
+<span class="kw">public bool</span> <span class="mth">TryHoldPessimistic</span>(<span class="typ">Seat</span> seat)
+{
+    <span class="kw">lock</span> (_lock)                      <span class="cmt">// blocks all other threads</span>
+    {
+        <span class="kw">if</span> (seat.<span class="prop">Status</span> != <span class="en">SeatStatus</span>.Available) <span class="kw">return false</span>;
+        seat.<span class="prop">Status</span> = <span class="en">SeatStatus</span>.TempHeld;
+        <span class="kw">return true</span>;
+    }
+}
+
+<span class="cmt">// ── OPTIMISTIC: read freely, validate before commit ────</span>
+<span class="kw">public bool</span> <span class="mth">TryHoldOptimistic</span>(<span class="typ">Seat</span> seat, <span class="kw">int</span> expectedVersion)
+{
+    <span class="cmt">// No lock — read current state</span>
+    <span class="kw">if</span> (seat.<span class="prop">Status</span> != <span class="en">SeatStatus</span>.Available) <span class="kw">return false</span>;
+
+    <span class="cmt">// Atomic compare-and-swap on version</span>
+    <span class="kw">int</span> original = Interlocked.<span class="mth">CompareExchange</span>(
+        <span class="kw">ref</span> seat._version, expectedVersion + 1, expectedVersion);
+
+    <span class="kw">if</span> (original != expectedVersion)
+        <span class="kw">return false</span>; <span class="cmt">// someone else changed it — retry</span>
+
+    seat.<span class="prop">Status</span> = <span class="en">SeatStatus</span>.TempHeld;
+    <span class="kw">return true</span>;
+}
+<span class="cmt">// In practice for LLD interviews: lock() is fine and expected.</span>
+<span class="cmt">// Mention CAS / Redis SETNX for distributed follow-up questions.</span>
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">MovieTicketBooking.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">SeatStatus</span>    { Available, TempHeld, Booked }
+<span class="kw">public enum</span> <span class="en">SeatCategory</span>  { Regular, Premium, Recliner }
+<span class="kw">public enum</span> <span class="en">BookingStatus</span> { PendingPayment, Confirmed, Cancelled, Expired }
+
+<span class="sec-comment">// ── Seat ───────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Seat</span>
+{
+    <span class="kw">public</span> Guid            <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>          <span class="prop">Row</span>      { <span class="kw">get</span>; }
+    <span class="kw">public int</span>             <span class="prop">Number</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">SeatCategory</span>    <span class="prop">Category</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">SeatStatus</span>      <span class="prop">Status</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">SeatStatus</span>.Available;
+    <span class="kw">public</span> <span class="typ">DateTime</span>?       <span class="prop">HeldAt</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">internal int</span> _version = 0;
+
+    <span class="kw">public</span> <span class="mth">Seat</span>(<span class="kw">string</span> row, <span class="kw">int</span> number, <span class="en">SeatCategory</span> cat)
+        => (<span class="prop">Row</span>, <span class="prop">Number</span>, <span class="prop">Category</span>) = (row, number, cat);
+
+    <span class="kw">public override string</span> <span class="mth">ToString</span>() => $<span class="str">"{Row}{Number}({Category})"</span>;
+}
+
+<span class="sec-comment">// ── Movie & Show ───────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Movie</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Title</span>    { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Language</span> { <span class="kw">get</span>; }
+    <span class="kw">public int</span>    <span class="prop">DurationMins</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">Movie</span>(<span class="kw">string</span> title, <span class="kw">string</span> lang, <span class="kw">int</span> duration)
+        => (<span class="prop">Title</span>, <span class="prop">Language</span>, <span class="prop">DurationMins</span>) = (title, lang, duration);
+}
+
+<span class="kw">public class</span> <span class="typ">Show</span>
+{
+    <span class="kw">public</span> Guid            <span class="prop">Id</span>        { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="typ">Movie</span>           <span class="prop">Movie</span>     { <span class="kw">get</span>; }
+    <span class="kw">public string</span>          <span class="prop">Screen</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>        <span class="prop">StartTime</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">Seat</span>&gt;      <span class="prop">Seats</span>     { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Show</span>(<span class="typ">Movie</span> movie, <span class="kw">string</span> screen, <span class="typ">DateTime</span> start)
+        => (<span class="prop">Movie</span>, <span class="prop">Screen</span>, <span class="prop">StartTime</span>) = (movie, screen, start);
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Seat</span>&gt; <span class="mth">GetAvailable</span>() =>
+        <span class="prop">Seats</span>.<span class="mth">Where</span>(s => s.<span class="prop">Status</span> == <span class="en">SeatStatus</span>.Available);
+
+    <span class="cmt">// Find N consecutive seats in the same row</span>
+    <span class="kw">public</span> List&lt;<span class="typ">Seat</span>&gt;? <span class="mth">FindConsecutive</span>(<span class="kw">int</span> count)
+    {
+        <span class="kw">var</span> byRow = <span class="prop">Seats</span>
+            .<span class="mth">Where</span>(s => s.<span class="prop">Status</span> == <span class="en">SeatStatus</span>.Available)
+            .<span class="mth">GroupBy</span>(s => s.<span class="prop">Row</span>);
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> row <span class="kw">in</span> byRow)
+        {
+            <span class="kw">var</span> sorted = row.<span class="mth">OrderBy</span>(s => s.<span class="prop">Number</span>).<span class="mth">ToList</span>();
+            <span class="kw">for</span> (<span class="kw">int</span> i = 0; i <= sorted.<span class="prop">Count</span> - count; i++)
+            {
+                <span class="kw">bool</span> consecutive = <span class="kw">true</span>;
+                <span class="kw">for</span> (<span class="kw">int</span> j = 1; j < count; j++)
+                    <span class="kw">if</span> (sorted[i+j].<span class="prop">Number</span> != sorted[i+j-1].<span class="prop">Number</span> + 1)
+                        { consecutive = <span class="kw">false</span>; <span class="kw">break</span>; }
+                <span class="kw">if</span> (consecutive) <span class="kw">return</span> sorted.<span class="mth">GetRange</span>(i, count);
+            }
+        }
+        <span class="kw">return null</span>;
+    }
+}
+
+<span class="sec-comment">// ── Pricing ────────────────────────────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">decimal</span> <span class="mth">Price</span>(<span class="typ">Show</span> show, <span class="typ">Seat</span> seat);
+}
+
+<span class="kw">public class</span> <span class="typ">CategoryPricing</span> : <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">private static readonly</span> Dictionary&lt;<span class="en">SeatCategory</span>, <span class="kw">decimal</span>&gt; _multipliers = <span class="kw">new</span>()
+    {
+        [<span class="en">SeatCategory</span>.Regular]  = 1.0m,
+        [<span class="en">SeatCategory</span>.Premium]  = 1.5m,
+        [<span class="en">SeatCategory</span>.Recliner] = 2.2m
+    };
+
+    <span class="kw">public decimal</span> <span class="mth">Price</span>(<span class="typ">Show</span> show, <span class="typ">Seat</span> seat)
+    {
+        <span class="kw">const decimal</span> basePrice = 150m;
+        <span class="kw">decimal</span> surge = show.<span class="prop">StartTime</span>.<span class="prop">Hour</span> >= 18 ? 1.2m : 1.0m; <span class="cmt">// evening surcharge</span>
+        <span class="kw">return</span> basePrice * _multipliers[seat.<span class="prop">Category</span>] * surge;
+    }
+}
+
+<span class="sec-comment">// ── User ───────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">User</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>    { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Name</span>  { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Email</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">User</span>(<span class="kw">string</span> name, <span class="kw">string</span> email) => (<span class="prop">Name</span>, <span class="prop">Email</span>) = (name, email);
+}
+
+<span class="sec-comment">// ── Booking ────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Booking</span>
+{
+    <span class="kw">public</span> Guid            <span class="prop">Id</span>        { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="typ">User</span>            <span class="prop">User</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Show</span>            <span class="prop">Show</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">Seat</span>&gt;      <span class="prop">Seats</span>     { <span class="kw">get</span>; }
+    <span class="kw">public decimal</span>         <span class="prop">TotalCost</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">BookingStatus</span>   <span class="prop">Status</span>    { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">BookingStatus</span>.PendingPayment;
+    <span class="kw">public</span> <span class="typ">DateTime</span>        <span class="prop">ExpiresAt</span> { <span class="kw">get</span>; }
+    <span class="kw">private</span> <span class="typ">Timer</span>?        _expTimer;
+
+    <span class="kw">public</span> <span class="mth">Booking</span>(<span class="typ">User</span> user, <span class="typ">Show</span> show, List&lt;<span class="typ">Seat</span>&gt; seats, <span class="kw">decimal</span> cost, Action&lt;<span class="typ">Booking</span>&gt; onExpiry)
+    {
+        (<span class="prop">User</span>, <span class="prop">Show</span>, <span class="prop">Seats</span>, <span class="prop">TotalCost</span>) = (user, show, seats, cost);
+        <span class="prop">ExpiresAt</span> = DateTime.<span class="prop">Now</span>.<span class="mth">AddMinutes</span>(10);
+        <span class="cmt">// Auto-cancel after 10 minutes if unpaid</span>
+        _expTimer = <span class="kw">new</span> Timer(_ => {
+            <span class="kw">if</span> (<span class="prop">Status</span> == <span class="en">BookingStatus</span>.PendingPayment) onExpiry(<span class="kw">this</span>);
+        }, <span class="kw">null</span>, TimeSpan.<span class="mth">FromMinutes</span>(10), Timeout.<span class="prop">InfiniteTimeSpan</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Dispose</span>() => _expTimer?.<span class="mth">Dispose</span>();
+}
+
+<span class="sec-comment">// ── Payment Gateway (abstraction) ──────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IPaymentGateway</span>
+{
+    <span class="kw">bool</span> <span class="mth">Charge</span>(<span class="typ">User</span> user, <span class="kw">decimal</span> amount, Guid idempotencyKey);
+    <span class="kw">void</span> <span class="mth">Refund</span>(<span class="typ">User</span> user, <span class="kw">decimal</span> amount, Guid bookingId);
+}
+
+<span class="kw">public class</span> <span class="typ">MockPaymentGateway</span> : <span class="iface">IPaymentGateway</span>
+{
+    <span class="kw">public bool</span> <span class="mth">Charge</span>(<span class="typ">User</span> u, <span class="kw">decimal</span> amount, Guid key)
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"💳 Charging {u.Name} ${amount:F2} [key:{key.ToString()[..8]}]"</span>);
+        <span class="kw">return true</span>; <span class="cmt">// always succeeds in mock</span>
+    }
+    <span class="kw">public void</span> <span class="mth">Refund</span>(<span class="typ">User</span> u, <span class="kw">decimal</span> amt, Guid id) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"💸 Refunding {u.Name} ${amt:F2}"</span>);
+}
+
+<span class="sec-comment">// ── Booking Service (core orchestrator) ────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">BookingService</span>
+{
+    <span class="kw">private readonly</span> <span class="iface">IPricingStrategy</span>            _pricing;
+    <span class="kw">private readonly</span> <span class="iface">IPaymentGateway</span>             _payment;
+    <span class="kw">private readonly</span> Dictionary&lt;Guid, <span class="typ">Booking</span>&gt;    _bookings = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="kw">object</span>                        _seatLock = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">BookingService</span>(<span class="iface">IPricingStrategy</span> pricing, <span class="iface">IPaymentGateway</span> payment)
+        => (_pricing, _payment) = (pricing, payment);
+
+    <span class="cmt">// Step 1: Hold seats temporarily (10-min window)</span>
+    <span class="kw">public</span> <span class="typ">Booking</span>? <span class="mth">HoldSeats</span>(<span class="typ">User</span> user, <span class="typ">Show</span> show, List&lt;<span class="typ">Seat</span>&gt; requestedSeats)
+    {
+        <span class="kw">lock</span> (_seatLock)
+        {
+            <span class="cmt">// Verify all seats still available</span>
+            <span class="kw">if</span> (requestedSeats.<span class="mth">Any</span>(s => s.<span class="prop">Status</span> != <span class="en">SeatStatus</span>.Available))
+            {
+                Console.<span class="mth">WriteLine</span>(<span class="str">"❌ One or more seats already taken."</span>);
+                <span class="kw">return null</span>;
+            }
+
+            <span class="kw">decimal</span> total = requestedSeats.<span class="mth">Sum</span>(s => _pricing.<span class="mth">Price</span>(show, s));
+
+            <span class="cmt">// Mark seats as held</span>
+            <span class="kw">foreach</span> (<span class="kw">var</span> seat <span class="kw">in</span> requestedSeats)
+            {
+                seat.<span class="prop">Status</span>  = <span class="en">SeatStatus</span>.TempHeld;
+                seat.<span class="prop">HeldAt</span>  = DateTime.<span class="prop">Now</span>;
+            }
+
+            <span class="kw">var</span> booking = <span class="kw">new</span> <span class="typ">Booking</span>(user, show, requestedSeats, total, <span class="mth">ExpireBooking</span>);
+            _bookings[booking.<span class="prop">Id</span>] = booking;
+            Console.<span class="mth">WriteLine</span>($<span class="str">"🎟  Held {requestedSeats.Count} seat(s) for {user.Name} — ${total:F2}. Pay within 10 min."</span>);
+            <span class="kw">return</span> booking;
+        }
+    }
+
+    <span class="cmt">// Step 2: Confirm with payment</span>
+    <span class="kw">public bool</span> <span class="mth">ConfirmPayment</span>(Guid bookingId)
+    {
+        <span class="kw">if</span> (!_bookings.<span class="mth">TryGetValue</span>(bookingId, <span class="kw">out var</span> b)) <span class="kw">return false</span>;
+        <span class="kw">if</span> (b.<span class="prop">Status</span> != <span class="en">BookingStatus</span>.PendingPayment) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Booking not payable."</span>); <span class="kw">return false</span>; }
+
+        <span class="kw">if</span> (!_payment.<span class="mth">Charge</span>(b.<span class="prop">User</span>, b.<span class="prop">TotalCost</span>, b.<span class="prop">Id</span>))
+        {
+            <span class="mth">ExpireBooking</span>(b);
+            <span class="kw">return false</span>;
+        }
+
+        b.<span class="prop">Status</span> = <span class="en">BookingStatus</span>.Confirmed;
+        <span class="kw">foreach</span> (<span class="kw">var</span> s <span class="kw">in</span> b.<span class="prop">Seats</span>) s.<span class="prop">Status</span> = <span class="en">SeatStatus</span>.Booked;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Booking {b.Id.ToString()[..8]} confirmed! Seats: {string.Join(", ", b.Seats)}"</span>);
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Cancel</span>(Guid bookingId)
+    {
+        <span class="kw">if</span> (!_bookings.<span class="mth">TryGetValue</span>(bookingId, <span class="kw">out var</span> b)) <span class="kw">return</span>;
+        <span class="kw">if</span> (b.<span class="prop">Status</span> == <span class="en">BookingStatus</span>.Confirmed) _payment.<span class="mth">Refund</span>(b.<span class="prop">User</span>, b.<span class="prop">TotalCost</span>, b.<span class="prop">Id</span>);
+        <span class="mth">ExpireBooking</span>(b);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🗑  Booking {b.Id.ToString()[..8]} cancelled."</span>);
+    }
+
+    <span class="kw">private void</span> <span class="mth">ExpireBooking</span>(<span class="typ">Booking</span> b)
+    {
+        <span class="kw">lock</span> (_seatLock)
+        {
+            <span class="kw">if</span> (b.<span class="prop">Status</span> is <span class="en">BookingStatus</span>.Confirmed <span class="kw">or</span> <span class="en">BookingStatus</span>.Cancelled) <span class="kw">return</span>;
+            b.<span class="prop">Status</span> = <span class="en">BookingStatus</span>.Expired;
+            <span class="kw">foreach</span> (<span class="kw">var</span> s <span class="kw">in</span> b.<span class="prop">Seats</span>) s.<span class="prop">Status</span> = <span class="en">SeatStatus</span>.Available;
+            Console.<span class="mth">WriteLine</span>($<span class="str">"⌛ Booking {b.Id.ToString()[..8]} expired — seats released."</span>);
+        }
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ──────────────────────────────────────────────────────</span>
+<span class="kw">var</span> movie   = <span class="kw">new</span> <span class="typ">Movie</span>(<span class="str">"Interstellar"</span>, <span class="str">"English"</span>, 169);
+<span class="kw">var</span> show    = <span class="kw">new</span> <span class="typ">Show</span>(movie, <span class="str">"Screen-1"</span>, <span class="typ">DateTime</span>.<span class="mth">Today</span>.<span class="mth">AddHours</span>(21));
+
+<span class="cmt">// Build seat map: rows A-C, seats 1-5</span>
+<span class="kw">foreach</span> (<span class="kw">var</span> row <span class="kw">in</span> <span class="kw">new</span>[] { <span class="str">"A"</span>, <span class="str">"B"</span>, <span class="str">"C"</span> })
+    <span class="kw">for</span> (<span class="kw">int</span> n = 1; n <= 5; n++)
+    {
+        <span class="kw">var</span> cat = row == <span class="str">"A"</span> ? <span class="en">SeatCategory</span>.Recliner
+                : row == <span class="str">"B"</span> ? <span class="en">SeatCategory</span>.Premium
+                              : <span class="en">SeatCategory</span>.Regular;
+        show.<span class="prop">Seats</span>.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">Seat</span>(row, n, cat));
+    }
+
+<span class="kw">var</span> svc    = <span class="kw">new</span> <span class="typ">BookingService</span>(<span class="kw">new</span> <span class="typ">CategoryPricing</span>(), <span class="kw">new</span> <span class="typ">MockPaymentGateway</span>());
+<span class="kw">var</span> alice  = <span class="kw">new</span> <span class="typ">User</span>(<span class="str">"Alice"</span>, <span class="str">"alice@example.com"</span>);
+
+<span class="cmt">// Alice wants 2 consecutive seats</span>
+<span class="kw">var</span> seats  = show.<span class="mth">FindConsecutive</span>(2)!;
+<span class="kw">var</span> booking= svc.<span class="mth">HoldSeats</span>(alice, show, seats)!;
+svc.<span class="mth">ConfirmPayment</span>(booking.<span class="prop">Id</span>);
+
+<span class="cmt">// Bob tries same seats — should fail</span>
+<span class="kw">var</span> bob    = <span class="kw">new</span> <span class="typ">User</span>(<span class="str">"Bob"</span>, <span class="str">"bob@example.com"</span>);
+<span class="kw">var</span> same   = show.<span class="prop">Seats</span>.<span class="mth">Where</span>(s => s.<span class="prop">Status</span> != <span class="en">SeatStatus</span>.Available).<span class="mth">ToList</span>();
+svc.<span class="mth">HoldSeats</span>(bob, show, same); <span class="cmt">// ❌ already booked</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     02. RIDE SHARING SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="ridesharing">
+  <div class="sys-header">
+    <div class="sys-num">02</div>
+    <div class="sys-meta">
+      <div class="sys-title">Ride Sharing System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Observer (Driver Matching)</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Strategy (Pricing)</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">State (Ride Lifecycle)</span>
+        <span class="sys-tag" style="color:var(--teal);border-color:rgba(78,205,196,.3)">Factory (Vehicle Types)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--purple)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Ride state machine: Requested → DriverAssigned → Started → Completed / Cancelled</li>
+          <li>Driver matching: geo-proximity + rating + vehicle type filter</li>
+          <li>Surge pricing strategy reads real-time demand/supply ratio</li>
+          <li>Driver location updates push to a spatial index (simulated here with list)</li>
+          <li>Trip fare = base + (distance × perKmRate) + (time × perMinRate) × surgeFactor</li>
+          <li>Rating system updates driver/rider reputation after trip completion</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Rider / Driver</strong> — profile, rating, current location</li>
+          <li><strong>Vehicle</strong> — type (Bike/Auto/Cab/XL), plate, capacity</li>
+          <li><strong>Ride</strong> — state machine, pickup, dropoff, fare, OTP</li>
+          <li><strong>RideService</strong> — requestRide, assignDriver, start, complete</li>
+          <li><strong>IPricingStrategy</strong> — standard, surge, toll-inclusive</li>
+          <li><strong>IDriverMatcher</strong> — nearest, highest-rated, by vehicle type</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How does driver matching work at scale?</span>
+    <span style="font-size:12px;color:#a09060">→ In production: a geospatial index (PostGIS, Redis Geo, or S2 cells) answers "drivers within R km" in O(log N). For LLD: keep a list of active drivers, compute Haversine distance, sort by score = distance + rating bonus + acceptance rate.</span>
+    <span class="q">Q: How do you implement surge pricing?</span>
+    <span style="font-size:12px;color:#a09060">→ Track demand (active requests) and supply (available drivers) in a grid cell. SurgeFactor = demand/supply clamped to [1.0, 3.0]. Recalculated every 5 minutes. User sees estimated fare before confirming.</span>
+    <span class="q">Q: How do you handle ride cancellations and refunds?</span>
+    <span style="font-size:12px;color:#a09060">→ Free cancellation within 2 minutes or before driver arrival. After that, a flat cancellation fee is charged. Driver gets a portion of the fee as compensation. All transitions fire events so notifications go out automatically.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(255,107,157,.08);border:1px solid rgba(255,107,157,.2);color:var(--pink)">State — ride lifecycle</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — surge pricing</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Observer — ride events</span>
+    <span class="pat" style="background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--teal)">Factory — vehicle types</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">RideSharingSystem.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">RideStatus</span>   { Requested, DriverAssigned, Started, Completed, Cancelled }
+<span class="kw">public enum</span> <span class="en">VehicleType</span>  { Bike, Auto, Cab, CabXL, Premium }
+<span class="kw">public enum</span> <span class="en">DriverStatus</span> { Offline, Available, OnRide }
+
+<span class="sec-comment">// ── Location (value object) ────────────────────────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">Location</span>(<span class="kw">double</span> Lat, <span class="kw">double</span> Lng)
+{
+    <span class="cmt">// Haversine distance in km</span>
+    <span class="kw">public double</span> <span class="mth">DistanceTo</span>(<span class="typ">Location</span> other)
+    {
+        <span class="kw">const double</span> R = 6371;
+        <span class="kw">double</span> dLat = (<span class="prop">Lat</span>  - other.<span class="prop">Lat</span>)  * Math.PI / 180;
+        <span class="kw">double</span> dLng = (<span class="prop">Lng</span>  - other.<span class="prop">Lng</span>)  * Math.PI / 180;
+        <span class="kw">double</span> a = Math.<span class="mth">Sin</span>(dLat/2) * Math.<span class="mth">Sin</span>(dLat/2) +
+                   Math.<span class="mth">Cos</span>(<span class="prop">Lat</span> * Math.PI/180) * Math.<span class="mth">Cos</span>(other.<span class="prop">Lat</span> * Math.PI/180) *
+                   Math.<span class="mth">Sin</span>(dLng/2) * Math.<span class="mth">Sin</span>(dLng/2);
+        <span class="kw">return</span> R * 2 * Math.<span class="mth">Atan2</span>(Math.<span class="mth">Sqrt</span>(a), Math.<span class="mth">Sqrt</span>(1 - a));
+    }
+}
+
+<span class="sec-comment">// ── People ─────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Rider</span>
+{
+    <span class="kw">public</span> Guid     <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>   <span class="prop">Name</span>     { <span class="kw">get</span>; }
+    <span class="kw">public string</span>   <span class="prop">Phone</span>    { <span class="kw">get</span>; }
+    <span class="kw">public double</span>   <span class="prop">Rating</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = 5.0;
+    <span class="kw">public</span> <span class="mth">Rider</span>(<span class="kw">string</span> name, <span class="kw">string</span> phone) => (<span class="prop">Name</span>, <span class="prop">Phone</span>) = (name, phone);
+}
+
+<span class="kw">public class</span> <span class="typ">Driver</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>       { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>        <span class="prop">Name</span>     { <span class="kw">get</span>; }
+    <span class="kw">public string</span>        <span class="prop">License</span>  { <span class="kw">get</span>; }
+    <span class="kw">public double</span>        <span class="prop">Rating</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = 5.0;
+    <span class="kw">public</span> <span class="en">DriverStatus</span>  <span class="prop">Status</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">DriverStatus</span>.Available;
+    <span class="kw">public</span> <span class="typ">Location</span>      <span class="prop">Location</span> { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="kw">new</span>(0, 0);
+    <span class="kw">public</span> <span class="en">VehicleType</span>   <span class="prop">VehicleType</span> { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="mth">Driver</span>(<span class="kw">string</span> name, <span class="kw">string</span> license, <span class="en">VehicleType</span> type)
+        => (<span class="prop">Name</span>, <span class="prop">License</span>, <span class="prop">VehicleType</span>) = (name, license, type);
+}
+
+<span class="sec-comment">// ── Ride ───────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Ride</span>
+{
+    <span class="kw">public</span> Guid         <span class="prop">Id</span>          { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="typ">Rider</span>        <span class="prop">Rider</span>       { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Driver</span>?      <span class="prop">Driver</span>      { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="typ">Location</span>     <span class="prop">Pickup</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Location</span>     <span class="prop">Dropoff</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">VehicleType</span>  <span class="prop">VehicleType</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">RideStatus</span>   <span class="prop">Status</span>      { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">RideStatus</span>.Requested;
+    <span class="kw">public string</span>       <span class="prop">Otp</span>         { <span class="kw">get</span>; } = Random.<span class="prop">Shared</span>.<span class="mth">Next</span>(1000, 9999).<span class="mth">ToString</span>();
+    <span class="kw">public decimal</span>      <span class="prop">EstimatedFare</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public decimal</span>      <span class="prop">FinalFare</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>     <span class="prop">RequestedAt</span> { <span class="kw">get</span>; } = DateTime.<span class="prop">Now</span>;
+    <span class="kw">public</span> <span class="typ">DateTime</span>?    <span class="prop">StartedAt</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>?    <span class="prop">CompletedAt</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Ride</span>(<span class="typ">Rider</span> rider, <span class="typ">Location</span> pickup, <span class="typ">Location</span> dropoff, <span class="en">VehicleType</span> type)
+        => (<span class="prop">Rider</span>, <span class="prop">Pickup</span>, <span class="prop">Dropoff</span>, <span class="prop">VehicleType</span>) = (rider, pickup, dropoff, type);
+
+    <span class="kw">public double</span> <span class="prop">DistanceKm</span> => <span class="prop">Pickup</span>.<span class="mth">DistanceTo</span>(<span class="prop">Dropoff</span>);
+}
+
+<span class="sec-comment">// ── Pricing Strategy ───────────────────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">decimal</span> <span class="mth">Estimate</span>(<span class="typ">Ride</span> ride);
+    <span class="kw">decimal</span> <span class="mth">Final</span>(<span class="typ">Ride</span> ride, <span class="kw">double</span> actualKm, <span class="kw">double</span> durationMins);
+}
+
+<span class="kw">public class</span> <span class="typ">SurgePricingStrategy</span> : <span class="iface">IPricingStrategy</span>
+{
+    <span class="kw">private readonly</span> <span class="kw">decimal</span> _surgeFactor;
+
+    <span class="kw">private static readonly</span> Dictionary&lt;<span class="en">VehicleType</span>, (<span class="kw">decimal</span> Base, <span class="kw">decimal</span> PerKm, <span class="kw">decimal</span> PerMin)&gt; _rates = <span class="kw">new</span>()
+    {
+        [<span class="en">VehicleType</span>.Bike]    = (20m, 5m, 0.5m),
+        [<span class="en">VehicleType</span>.Auto]    = (30m, 8m, 1.0m),
+        [<span class="en">VehicleType</span>.Cab]     = (50m, 12m, 1.5m),
+        [<span class="en">VehicleType</span>.CabXL]   = (80m, 16m, 2.0m),
+        [<span class="en">VehicleType</span>.Premium] = (120m, 20m, 2.5m),
+    };
+
+    <span class="kw">public</span> <span class="mth">SurgePricingStrategy</span>(<span class="kw">decimal</span> surgeFactor = 1.0m) => _surgeFactor = surgeFactor;
+
+    <span class="kw">public decimal</span> <span class="mth">Estimate</span>(<span class="typ">Ride</span> ride)
+    {
+        <span class="kw">var</span> r = _rates[ride.<span class="prop">VehicleType</span>];
+        <span class="kw">return</span> (r.Base + (<span class="kw">decimal</span>)ride.<span class="prop">DistanceKm</span> * r.PerKm) * _surgeFactor;
+    }
+
+    <span class="kw">public decimal</span> <span class="mth">Final</span>(<span class="typ">Ride</span> ride, <span class="kw">double</span> actualKm, <span class="kw">double</span> durationMins)
+    {
+        <span class="kw">var</span> r = _rates[ride.<span class="prop">VehicleType</span>];
+        <span class="kw">return</span> (r.Base + (<span class="kw">decimal</span>)actualKm * r.PerKm + (<span class="kw">decimal</span>)durationMins * r.PerMin) * _surgeFactor;
+    }
+}
+
+<span class="sec-comment">// ── Driver Matcher ─────────────────────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IDriverMatcher</span>
+{
+    <span class="typ">Driver</span>? <span class="mth">Match</span>(<span class="typ">Ride</span> ride, IEnumerable&lt;<span class="typ">Driver</span>&gt; available);
+}
+
+<span class="kw">public class</span> <span class="typ">NearestDriverMatcher</span> : <span class="iface">IDriverMatcher</span>
+{
+    <span class="kw">public</span> <span class="typ">Driver</span>? <span class="mth">Match</span>(<span class="typ">Ride</span> ride, IEnumerable&lt;<span class="typ">Driver</span>&gt; available)
+    {
+        <span class="kw">return</span> available
+            .<span class="mth">Where</span>(d => d.<span class="prop">Status</span> == <span class="en">DriverStatus</span>.Available
+                      && d.<span class="prop">VehicleType</span> == ride.<span class="prop">VehicleType</span>)
+            .<span class="mth">OrderBy</span>(d => d.<span class="prop">Location</span>.<span class="mth">DistanceTo</span>(ride.<span class="prop">Pickup</span>))
+            .<span class="mth">ThenByDescending</span>(d => d.<span class="prop">Rating</span>)
+            .<span class="mth">FirstOrDefault</span>();
+    }
+}
+
+<span class="sec-comment">// ── Ride Events (Observer) ─────────────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IRideEventHandler</span>
+{
+    <span class="kw">void</span> <span class="mth">OnRideRequested</span>(<span class="typ">Ride</span> ride);
+    <span class="kw">void</span> <span class="mth">OnDriverAssigned</span>(<span class="typ">Ride</span> ride);
+    <span class="kw">void</span> <span class="mth">OnRideCompleted</span>(<span class="typ">Ride</span> ride);
+    <span class="kw">void</span> <span class="mth">OnRideCancelled</span>(<span class="typ">Ride</span> ride);
+}
+
+<span class="kw">public class</span> <span class="typ">NotificationHandler</span> : <span class="iface">IRideEventHandler</span>
+{
+    <span class="kw">public void</span> <span class="mth">OnRideRequested</span>(<span class="typ">Ride</span> r)  => Console.<span class="mth">WriteLine</span>($<span class="str">"📱 {r.Rider.Name}: Looking for your {r.VehicleType}..."</span>);
+    <span class="kw">public void</span> <span class="mth">OnDriverAssigned</span>(<span class="typ">Ride</span> r) => Console.<span class="mth">WriteLine</span>($<span class="str">"📱 {r.Rider.Name}: {r.Driver!.Name} is on the way! OTP: {r.Otp}"</span>);
+    <span class="kw">public void</span> <span class="mth">OnRideCompleted</span>(<span class="typ">Ride</span> r)  => Console.<span class="mth">WriteLine</span>($<span class="str">"📱 {r.Rider.Name}: Arrived! Fare: ₹{r.FinalFare:F2}. Please rate your driver."</span>);
+    <span class="kw">public void</span> <span class="mth">OnRideCancelled</span>(<span class="typ">Ride</span> r)  => Console.<span class="mth">WriteLine</span>($<span class="str">"📱 {r.Rider.Name}: Ride cancelled."</span>);
+}
+
+<span class="sec-comment">// ── Ride Service ───────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">RideService</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Driver</span>&gt;           _drivers  = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Ride</span>&gt;             _rides    = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IDriverMatcher</span>         _matcher;
+    <span class="kw">private readonly</span> <span class="iface">IPricingStrategy</span>        _pricing;
+    <span class="kw">private readonly</span> List&lt;<span class="iface">IRideEventHandler</span>&gt; _handlers = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">RideService</span>(<span class="iface">IDriverMatcher</span> matcher, <span class="iface">IPricingStrategy</span> pricing)
+        => (_matcher, _pricing) = (matcher, pricing);
+
+    <span class="kw">public void</span> <span class="mth">RegisterDriver</span>(<span class="typ">Driver</span> d)         => _drivers.<span class="mth">Add</span>(d);
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(<span class="iface">IRideEventHandler</span> h)   => _handlers.<span class="mth">Add</span>(h);
+
+    <span class="kw">public</span> <span class="typ">Ride</span>? <span class="mth">RequestRide</span>(<span class="typ">Rider</span> rider, <span class="typ">Location</span> pickup, <span class="typ">Location</span> dropoff, <span class="en">VehicleType</span> type)
+    {
+        <span class="kw">var</span> ride = <span class="kw">new</span> <span class="typ">Ride</span>(rider, pickup, dropoff, type);
+        ride.<span class="prop">EstimatedFare</span> = _pricing.<span class="mth">Estimate</span>(ride);
+        _rides.<span class="mth">Add</span>(ride);
+        _handlers.<span class="mth">ForEach</span>(h => h.<span class="mth">OnRideRequested</span>(ride));
+
+        <span class="kw">var</span> driver = _matcher.<span class="mth">Match</span>(ride, _drivers);
+        <span class="kw">if</span> (driver == <span class="kw">null</span>)
+        {
+            Console.<span class="mth">WriteLine</span>(<span class="str">"❌ No drivers available."</span>);
+            ride.<span class="prop">Status</span> = <span class="en">RideStatus</span>.Cancelled;
+            <span class="kw">return null</span>;
+        }
+
+        ride.<span class="prop">Driver</span>    = driver;
+        ride.<span class="prop">Status</span>    = <span class="en">RideStatus</span>.DriverAssigned;
+        driver.<span class="prop">Status</span>  = <span class="en">DriverStatus</span>.OnRide;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🚗 Estimated fare: ₹{ride.EstimatedFare:F2} (Surge: {(_pricing is SurgePricingStrategy s ? "active" : "none")})"</span>);
+        _handlers.<span class="mth">ForEach</span>(h => h.<span class="mth">OnDriverAssigned</span>(ride));
+        <span class="kw">return</span> ride;
+    }
+
+    <span class="kw">public void</span> <span class="mth">StartRide</span>(Guid rideId, <span class="kw">string</span> otp)
+    {
+        <span class="kw">var</span> ride = _rides.<span class="mth">First</span>(r => r.<span class="prop">Id</span> == rideId);
+        <span class="kw">if</span> (ride.<span class="prop">Otp</span> != otp) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Wrong OTP."</span>); <span class="kw">return</span>; }
+        ride.<span class="prop">Status</span>    = <span class="en">RideStatus</span>.Started;
+        ride.<span class="prop">StartedAt</span> = DateTime.<span class="prop">Now</span>;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"▶️  Ride started. OTP verified."</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">CompleteRide</span>(Guid rideId, <span class="kw">double</span> actualKm, <span class="kw">double</span> durationMins)
+    {
+        <span class="kw">var</span> ride = _rides.<span class="mth">First</span>(r => r.<span class="prop">Id</span> == rideId);
+        ride.<span class="prop">FinalFare</span>    = _pricing.<span class="mth">Final</span>(ride, actualKm, durationMins);
+        ride.<span class="prop">Status</span>       = <span class="en">RideStatus</span>.Completed;
+        ride.<span class="prop">CompletedAt</span>  = DateTime.<span class="prop">Now</span>;
+        ride.<span class="prop">Driver</span>!.<span class="prop">Status</span> = <span class="en">DriverStatus</span>.Available;
+        _handlers.<span class="mth">ForEach</span>(h => h.<span class="mth">OnRideCompleted</span>(ride));
+    }
+
+    <span class="kw">public void</span> <span class="mth">RateDriver</span>(Guid rideId, <span class="kw">double</span> stars)
+    {
+        <span class="kw">var</span> ride = _rides.<span class="mth">First</span>(r => r.<span class="prop">Id</span> == rideId);
+        <span class="kw">if</span> (ride.<span class="prop">Driver</span> == <span class="kw">null</span>) <span class="kw">return</span>;
+        ride.<span class="prop">Driver</span>.<span class="prop">Rating</span> = (ride.<span class="prop">Driver</span>.<span class="prop">Rating</span> * 9 + stars) / 10; <span class="cmt">// rolling avg</span>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"⭐ {ride.Driver.Name} new rating: {ride.Driver.Rating:F2}"</span>);
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ──────────────────────────────────────────────────────</span>
+<span class="kw">var</span> svc     = <span class="kw">new</span> <span class="typ">RideService</span>(<span class="kw">new</span> <span class="typ">NearestDriverMatcher</span>(), <span class="kw">new</span> <span class="typ">SurgePricingStrategy</span>(surgeFactor: 1.4m));
+svc.<span class="mth">Subscribe</span>(<span class="kw">new</span> <span class="typ">NotificationHandler</span>());
+
+<span class="kw">var</span> driver1 = <span class="kw">new</span> <span class="typ">Driver</span>(<span class="str">"Ravi Kumar"</span>, <span class="str">"KA-DL-001"</span>, <span class="en">VehicleType</span>.Cab) { <span class="prop">Location</span> = <span class="kw">new</span>(12.97, 77.59) };
+<span class="kw">var</span> driver2 = <span class="kw">new</span> <span class="typ">Driver</span>(<span class="str">"Suresh Babu"</span>, <span class="str">"KA-DL-002"</span>, <span class="en">VehicleType</span>.Bike) { <span class="prop">Location</span> = <span class="kw">new</span>(12.98, 77.60) };
+svc.<span class="mth">RegisterDriver</span>(driver1);
+svc.<span class="mth">RegisterDriver</span>(driver2);
+
+<span class="kw">var</span> rider   = <span class="kw">new</span> <span class="typ">Rider</span>(<span class="str">"Priya S"</span>, <span class="str">"9876543210"</span>);
+<span class="kw">var</span> ride    = svc.<span class="mth">RequestRide</span>(rider, <span class="kw">new</span>(12.97, 77.59), <span class="kw">new</span>(12.92, 77.61), <span class="en">VehicleType</span>.Cab)!;
+svc.<span class="mth">StartRide</span>(ride.<span class="prop">Id</span>, ride.<span class="prop">Otp</span>);
+svc.<span class="mth">CompleteRide</span>(ride.<span class="prop">Id</span>, actualKm: 6.2, durationMins: 22);
+svc.<span class="mth">RateDriver</span>(ride.<span class="prop">Id</span>, stars: 4.5);
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     03. AIRLINE MANAGEMENT SYSTEM
+════════════════════════════════════════ -->
+<section class="system" id="airline">
+  <div class="sys-header">
+    <div class="sys-num">03</div>
+    <div class="sys-meta">
+      <div class="sys-title">Airline Management System</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">State (Flight)</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Strategy (Pricing)</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Observer (Notifications)</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Composite (Itinerary)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Flight states: Scheduled → Boarding → InAir → Landed → Cancelled / Delayed</li>
+          <li>Seat inventory per cabin class (Economy, Business, First)</li>
+          <li>Dynamic pricing: base fare × load factor (occupancy %) × days-before-departure</li>
+          <li>Itinerary = composite of 1 or more flights (direct + connecting)</li>
+          <li>Crew assignment checks certifications and hours; avoids double-booking</li>
+          <li>All flight status changes notify subscribed passengers and crew</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Flight</strong> — route, aircraft, state machine, seat map</li>
+          <li><strong>Aircraft</strong> — tail number, cabin config, total capacity</li>
+          <li><strong>Reservation</strong> — passenger, seats, itinerary, fare</li>
+          <li><strong>AirlineSystem</strong> — searchFlights, book, checkin, cancel</li>
+          <li><strong>IDynamicPricing</strong> — load-based, early-bird, last-minute</li>
+          <li><strong>Crew / CrewAssignment</strong> — role, certifications, scheduling</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How does dynamic pricing work?</span>
+    <span style="font-size:12px;color:#a09060">→ Three factors multiply: (1) load factor — price rises as seats fill (60% occupancy = 1.2×, 90% = 1.8×). (2) Days before departure — &lt;7 days = 1.5×, &gt;60 days = 0.8× (early bird). (3) Cabin class base rate. All configurable.</span>
+    <span class="q">Q: How do you handle flight cancellations and cascading rebooking?</span>
+    <span style="font-size:12px;color:#a09060">→ Flight cancellation fires an event. Each affected reservation is marked Disrupted. Rebooking service searches for next available flights on the same route. Automatically rebooks when a seat is found; otherwise adds to a waitlist and notifies the passenger.</span>
+    <span class="q">Q: How does check-in work and what prevents duplicate boarding passes?</span>
+    <span style="font-size:12px;color:#a09060">→ Check-in sets a seat to CheckedIn status with the passenger's ID. Boarding pass has a unique barcode = HMAC(flightId + seatId + passengerId). Gate scanner validates the HMAC and checks the seat isn't already boarded.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">State — flight lifecycle</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Strategy — dynamic pricing</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Observer — status alerts</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Composite — itinerary</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">AirlineManagementSystem.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">FlightStatus</span>      { Scheduled, Boarding, InAir, Landed, Delayed, Cancelled }
+<span class="kw">public enum</span> <span class="en">CabinClass</span>        { Economy, Business, First }
+<span class="kw">public enum</span> <span class="en">SeatStatus</span>        { Available, Reserved, CheckedIn, Boarded }
+<span class="kw">public enum</span> <span class="en">ReservationStatus</span> { Confirmed, CheckedIn, Cancelled, Disrupted }
+
+<span class="sec-comment">// ── Aircraft & Seat ────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">FlightSeat</span>
+{
+    <span class="kw">public string</span>     <span class="prop">SeatNo</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">CabinClass</span> <span class="prop">Cabin</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">SeatStatus</span> <span class="prop">Status</span>    { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">SeatStatus</span>.Available;
+    <span class="kw">public</span> Guid?      <span class="prop">PassengerId</span>{ <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="mth">FlightSeat</span>(<span class="kw">string</span> no, <span class="en">CabinClass</span> cabin) => (<span class="prop">SeatNo</span>, <span class="prop">Cabin</span>) = (no, cabin);
+}
+
+<span class="kw">public class</span> <span class="typ">Aircraft</span>
+{
+    <span class="kw">public string</span>         <span class="prop">TailNumber</span> { <span class="kw">get</span>; }
+    <span class="kw">public string</span>         <span class="prop">Model</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">FlightSeat</span>&gt; <span class="prop">Seats</span>   { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="mth">Aircraft</span>(<span class="kw">string</span> tail, <span class="kw">string</span> model) => (<span class="prop">TailNumber</span>, <span class="prop">Model</span>) = (tail, model);
+
+    <span class="kw">public void</span> <span class="mth">AddSeats</span>(<span class="kw">int</span> count, <span class="en">CabinClass</span> cabin, <span class="kw">string</span> prefix)
+    {
+        <span class="kw">for</span> (<span class="kw">int</span> i = 1; i <= count; i++) <span class="prop">Seats</span>.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">FlightSeat</span>($<span class="str">"{prefix}{i}"</span>, cabin));
+    }
+
+    <span class="kw">public int</span> <span class="mth">OccupiedCount</span>() => <span class="prop">Seats</span>.<span class="mth">Count</span>(s => s.<span class="prop">Status</span> != <span class="en">SeatStatus</span>.Available);
+    <span class="kw">public double</span> <span class="mth">LoadFactor</span>()  => <span class="prop">Seats</span>.<span class="prop">Count</span> == 0 ? 0 : (<span class="kw">double</span>)<span class="mth">OccupiedCount</span>() / <span class="prop">Seats</span>.<span class="prop">Count</span>;
+}
+
+<span class="sec-comment">// ── Passenger ──────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Passenger</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>         { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Name</span>       { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Passport</span>   { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Email</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">Passenger</span>(<span class="kw">string</span> name, <span class="kw">string</span> passport, <span class="kw">string</span> email)
+        => (<span class="prop">Name</span>, <span class="prop">Passport</span>, <span class="prop">Email</span>) = (name, passport, email);
+}
+
+<span class="sec-comment">// ── Flight ─────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Flight</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>          { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>        <span class="prop">FlightNo</span>    { <span class="kw">get</span>; }
+    <span class="kw">public string</span>        <span class="prop">Origin</span>      { <span class="kw">get</span>; }
+    <span class="kw">public string</span>        <span class="prop">Destination</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>      <span class="prop">Departure</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>      <span class="prop">Arrival</span>     { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Aircraft</span>      <span class="prop">Aircraft</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">FlightStatus</span>  <span class="prop">Status</span>      { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="en">FlightStatus</span>.Scheduled;
+
+    <span class="kw">private readonly</span> List&lt;Action&lt;<span class="typ">Flight</span>, <span class="en">FlightStatus</span>&gt;&gt; _listeners = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">Flight</span>(<span class="kw">string</span> no, <span class="kw">string</span> origin, <span class="kw">string</span> dest, <span class="typ">DateTime</span> dep, <span class="typ">DateTime</span> arr, <span class="typ">Aircraft</span> ac)
+        => (<span class="prop">FlightNo</span>, <span class="prop">Origin</span>, <span class="prop">Destination</span>, <span class="prop">Departure</span>, <span class="prop">Arrival</span>, <span class="prop">Aircraft</span>) = (no, origin, dest, dep, arr, ac);
+
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(Action&lt;<span class="typ">Flight</span>, <span class="en">FlightStatus</span>&gt; listener) => _listeners.<span class="mth">Add</span>(listener);
+
+    <span class="kw">public void</span> <span class="mth">UpdateStatus</span>(<span class="en">FlightStatus</span> newStatus)
+    {
+        <span class="kw">var</span> old = <span class="prop">Status</span>;
+        <span class="prop">Status</span> = newStatus;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✈️  {FlightNo}: {old} → {newStatus}"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> l <span class="kw">in</span> _listeners) l(<span class="kw">this</span>, newStatus);
+    }
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">FlightSeat</span>&gt; <span class="mth">GetAvailableSeats</span>(<span class="en">CabinClass</span> cabin) =>
+        <span class="prop">Aircraft</span>.<span class="prop">Seats</span>.<span class="mth">Where</span>(s => s.<span class="prop">Cabin</span> == cabin && s.<span class="prop">Status</span> == <span class="en">SeatStatus</span>.Available);
+}
+
+<span class="sec-comment">// ── Dynamic Pricing ────────────────────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IDynamicPricing</span>
+{
+    <span class="kw">decimal</span> <span class="mth">Calculate</span>(<span class="typ">Flight</span> flight, <span class="en">CabinClass</span> cabin);
+}
+
+<span class="kw">public class</span> <span class="typ">LoadBasedPricing</span> : <span class="iface">IDynamicPricing</span>
+{
+    <span class="kw">private static readonly</span> Dictionary&lt;<span class="en">CabinClass</span>, <span class="kw">decimal</span>&gt; _base = <span class="kw">new</span>()
+    { [<span class="en">CabinClass</span>.Economy] = 4000m, [<span class="en">CabinClass</span>.Business] = 18000m, [<span class="en">CabinClass</span>.First] = 45000m };
+
+    <span class="kw">public decimal</span> <span class="mth">Calculate</span>(<span class="typ">Flight</span> flight, <span class="en">CabinClass</span> cabin)
+    {
+        <span class="kw">double</span> load     = flight.<span class="prop">Aircraft</span>.<span class="mth">LoadFactor</span>();
+        <span class="kw">double</span> daysToDep = (flight.<span class="prop">Departure</span> - DateTime.<span class="prop">Now</span>).<span class="prop">TotalDays</span>;
+
+        <span class="kw">decimal</span> loadMul = load switch
+        {
+            >= 0.90 => 1.8m,
+            >= 0.75 => 1.4m,
+            >= 0.60 => 1.2m,
+            _       => 1.0m
+        };
+
+        <span class="kw">decimal</span> daysMul = daysToDep switch
+        {
+            <= 3   => 1.8m,
+            <= 7   => 1.5m,
+            <= 14  => 1.2m,
+            >= 60  => 0.8m,
+            _      => 1.0m
+        };
+
+        <span class="kw">return</span> Math.<span class="mth">Round</span>(_base[cabin] * loadMul * daysMul, 0);
+    }
+}
+
+<span class="sec-comment">// ── Reservation ────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">AirlineReservation</span>
+{
+    <span class="kw">public</span> Guid               <span class="prop">Id</span>          { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>             <span class="prop">Pnr</span>         { <span class="kw">get</span>; } = <span class="mth">GeneratePnr</span>();
+    <span class="kw">public</span> <span class="typ">Passenger</span>          <span class="prop">Passenger</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Flight</span>             <span class="prop">Flight</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">FlightSeat</span>         <span class="prop">Seat</span>        { <span class="kw">get</span>; }
+    <span class="kw">public decimal</span>            <span class="prop">Fare</span>        { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">ReservationStatus</span>  <span class="prop">Status</span>      { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">ReservationStatus</span>.Confirmed;
+
+    <span class="kw">public</span> <span class="mth">AirlineReservation</span>(<span class="typ">Passenger</span> p, <span class="typ">Flight</span> f, <span class="typ">FlightSeat</span> seat, <span class="kw">decimal</span> fare)
+        => (<span class="prop">Passenger</span>, <span class="prop">Flight</span>, <span class="prop">Seat</span>, <span class="prop">Fare</span>) = (p, f, seat, fare);
+
+    <span class="kw">private static string</span> <span class="mth">GeneratePnr</span>()
+    {
+        <span class="kw">const string</span> chars = <span class="str">"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"</span>;
+        <span class="kw">return new string</span>(Enumerable.<span class="mth">Range</span>(0, 6).<span class="mth">Select</span>(_ => chars[Random.<span class="prop">Shared</span>.<span class="mth">Next</span>(chars.<span class="prop">Length</span>)]).<span class="mth">ToArray</span>());
+    }
+}
+
+<span class="sec-comment">// ── Airline System (Facade) ────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">AirlineSystem</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Flight</span>&gt;              _flights      = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="typ">AirlineReservation</span>&gt;  _reservations = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IDynamicPricing</span>            _pricing;
+    <span class="kw">private readonly</span> <span class="kw">object</span>                      _lock = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">AirlineSystem</span>(<span class="iface">IDynamicPricing</span>? pricing = <span class="kw">null</span>)
+        => _pricing = pricing ?? <span class="kw">new</span> <span class="typ">LoadBasedPricing</span>();
+
+    <span class="kw">public void</span> <span class="mth">AddFlight</span>(<span class="typ">Flight</span> f)
+    {
+        <span class="cmt">// Notify reservations if flight status changes</span>
+        f.<span class="mth">Subscribe</span>((flight, status) => {
+            <span class="kw">if</span> (status == <span class="en">FlightStatus</span>.Cancelled)
+                _reservations.<span class="mth">Where</span>(r => r.<span class="prop">Flight</span> == flight).ToList()
+                              .<span class="mth">ForEach</span>(r => {
+                                  r.<span class="prop">Status</span> = <span class="en">ReservationStatus</span>.Disrupted;
+                                  Console.<span class="mth">WriteLine</span>($<span class="str">"📧 {r.Passenger.Email}: Flight {flight.FlightNo} cancelled. PNR {r.Pnr} disrupted."</span>);
+                              });
+        });
+        _flights.<span class="mth">Add</span>(f);
+    }
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Flight</span>&gt; <span class="mth">SearchFlights</span>(<span class="kw">string</span> origin, <span class="kw">string</span> dest, <span class="typ">DateTime</span> date) =>
+        _flights.<span class="mth">Where</span>(f => f.<span class="prop">Origin</span> == origin && f.<span class="prop">Destination</span> == dest
+                           && f.<span class="prop">Departure</span>.<span class="prop">Date</span> == date.<span class="prop">Date</span>
+                           && f.<span class="prop">Status</span> == <span class="en">FlightStatus</span>.Scheduled);
+
+    <span class="kw">public</span> <span class="typ">AirlineReservation</span>? <span class="mth">Book</span>(<span class="typ">Passenger</span> passenger, <span class="typ">Flight</span> flight, <span class="en">CabinClass</span> cabin)
+    {
+        <span class="kw">lock</span> (_lock)
+        {
+            <span class="kw">var</span> seat = flight.<span class="mth">GetAvailableSeats</span>(cabin).<span class="mth">FirstOrDefault</span>();
+            <span class="kw">if</span> (seat == <span class="kw">null</span>) { Console.<span class="mth">WriteLine</span>($<span class="str">"❌ No {cabin} seats on {flight.FlightNo}."</span>); <span class="kw">return null</span>; }
+
+            <span class="kw">decimal</span> fare = _pricing.<span class="mth">Calculate</span>(flight, cabin);
+            seat.<span class="prop">Status</span>      = <span class="en">SeatStatus</span>.Reserved;
+            seat.<span class="prop">PassengerId</span> = passenger.<span class="prop">Id</span>;
+
+            <span class="kw">var</span> res = <span class="kw">new</span> <span class="typ">AirlineReservation</span>(passenger, flight, seat, fare);
+            _reservations.<span class="mth">Add</span>(res);
+            Console.<span class="mth">WriteLine</span>($<span class="str">"✅ PNR {res.Pnr}: {passenger.Name} → {flight.FlightNo} Seat {seat.SeatNo} ({cabin}) ₹{fare:F0}"</span>);
+            <span class="kw">return</span> res;
+        }
+    }
+
+    <span class="kw">public void</span> <span class="mth">CheckIn</span>(<span class="kw">string</span> pnr)
+    {
+        <span class="kw">var</span> res = _reservations.<span class="mth">FirstOrDefault</span>(r => r.<span class="prop">Pnr</span> == pnr);
+        <span class="kw">if</span> (res == <span class="kw">null</span>) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ PNR not found."</span>); <span class="kw">return</span>; }
+        <span class="kw">if</span> (res.<span class="prop">Status</span> != <span class="en">ReservationStatus</span>.Confirmed) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Cannot check in."</span>); <span class="kw">return</span>; }
+
+        res.<span class="prop">Seat</span>.<span class="prop">Status</span> = <span class="en">SeatStatus</span>.CheckedIn;
+        res.<span class="prop">Status</span>      = <span class="en">ReservationStatus</span>.CheckedIn;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🛂 Checked in: {res.Passenger.Name} on {res.Flight.FlightNo} seat {res.Seat.SeatNo}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">Cancel</span>(<span class="kw">string</span> pnr)
+    {
+        <span class="kw">var</span> res = _reservations.<span class="mth">FirstOrDefault</span>(r => r.<span class="prop">Pnr</span> == pnr);
+        <span class="kw">if</span> (res == <span class="kw">null</span>) <span class="kw">return</span>;
+        res.<span class="prop">Seat</span>.<span class="prop">Status</span>      = <span class="en">SeatStatus</span>.Available;
+        res.<span class="prop">Seat</span>.<span class="prop">PassengerId</span> = <span class="kw">null</span>;
+        res.<span class="prop">Status</span>           = <span class="en">ReservationStatus</span>.Cancelled;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🗑  PNR {pnr} cancelled. Seat {res.Seat.SeatNo} released."</span>);
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ──────────────────────────────────────────────────────</span>
+<span class="kw">var</span> airline = <span class="kw">new</span> <span class="typ">AirlineSystem</span>();
+
+<span class="kw">var</span> ac = <span class="kw">new</span> <span class="typ">Aircraft</span>(<span class="str">"VT-AIR1"</span>, <span class="str">"Boeing 737"</span>);
+ac.<span class="mth">AddSeats</span>(120, <span class="en">CabinClass</span>.Economy, <span class="str">"E"</span>);
+ac.<span class="mth">AddSeats</span>( 20, <span class="en">CabinClass</span>.Business, <span class="str">"B"</span>);
+ac.<span class="mth">AddSeats</span>(  4, <span class="en">CabinClass</span>.First,    <span class="str">"F"</span>);
+
+<span class="kw">var</span> flight = <span class="kw">new</span> <span class="typ">Flight</span>(<span class="str">"AI-202"</span>, <span class="str">"BLR"</span>, <span class="str">"DEL"</span>,
+    <span class="typ">DateTime</span>.<span class="mth">Today</span>.<span class="mth">AddDays</span>(5).<span class="mth">AddHours</span>(8),
+    <span class="typ">DateTime</span>.<span class="mth">Today</span>.<span class="mth">AddDays</span>(5).<span class="mth">AddHours</span>(11), ac);
+airline.<span class="mth">AddFlight</span>(flight);
+
+<span class="kw">var</span> p1  = <span class="kw">new</span> <span class="typ">Passenger</span>(<span class="str">"Arjun Nair"</span>, <span class="str">"P1234567"</span>, <span class="str">"arjun@mail.com"</span>);
+<span class="kw">var</span> res = airline.<span class="mth">Book</span>(p1, flight, <span class="en">CabinClass</span>.Business)!;
+
+airline.<span class="mth">CheckIn</span>(res.<span class="prop">Pnr</span>);
+flight.<span class="mth">UpdateStatus</span>(<span class="en">FlightStatus</span>.Boarding);
+flight.<span class="mth">UpdateStatus</span>(<span class="en">FlightStatus</span>.InAir);
+
+<span class="cmt">// Demonstrate cancellation cascade</span>
+<span class="kw">var</span> p2   = <span class="kw">new</span> <span class="typ">Passenger</span>(<span class="str">"Meera Singh"</span>, <span class="str">"P7654321"</span>, <span class="str">"meera@mail.com"</span>);
+<span class="kw">var</span> res2 = airline.<span class="mth">Book</span>(p2, flight, <span class="en">CabinClass</span>.Economy)!;
+flight.<span class="mth">UpdateStatus</span>(<span class="en">FlightStatus</span>.Cancelled); <span class="cmt">// triggers disruption emails</span>
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     04. STACK OVERFLOW
+════════════════════════════════════════ -->
+<section class="system" id="stackoverflow">
+  <div class="sys-header">
+    <div class="sys-num">04</div>
+    <div class="sys-meta">
+      <div class="sys-title">Stack Overflow</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Decorator (Reputation)</span>
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Observer (Notifications)</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Strategy (Search Ranking)</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Command (Vote/Edit)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--amber)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Reputation gates privileges: post (1+), comment (50+), vote (15+), edit (2000+)</li>
+          <li>Voting is idempotent — same user can't double-vote; can undo vote</li>
+          <li>Accepted answer gives +15 rep to answerer, +2 to question asker</li>
+          <li>Tags are first-class entities — questions have 1–5 tags, searchable</li>
+          <li>Full-text search ranks by: vote score × recency × accepted-answer bonus</li>
+          <li>Badges awarded by a rule engine checking rep/activity thresholds</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>User</strong> — reputation, privileges, badges, activity feed</li>
+          <li><strong>Question</strong> — title, body, tags, answers, vote count, closed flag</li>
+          <li><strong>Answer</strong> — body, vote count, accepted flag</li>
+          <li><strong>Vote</strong> — user, target (Q or A), direction (Up/Down)</li>
+          <li><strong>Tag</strong> — name, description, question count</li>
+          <li><strong>StackOverflowService</strong> — ask, answer, vote, accept, search</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you implement the reputation system?</span>
+    <span style="font-size:12px;color:#a09060">→ Each votable event (upvote +10, downvote -2, answer accepted +15, question accepted +2) triggers a ReputationEvent. An event handler applies the delta to the target user's reputation. Rep is an aggregate; never stored per-vote — recomputed on demand for auditing.</span>
+    <span class="q">Q: How does search ranking work?</span>
+    <span style="font-size:12px;color:#a09060">→ Score = (voteScore × 3) + (hasAcceptedAnswer ? 10 : 0) + (viewCount × 0.01) − (daysSinceActivity × 0.1). Full-text match against title+tags gets a keyword bonus. Results sorted by score descending.</span>
+    <span class="q">Q: How do you prevent voting fraud (sockpuppets)?</span>
+    <span style="font-size:12px;color:#a09060">→ Idempotency check: one vote record per (userId, targetId). Suspicious patterns: multiple votes from same IP, same-user Q&amp;A accept chain. Flag for review. Serial voting reversal: cron job detects and reverses vote chains between two users.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Decorator — privilege gates</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Observer — reputation events</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Strategy — search ranking</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Command — vote/edit actions</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">StackOverflow.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">VoteDirection</span> { Up, Down }
+<span class="kw">public enum</span> <span class="en">PostType</span>      { Question, Answer }
+
+<span class="sec-comment">// ── Tag ────────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Tag</span>
+{
+    <span class="kw">public string</span> <span class="prop">Name</span>          { <span class="kw">get</span>; }
+    <span class="kw">public string</span> <span class="prop">Description</span>   { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">""</span>;
+    <span class="kw">public int</span>    <span class="prop">QuestionCount</span>  { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="mth">Tag</span>(<span class="kw">string</span> name) => <span class="prop">Name</span> = name;
+}
+
+<span class="sec-comment">// ── User ───────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">SoUser</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>         { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>        <span class="prop">Username</span>   { <span class="kw">get</span>; }
+    <span class="kw">public int</span>           <span class="prop">Reputation</span> { <span class="kw">get</span>; <span class="kw">set</span>; } = 1;
+    <span class="kw">public</span> List&lt;<span class="kw">string</span>&gt;  <span class="prop">Badges</span>     { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="mth">SoUser</span>(<span class="kw">string</span> username) => <span class="prop">Username</span> = username;
+
+    <span class="cmt">// Privilege gates</span>
+    <span class="kw">public bool</span> <span class="prop">CanVote</span>       => <span class="prop">Reputation</span> >= 15;
+    <span class="kw">public bool</span> <span class="prop">CanComment</span>    => <span class="prop">Reputation</span> >= 50;
+    <span class="kw">public bool</span> <span class="prop">CanEditOthers</span> => <span class="prop">Reputation</span> >= 2000;
+    <span class="kw">public bool</span> <span class="prop">CanDownvote</span>   => <span class="prop">Reputation</span> >= 125;
+}
+
+<span class="sec-comment">// ── Votable base ───────────────────────────────────────────────────────</span>
+<span class="kw">public abstract class</span> <span class="typ">Post</span>
+{
+    <span class="kw">public</span> Guid          <span class="prop">Id</span>        { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span>        <span class="prop">Body</span>      { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="typ">SoUser</span>        <span class="prop">Author</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>      <span class="prop">CreatedAt</span> { <span class="kw">get</span>; } = DateTime.<span class="prop">Now</span>;
+    <span class="kw">public</span> <span class="typ">DateTime</span>      <span class="prop">UpdatedAt</span> { <span class="kw">get</span>; <span class="kw">set</span>; } = DateTime.<span class="prop">Now</span>;
+    <span class="kw">public int</span>           <span class="prop">VoteScore</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="cmt">// key: userId, value: direction</span>
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="en">VoteDirection</span>&gt; <span class="prop">Votes</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> List&lt;<span class="kw">string</span>&gt;  <span class="prop">Comments</span>  { <span class="kw">get</span>; } = <span class="kw">new</span>();
+
+    <span class="kw">protected</span> <span class="mth">Post</span>(<span class="kw">string</span> body, <span class="typ">SoUser</span> author) => (<span class="prop">Body</span>, <span class="prop">Author</span>) = (body, author);
+}
+
+<span class="sec-comment">// ── Answer ─────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Answer</span> : <span class="typ">Post</span>
+{
+    <span class="kw">public bool</span> <span class="prop">IsAccepted</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="mth">Answer</span>(<span class="kw">string</span> body, <span class="typ">SoUser</span> author) : <span class="kw">base</span>(body, author) { }
+}
+
+<span class="sec-comment">// ── Question ───────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Question</span> : <span class="typ">Post</span>
+{
+    <span class="kw">public string</span>        <span class="prop">Title</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">Tag</span>&gt;     <span class="prop">Tags</span>       { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> List&lt;<span class="typ">Answer</span>&gt;  <span class="prop">Answers</span>    { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="typ">Answer</span>?       <span class="prop">Accepted</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public bool</span>          <span class="prop">IsClosed</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>           <span class="prop">ViewCount</span>  { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="mth">Question</span>(<span class="kw">string</span> title, <span class="kw">string</span> body, <span class="typ">SoUser</span> author)
+        : <span class="kw">base</span>(body, author) => <span class="prop">Title</span> = title;
+
+    <span class="cmt">// Search score for ranking</span>
+    <span class="kw">public double</span> <span class="mth">SearchScore</span>(<span class="kw">bool</span> hasKeywordMatch = <span class="kw">false</span>)
+    {
+        <span class="kw">double</span> score  = <span class="prop">VoteScore</span> * 3.0
+                      + (<span class="prop">Accepted</span> != <span class="kw">null</span> ? 10 : 0)
+                      + <span class="prop">ViewCount</span> * 0.01
+                      - (DateTime.<span class="prop">Now</span> - <span class="prop">UpdatedAt</span>).<span class="prop">TotalDays</span> * 0.1
+                      + (hasKeywordMatch ? 5 : 0);
+        <span class="kw">return</span> score;
+    }
+}
+
+<span class="sec-comment">// ── Reputation Event Handler ────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">ReputationService</span>
+{
+    <span class="kw">public void</span> <span class="mth">OnUpvote</span>(<span class="typ">SoUser</span> author) => <span class="mth">Change</span>(author, +10, <span class="str">"Upvote received"</span>);
+    <span class="kw">public void</span> <span class="mth">OnDownvote</span>(<span class="typ">SoUser</span> author, <span class="typ">SoUser</span> voter)
+    {
+        <span class="mth">Change</span>(author, -2, <span class="str">"Downvote received"</span>);
+        <span class="mth">Change</span>(voter,  -1, <span class="str">"Cast downvote"</span>);  <span class="cmt">// costs voter 1 rep</span>
+    }
+    <span class="kw">public void</span> <span class="mth">OnAnswerAccepted</span>(<span class="typ">SoUser</span> answerer, <span class="typ">SoUser</span> asker)
+    {
+        <span class="mth">Change</span>(answerer, +15, <span class="str">"Answer accepted"</span>);
+        <span class="mth">Change</span>(asker,    +2,  <span class="str">"Accept vote cast"</span>);
+    }
+
+    <span class="kw">private void</span> <span class="mth">Change</span>(<span class="typ">SoUser</span> user, <span class="kw">int</span> delta, <span class="kw">string</span> reason)
+    {
+        user.<span class="prop">Reputation</span> = Math.<span class="mth">Max</span>(1, user.<span class="prop">Reputation</span> + delta);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🏅 {user.Username}: {(delta > 0 ? "+" : "")}{delta} rep ({reason}) → {user.Reputation}"</span>);
+        <span class="mth">CheckBadges</span>(user);
+    }
+
+    <span class="kw">private void</span> <span class="mth">CheckBadges</span>(<span class="typ">SoUser</span> user)
+    {
+        <span class="kw">if</span> (user.<span class="prop">Reputation</span> >= 100  && !user.<span class="prop">Badges</span>.<span class="mth">Contains</span>(<span class="str">"Autobiographer"</span>)) { user.<span class="prop">Badges</span>.<span class="mth">Add</span>(<span class="str">"Autobiographer"</span>); Console.<span class="mth">WriteLine</span>($<span class="str">"🏆 {user.Username} earned badge: Autobiographer!"</span>); }
+        <span class="kw">if</span> (user.<span class="prop">Reputation</span> >= 500  && !user.<span class="prop">Badges</span>.<span class="mth">Contains</span>(<span class="str">"Civic Duty"</span>))     { user.<span class="prop">Badges</span>.<span class="mth">Add</span>(<span class="str">"Civic Duty"</span>);     Console.<span class="mth">WriteLine</span>($<span class="str">"🏆 {user.Username} earned badge: Civic Duty!"</span>); }
+        <span class="kw">if</span> (user.<span class="prop">Reputation</span> >= 1000 && !user.<span class="prop">Badges</span>.<span class="mth">Contains</span>(<span class="str">"Established"</span>))    { user.<span class="prop">Badges</span>.<span class="mth">Add</span>(<span class="str">"Established"</span>);    Console.<span class="mth">WriteLine</span>($<span class="str">"🏆 {user.Username} earned badge: Established!"</span>); }
+    }
+}
+
+<span class="sec-comment">// ── Stack Overflow Service ──────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">StackOverflowService</span>
+{
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Question</span>&gt;     _questions = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;<span class="typ">Tag</span>&gt;          _tags       = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="typ">ReputationService</span>  _repSvc     = <span class="kw">new</span>();
+
+    <span class="kw">public</span> <span class="typ">Question</span> <span class="mth">AskQuestion</span>(<span class="typ">SoUser</span> user, <span class="kw">string</span> title, <span class="kw">string</span> body, List&lt;<span class="kw">string</span>&gt; tagNames)
+    {
+        <span class="kw">if</span> (user.<span class="prop">Reputation</span> < 1) <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>(<span class="str">"Insufficient reputation."</span>);
+        <span class="kw">var</span> q = <span class="kw">new</span> <span class="typ">Question</span>(title, body, user);
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> name <span class="kw">in</span> tagNames.<span class="mth">Take</span>(5))
+        {
+            <span class="kw">var</span> tag = _tags.<span class="mth">FirstOrDefault</span>(t => t.<span class="prop">Name</span> == name) ?? <span class="kw">new</span> <span class="typ">Tag</span>(name);
+            <span class="kw">if</span> (!_tags.<span class="mth">Contains</span>(tag)) _tags.<span class="mth">Add</span>(tag);
+            tag.<span class="prop">QuestionCount</span>++;
+            q.<span class="prop">Tags</span>.<span class="mth">Add</span>(tag);
+        }
+
+        _questions.<span class="mth">Add</span>(q);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"❓ [{string.Join(", ", tagNames)}] {user.Username} asked: \"{title}\""</span>);
+        <span class="kw">return</span> q;
+    }
+
+    <span class="kw">public</span> <span class="typ">Answer</span> <span class="mth">PostAnswer</span>(<span class="typ">SoUser</span> user, <span class="typ">Question</span> question, <span class="kw">string</span> body)
+    {
+        <span class="kw">if</span> (question.<span class="prop">IsClosed</span>) <span class="kw">throw new</span> <span class="typ">InvalidOperationException</span>(<span class="str">"Question is closed."</span>);
+        <span class="kw">var</span> ans = <span class="kw">new</span> <span class="typ">Answer</span>(body, user);
+        question.<span class="prop">Answers</span>.<span class="mth">Add</span>(ans);
+        question.<span class="prop">UpdatedAt</span> = DateTime.<span class="prop">Now</span>;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"💬 {user.Username} answered question \"{question.Title}\""</span>);
+        <span class="kw">return</span> ans;
+    }
+
+    <span class="kw">public void</span> <span class="mth">Vote</span>(<span class="typ">SoUser</span> voter, <span class="typ">Post</span> post, <span class="en">VoteDirection</span> direction)
+    {
+        <span class="kw">if</span> (!voter.<span class="prop">CanVote</span>) { Console.<span class="mth">WriteLine</span>($<span class="str">"❌ {voter.Username}: need 15 rep to vote."</span>); <span class="kw">return</span>; }
+        <span class="kw">if</span> (direction == <span class="en">VoteDirection</span>.Down && !voter.<span class="prop">CanDownvote</span>) { Console.<span class="mth">WriteLine</span>($<span class="str">"❌ {voter.Username}: need 125 rep to downvote."</span>); <span class="kw">return</span>; }
+        <span class="kw">if</span> (post.<span class="prop">Author</span>.<span class="prop">Id</span> == voter.<span class="prop">Id</span>) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Cannot vote own post."</span>); <span class="kw">return</span>; }
+
+        <span class="cmt">// Idempotent: undo if same direction, switch if different</span>
+        <span class="kw">if</span> (post.<span class="prop">Votes</span>.<span class="mth">TryGetValue</span>(voter.<span class="prop">Id</span>, <span class="kw">out var</span> existing))
+        {
+            post.<span class="prop">VoteScore</span> += existing == <span class="en">VoteDirection</span>.Up ? -1 : +1; <span class="cmt">// undo</span>
+            post.<span class="prop">Votes</span>.<span class="mth">Remove</span>(voter.<span class="prop">Id</span>);
+            <span class="kw">if</span> (existing == direction) { Console.<span class="mth">WriteLine</span>($<span class="str">"↩️  Vote undone."</span>); <span class="kw">return</span>; }
+        }
+
+        post.<span class="prop">Votes</span>[voter.<span class="prop">Id</span>] = direction;
+        post.<span class="prop">VoteScore</span>      += direction == <span class="en">VoteDirection</span>.Up ? 1 : -1;
+
+        <span class="kw">if</span> (direction == <span class="en">VoteDirection</span>.Up) _repSvc.<span class="mth">OnUpvote</span>(post.<span class="prop">Author</span>);
+        <span class="kw">else</span>                               _repSvc.<span class="mth">OnDownvote</span>(post.<span class="prop">Author</span>, voter);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"👍 {voter.Username} {direction}voted. Score now: {post.VoteScore}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">AcceptAnswer</span>(<span class="typ">SoUser</span> asker, <span class="typ">Question</span> q, <span class="typ">Answer</span> answer)
+    {
+        <span class="kw">if</span> (asker.<span class="prop">Id</span> != q.<span class="prop">Author</span>.<span class="prop">Id</span>) { Console.<span class="mth">WriteLine</span>(<span class="str">"❌ Only the asker can accept."</span>); <span class="kw">return</span>; }
+        <span class="kw">if</span> (q.<span class="prop">Accepted</span> != <span class="kw">null</span>) q.<span class="prop">Accepted</span>.<span class="prop">IsAccepted</span> = <span class="kw">false</span>; <span class="cmt">// unaccept previous</span>
+        answer.<span class="prop">IsAccepted</span> = <span class="kw">true</span>;
+        q.<span class="prop">Accepted</span>        = answer;
+        _repSvc.<span class="mth">OnAnswerAccepted</span>(answer.<span class="prop">Author</span>, asker);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"✅ Answer by {answer.Author.Username} accepted for \"{q.Title}\""</span>);
+    }
+
+    <span class="kw">public</span> IEnumerable&lt;<span class="typ">Question</span>&gt; <span class="mth">Search</span>(<span class="kw">string</span> query)
+    {
+        query = query.<span class="mth">ToLower</span>();
+        <span class="kw">return</span> _questions
+            .<span class="mth">Where</span>(q => !q.<span class="prop">IsClosed</span>)
+            .<span class="mth">Select</span>(q => <span class="kw">new</span> {
+                Q     = q,
+                Score = q.<span class="mth">SearchScore</span>(
+                    q.<span class="prop">Title</span>.<span class="mth">ToLower</span>().<span class="mth">Contains</span>(query) ||
+                    q.<span class="prop">Tags</span>.<span class="mth">Any</span>(t => t.<span class="prop">Name</span>.<span class="mth">ToLower</span>().<span class="mth">Contains</span>(query)))
+            })
+            .<span class="mth">OrderByDescending</span>(x => x.<span class="prop">Score</span>)
+            .<span class="mth">Select</span>(x => x.<span class="prop">Q</span>);
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ──────────────────────────────────────────────────────</span>
+<span class="kw">var</span> svc   = <span class="kw">new</span> <span class="typ">StackOverflowService</span>();
+<span class="kw">var</span> alice = <span class="kw">new</span> <span class="typ">SoUser</span>(<span class="str">"alice_dev"</span>) { <span class="prop">Reputation</span> = 200 };
+<span class="kw">var</span> bob   = <span class="kw">new</span> <span class="typ">SoUser</span>(<span class="str">"bob_coder"</span>) { <span class="prop">Reputation</span> = 50 };
+<span class="kw">var</span> carol = <span class="kw">new</span> <span class="typ">SoUser</span>(<span class="str">"carol_eng"</span>)  { <span class="prop">Reputation</span> = 500 };
+
+<span class="kw">var</span> q     = svc.<span class="mth">AskQuestion</span>(alice, <span class="str">"How does async/await work in C#?"</span>,
+                <span class="str">"I'm confused about the state machine generated by the compiler..."</span>,
+                <span class="kw">new</span>() { <span class="str">"c#"</span>, <span class="str">"async"</span>, <span class="str">"await"</span> });
+
+<span class="kw">var</span> ans1  = svc.<span class="mth">PostAnswer</span>(bob,   q, <span class="str">"async/await is syntactic sugar over Task and state machines..."</span>);
+<span class="kw">var</span> ans2  = svc.<span class="mth">PostAnswer</span>(carol, q, <span class="str">"The compiler transforms async methods into a IAsyncStateMachine..."</span>);
+
+svc.<span class="mth">Vote</span>(carol, q,    <span class="en">VoteDirection</span>.Up);
+svc.<span class="mth">Vote</span>(carol, ans1, <span class="en">VoteDirection</span>.Up);
+svc.<span class="mth">Vote</span>(carol, ans2, <span class="en">VoteDirection</span>.Up);
+svc.<span class="mth">AcceptAnswer</span>(alice, q, ans2);
+
+<span class="kw">var</span> results = svc.<span class="mth">Search</span>(<span class="str">"async"</span>);
+Console.<span class="mth">WriteLine</span>($<span class="str">"\n🔍 Search results: {string.Join(", ", results.Select(r => $"\"{r.Title}\""))}"</span>);
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     05. ONLINE STOCK BROKERAGE
+════════════════════════════════════════ -->
+<section class="system" id="brokerage">
+  <div class="sys-header">
+    <div class="sys-num">05</div>
+    <div class="sys-meta">
+      <div class="sys-title">Online Stock Brokerage</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--teal);border-color:rgba(78,205,196,.3)">Order Matching Engine</span>
+        <span class="sys-tag" style="color:var(--pink);border-color:rgba(255,107,157,.3)">Observer (Market Data)</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">Command (Order)</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Strategy (Order Types)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--teal)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Order Book: two priority queues — bids (max-heap), asks (min-heap)</li>
+          <li>Matching engine: continuous price-time priority matching</li>
+          <li>Order types: Market (execute immediately), Limit (execute at price), Stop</li>
+          <li>Portfolio tracks holdings with average cost basis (FIFO for tax)</li>
+          <li>Market data feed publishes tick data to all subscribers (Observer)</li>
+          <li>All trades produce a confirmed Trade record with timestamp and price</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--pink)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Order</strong> — type, side, ticker, qty, limitPrice, status</li>
+          <li><strong>OrderBook</strong> — per-ticker bid/ask queues, match()</li>
+          <li><strong>Trade</strong> — buyer, seller, price, qty, timestamp</li>
+          <li><strong>Portfolio</strong> — holdings, cash, P&amp;L calculation</li>
+          <li><strong>BrokerageService</strong> — placeOrder, cancel, getQuote, portfolio</li>
+          <li><strong>MarketDataFeed</strong> — real-time tick publisher</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How does the order matching engine work?</span>
+    <span style="font-size:12px;color:#a09060">→ Bids (buy orders) are a max-heap sorted by price desc, then time asc. Asks (sell orders) are a min-heap sorted by price asc. On each new order: peek both heaps. If best bid ≥ best ask, match them at the earlier order's price. Partial fills: reduce qty, keep order on book. Full fill: remove from book.</span>
+    <span class="q">Q: How do you handle a Market order vs Limit order?</span>
+    <span style="font-size:12px;color:#a09060">→ Market order matches at whatever the best available price is — it always fills (or rejects if book is empty). Limit buy order only matches if ask ≤ limit price; otherwise rests on the book. Limit sell is symmetric.</span>
+    <span class="q">Q: How do you prevent overselling (selling stock you don't own)?</span>
+    <span style="font-size:12px;color:#a09060">→ Before placing a sell order, check Portfolio.Holdings[ticker] ≥ qty. Reserve the quantity immediately when the order is placed (not when it fills). Cancel releases the reservation. This prevents concurrent oversells.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--teal)">Order Book — price-time priority</span>
+    <span class="pat" style="background:rgba(255,107,157,.08);border:1px solid rgba(255,107,157,.2);color:var(--pink)">Observer — market data ticks</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">Command — order lifecycle</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Strategy — order execution</span>
+  </div>
+
+  <div class="primer" style="border-left-color:var(--teal)">
+    <div class="primer-header" style="background:rgba(78,205,196,0.06);border-bottom-color:rgba(78,205,196,0.15)">
+      <span class="primer-label" style="color:var(--teal)">📖 Concept Primer</span>
+      <span class="primer-name">Order Book Matching — price-time priority matching engine</span>
+    </div>
+    <div class="primer-desc">The core of every exchange. Two sorted collections: bids (buyers, want lowest ask) and asks (sellers, want highest bid). Match when best bid ≥ best ask. Trade price = earlier order's price.</div>
+<pre>
+<span class="cmt">// Bid book: max-heap (highest price first, then earliest time)</span>
+<span class="cmt">// Ask book: min-heap (lowest price first, then earliest time)</span>
+<span class="cmt">//</span>
+<span class="cmt">// Bids:  [45.50, 45.25, 45.00]</span>
+<span class="cmt">// Asks:  [45.30, 45.55, 45.80]</span>
+<span class="cmt">//        ↑ best bid 45.50 ≥ best ask 45.30 → MATCH at 45.30 (ask was there first)</span>
+<span class="cmt">//</span>
+<span class="cmt">// Price-time priority:</span>
+<span class="cmt">//   1. Best price wins (highest bid, lowest ask)</span>
+<span class="cmt">//   2. Among equal prices, earliest timestamp wins</span>
+<span class="cmt">//</span>
+<span class="kw">public record</span> <span class="typ">PriceLevel</span>(<span class="kw">decimal</span> Price, <span class="typ">DateTime</span> Time, Guid OrderId);
+
+<span class="cmt">// PriorityQueue in .NET 6+ (min-heap):</span>
+<span class="kw">var</span> askBook = <span class="kw">new</span> PriorityQueue&lt;<span class="typ">Order</span>, (<span class="kw">decimal</span> Price, <span class="typ">DateTime</span> Time)&gt;(
+    Comparer&lt;(<span class="kw">decimal</span>, <span class="typ">DateTime</span>)&gt;.<span class="mth">Create</span>((a, b) =>
+        a.Price != b.Price ? a.Price.<span class="mth">CompareTo</span>(b.Price) : a.Time.<span class="mth">CompareTo</span>(b.Time)));
+
+<span class="cmt">// For bids (max-heap): negate price in comparison</span>
+<span class="kw">var</span> bidBook = <span class="kw">new</span> PriorityQueue&lt;<span class="typ">Order</span>, (<span class="kw">decimal</span> Price, <span class="typ">DateTime</span> Time)&gt;(
+    Comparer&lt;(<span class="kw">decimal</span>, <span class="typ">DateTime</span>)&gt;.<span class="mth">Create</span>((a, b) =>
+        a.Price != b.Price ? b.Price.<span class="mth">CompareTo</span>(a.Price) : a.Time.<span class="mth">CompareTo</span>(b.Time)));
+</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">StockBrokerage.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">OrderSide</span>   { Buy, Sell }
+<span class="kw">public enum</span> <span class="en">OrderType</span>   { Market, Limit, StopLoss }
+<span class="kw">public enum</span> <span class="en">OrderStatus</span> { Open, PartiallyFilled, Filled, Cancelled, Rejected }
+
+<span class="sec-comment">// ── Order ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Order</span>
+{
+    <span class="kw">public</span> Guid         <span class="prop">Id</span>          { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> Guid         <span class="prop">AccountId</span>   { <span class="kw">get</span>; }
+    <span class="kw">public string</span>       <span class="prop">Ticker</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">OrderSide</span>   <span class="prop">Side</span>        { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">OrderType</span>   <span class="prop">Type</span>        { <span class="kw">get</span>; }
+    <span class="kw">public int</span>          <span class="prop">Quantity</span>    { <span class="kw">get</span>; }
+    <span class="kw">public int</span>          <span class="prop">FilledQty</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public decimal?</span>     <span class="prop">LimitPrice</span>  { <span class="kw">get</span>; }
+    <span class="kw">public decimal?</span>     <span class="prop">StopPrice</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">OrderStatus</span> <span class="prop">Status</span>      { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">OrderStatus</span>.Open;
+    <span class="kw">public</span> <span class="typ">DateTime</span>    <span class="prop">PlacedAt</span>    { <span class="kw">get</span>; } = DateTime.<span class="prop">Now</span>;
+    <span class="kw">public int</span>          <span class="prop">RemainingQty</span> => <span class="prop">Quantity</span> - <span class="prop">FilledQty</span>;
+
+    <span class="kw">public</span> <span class="mth">Order</span>(Guid acct, <span class="kw">string</span> ticker, <span class="en">OrderSide</span> side, <span class="en">OrderType</span> type,
+                 <span class="kw">int</span> qty, <span class="kw">decimal</span>? limit = <span class="kw">null</span>, <span class="kw">decimal</span>? stop = <span class="kw">null</span>)
+        => (<span class="prop">AccountId</span>, <span class="prop">Ticker</span>, <span class="prop">Side</span>, <span class="prop">Type</span>, <span class="prop">Quantity</span>, <span class="prop">LimitPrice</span>, <span class="prop">StopPrice</span>)
+         = (acct, ticker, side, type, qty, limit, stop);
+}
+
+<span class="sec-comment">// ── Trade (execution record) ────────────────────────────────────────────</span>
+<span class="kw">public record</span> <span class="typ">Trade</span>(Guid BuyOrderId, Guid SellOrderId, <span class="kw">string</span> Ticker,
+                    <span class="kw">int</span> Quantity, <span class="kw">decimal</span> Price, <span class="typ">DateTime</span> ExecutedAt);
+
+<span class="sec-comment">// ── Order Book (per ticker) ─────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">OrderBook</span>
+{
+    <span class="kw">public string</span> <span class="prop">Ticker</span> { <span class="kw">get</span>; }
+
+    <span class="cmt">// Bids: highest price first (max-heap via negated price)</span>
+    <span class="kw">private readonly</span> PriorityQueue&lt;<span class="typ">Order</span>, (<span class="kw">decimal</span>, <span class="typ">DateTime</span>)&gt; _bids =
+        <span class="kw">new</span>(Comparer&lt;(<span class="kw">decimal</span>, <span class="typ">DateTime</span>)&gt;.<span class="mth">Create</span>((a, b) =>
+            a.Item1 != b.Item1 ? b.Item1.<span class="mth">CompareTo</span>(a.Item1) : a.Item2.<span class="mth">CompareTo</span>(b.Item2)));
+
+    <span class="cmt">// Asks: lowest price first (min-heap)</span>
+    <span class="kw">private readonly</span> PriorityQueue&lt;<span class="typ">Order</span>, (<span class="kw">decimal</span>, <span class="typ">DateTime</span>)&gt; _asks =
+        <span class="kw">new</span>(Comparer&lt;(<span class="kw">decimal</span>, <span class="typ">DateTime</span>)&gt;.<span class="mth">Create</span>((a, b) =>
+            a.Item1 != b.Item1 ? a.Item1.<span class="mth">CompareTo</span>(b.Item1) : a.Item2.<span class="mth">CompareTo</span>(b.Item2)));
+
+    <span class="kw">public decimal</span> <span class="prop">LastPrice</span> { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public</span> <span class="mth">OrderBook</span>(<span class="kw">string</span> ticker) => <span class="prop">Ticker</span> = ticker;
+
+    <span class="kw">public void</span> <span class="mth">AddOrder</span>(<span class="typ">Order</span> order)
+    {
+        <span class="kw">decimal</span> priority = order.<span class="prop">Type</span> == <span class="en">OrderType</span>.Market
+            ? (order.<span class="prop">Side</span> == <span class="en">OrderSide</span>.Buy ? <span class="kw">decimal</span>.MaxValue : <span class="kw">decimal</span>.MinValue)
+            : order.<span class="prop">LimitPrice</span>!.Value;
+
+        <span class="kw">if</span> (order.<span class="prop">Side</span> == <span class="en">OrderSide</span>.Buy)
+            _bids.<span class="mth">Enqueue</span>(order, (priority, order.<span class="prop">PlacedAt</span>));
+        <span class="kw">else</span>
+            _asks.<span class="mth">Enqueue</span>(order, (priority, order.<span class="prop">PlacedAt</span>));
+    }
+
+    <span class="cmt">// Returns list of trades generated by matching</span>
+    <span class="kw">public</span> List&lt;<span class="typ">Trade</span>&gt; <span class="mth">Match</span>()
+    {
+        <span class="kw">var</span> trades = <span class="kw">new</span> List&lt;<span class="typ">Trade</span>&gt;();
+
+        <span class="kw">while</span> (_bids.<span class="prop">Count</span> > 0 && _asks.<span class="prop">Count</span> > 0)
+        {
+            <span class="kw">var</span> bid = _bids.<span class="mth">Peek</span>();
+            <span class="kw">var</span> ask = _asks.<span class="mth">Peek</span>();
+
+            <span class="cmt">// Check if prices cross</span>
+            <span class="kw">decimal</span> bidPx = bid.<span class="prop">LimitPrice</span> ?? <span class="kw">decimal</span>.MaxValue;
+            <span class="kw">decimal</span> askPx = ask.<span class="prop">LimitPrice</span> ?? <span class="kw">decimal</span>.MinValue;
+            <span class="kw">if</span> (bidPx < askPx) <span class="kw">break</span>; <span class="cmt">// no match possible</span>
+
+            <span class="cmt">// Trade at the resting order's price</span>
+            <span class="kw">decimal</span> tradePrice  = bid.<span class="prop">PlacedAt</span> < ask.<span class="prop">PlacedAt</span> ? bidPx : askPx;
+            <span class="kw">int</span>     tradeQty    = Math.<span class="mth">Min</span>(bid.<span class="prop">RemainingQty</span>, ask.<span class="prop">RemainingQty</span>);
+
+            bid.<span class="prop">FilledQty</span> += tradeQty;
+            ask.<span class="prop">FilledQty</span> += tradeQty;
+            <span class="prop">LastPrice</span>      = tradePrice;
+
+            trades.<span class="mth">Add</span>(<span class="kw">new</span> <span class="typ">Trade</span>(bid.<span class="prop">Id</span>, ask.<span class="prop">Id</span>, <span class="prop">Ticker</span>, tradeQty, tradePrice, DateTime.<span class="prop">Now</span>));
+            Console.<span class="mth">WriteLine</span>($<span class="str">"🤝 TRADE {Ticker}: {tradeQty} @ ₹{tradePrice:F2}"</span>);
+
+            <span class="kw">if</span> (bid.<span class="prop">RemainingQty</span> == 0) { bid.<span class="prop">Status</span> = <span class="en">OrderStatus</span>.Filled;    _bids.<span class="mth">Dequeue</span>(); }
+            <span class="kw">else</span>                          bid.<span class="prop">Status</span> = <span class="en">OrderStatus</span>.PartiallyFilled;
+            <span class="kw">if</span> (ask.<span class="prop">RemainingQty</span> == 0) { ask.<span class="prop">Status</span> = <span class="en">OrderStatus</span>.Filled;    _asks.<span class="mth">Dequeue</span>(); }
+            <span class="kw">else</span>                          ask.<span class="prop">Status</span> = <span class="en">OrderStatus</span>.PartiallyFilled;
+        }
+
+        <span class="kw">return</span> trades;
+    }
+}
+
+<span class="sec-comment">// ── Portfolio ──────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Portfolio</span>
+{
+    <span class="kw">public</span> Guid    <span class="prop">AccountId</span>  { <span class="kw">get</span>; }
+    <span class="kw">public string</span>  <span class="prop">Owner</span>      { <span class="kw">get</span>; }
+    <span class="kw">public decimal</span> <span class="prop">Cash</span>       { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> Dictionary&lt;<span class="kw">string</span>, <span class="kw">int</span>&gt;     <span class="prop">Holdings</span>   { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> Dictionary&lt;<span class="kw">string</span>, <span class="kw">decimal</span>&gt; <span class="prop">AvgCost</span>    { <span class="kw">get</span>; } = <span class="kw">new</span>(); <span class="cmt">// for P&L</span>
+
+    <span class="kw">public</span> <span class="mth">Portfolio</span>(<span class="kw">string</span> owner, <span class="kw">decimal</span> initialCash)
+        => (<span class="prop">AccountId</span>, <span class="prop">Owner</span>, <span class="prop">Cash</span>) = (Guid.<span class="mth">NewGuid</span>(), owner, initialCash);
+
+    <span class="kw">public void</span> <span class="mth">ApplyTrade</span>(<span class="typ">Trade</span> trade, <span class="en">OrderSide</span> side)
+    {
+        <span class="kw">decimal</span> value = trade.<span class="prop">Price</span> * trade.<span class="prop">Quantity</span>;
+        <span class="kw">if</span> (side == <span class="en">OrderSide</span>.Buy)
+        {
+            <span class="prop">Cash</span> -= value;
+            <span class="prop">Holdings</span>[trade.<span class="prop">Ticker</span>]  = <span class="prop">Holdings</span>.<span class="mth">GetValueOrDefault</span>(trade.<span class="prop">Ticker</span>) + trade.<span class="prop">Quantity</span>;
+            <span class="kw">decimal</span> prevQty    = <span class="prop">Holdings</span>[trade.<span class="prop">Ticker</span>] - trade.<span class="prop">Quantity</span>;
+            <span class="kw">decimal</span> prevCost   = <span class="prop">AvgCost</span>.<span class="mth">GetValueOrDefault</span>(trade.<span class="prop">Ticker</span>);
+            <span class="prop">AvgCost</span>[trade.<span class="prop">Ticker</span>] = (prevQty * prevCost + value) / <span class="prop">Holdings</span>[trade.<span class="prop">Ticker</span>];
+        }
+        <span class="kw">else</span>
+        {
+            <span class="prop">Cash</span> += value;
+            <span class="prop">Holdings</span>[trade.<span class="prop">Ticker</span>] -= trade.<span class="prop">Quantity</span>;
+        }
+        Console.<span class="mth">WriteLine</span>($<span class="str">"💼 {Owner}: {side} {trade.Quantity} {trade.Ticker} @ ₹{trade.Price:F2}. Cash: ₹{Cash:F2}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">PrintSummary</span>(Dictionary&lt;<span class="kw">string</span>, <span class="kw">decimal</span>&gt; marketPrices)
+    {
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n📊 Portfolio: {Owner} | Cash: ₹{Cash:F2}"</span>);
+        <span class="kw">foreach</span> (<span class="kw">var</span> (ticker, qty) <span class="kw">in</span> <span class="prop">Holdings</span>.<span class="mth">Where</span>(h => h.<span class="prop">Value</span> > 0))
+        {
+            <span class="kw">decimal</span> mkt   = marketPrices.<span class="mth">GetValueOrDefault</span>(ticker, <span class="prop">AvgCost</span>[ticker]);
+            <span class="kw">decimal</span> pnl   = (mkt - <span class="prop">AvgCost</span>[ticker]) * qty;
+            Console.<span class="mth">WriteLine</span>($<span class="str">"  {ticker,-8} {qty,5} shares  avg ₹{AvgCost[ticker]:F2}  mkt ₹{mkt:F2}  P&L: {(pnl >= 0 ? "+" : "")}₹{pnl:F2}"</span>);
+        }
+    }
+}
+
+<span class="sec-comment">// ── Market Data Feed ────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">MarketDataFeed</span>
+{
+    <span class="kw">private readonly</span> Dictionary&lt;<span class="kw">string</span>, <span class="kw">decimal</span>&gt; _prices = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> List&lt;Action&lt;<span class="kw">string</span>, <span class="kw">decimal</span>&gt;&gt; _subscribers = <span class="kw">new</span>();
+
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(Action&lt;<span class="kw">string</span>, <span class="kw">decimal</span>&gt; handler) => _subscribers.<span class="mth">Add</span>(handler);
+
+    <span class="kw">public void</span> <span class="mth">PublishTick</span>(<span class="kw">string</span> ticker, <span class="kw">decimal</span> price)
+    {
+        _prices[ticker] = price;
+        <span class="kw">foreach</span> (<span class="kw">var</span> s <span class="kw">in</span> _subscribers) s(ticker, price);
+    }
+
+    <span class="kw">public decimal</span> <span class="mth">GetPrice</span>(<span class="kw">string</span> ticker) =>
+        _prices.<span class="mth">GetValueOrDefault</span>(ticker, 0);
+
+    <span class="kw">public</span> Dictionary&lt;<span class="kw">string</span>, <span class="kw">decimal</span>&gt; <span class="mth">GetAllPrices</span>() => <span class="kw">new</span>(_prices);
+}
+
+<span class="sec-comment">// ── Brokerage Service (Facade) ─────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">BrokerageService</span>
+{
+    <span class="kw">private readonly</span> Dictionary&lt;<span class="kw">string</span>, <span class="typ">OrderBook</span>&gt;  _books     = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> Dictionary&lt;Guid, <span class="typ">Portfolio</span>&gt;    _portfolios= <span class="kw">new</span>();
+    <span class="kw">private readonly</span> Dictionary&lt;Guid, <span class="typ">Order</span>&gt;        _orders    = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="typ">MarketDataFeed</span>                 _feed;
+
+    <span class="kw">public</span> <span class="mth">BrokerageService</span>(<span class="typ">MarketDataFeed</span> feed) => _feed = feed;
+
+    <span class="kw">public void</span> <span class="mth">OpenAccount</span>(<span class="typ">Portfolio</span> p) => _portfolios[p.<span class="prop">AccountId</span>] = p;
+
+    <span class="kw">private</span> <span class="typ">OrderBook</span> <span class="mth">GetBook</span>(<span class="kw">string</span> ticker)
+    {
+        <span class="kw">if</span> (!_books.<span class="mth">ContainsKey</span>(ticker)) _books[ticker] = <span class="kw">new</span> <span class="typ">OrderBook</span>(ticker);
+        <span class="kw">return</span> _books[ticker];
+    }
+
+    <span class="kw">public</span> <span class="typ">Order</span>? <span class="mth">PlaceOrder</span>(<span class="typ">Portfolio</span> portfolio, <span class="en">OrderSide</span> side, <span class="en">OrderType</span> type,
+                             <span class="kw">string</span> ticker, <span class="kw">int</span> qty, <span class="kw">decimal</span>? limit = <span class="kw">null</span>)
+    {
+        <span class="cmt">// Pre-trade checks</span>
+        <span class="kw">if</span> (side == <span class="en">OrderSide</span>.Buy)
+        {
+            <span class="kw">decimal</span> requiredCash = (limit ?? _feed.<span class="mth">GetPrice</span>(ticker)) * qty;
+            <span class="kw">if</span> (portfolio.<span class="prop">Cash</span> < requiredCash) { Console.<span class="mth">WriteLine</span>($<span class="str">"❌ Insufficient cash."</span>); <span class="kw">return null</span>; }
+        }
+        <span class="kw">else</span>
+        {
+            <span class="kw">int</span> holdings = portfolio.<span class="prop">Holdings</span>.<span class="mth">GetValueOrDefault</span>(ticker);
+            <span class="kw">if</span> (holdings < qty) { Console.<span class="mth">WriteLine</span>($<span class="str">"❌ Insufficient shares ({holdings} held)."</span>); <span class="kw">return null</span>; }
+        }
+
+        <span class="kw">var</span> order = <span class="kw">new</span> <span class="typ">Order</span>(portfolio.<span class="prop">AccountId</span>, ticker, side, type, qty, limit);
+        _orders[order.<span class="prop">Id</span>] = order;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"📋 {portfolio.Owner}: {side} {qty} {ticker} {(type == OrderType.Market ? "MARKET" : $"LIMIT ₹{limit}")}"</span>);
+
+        <span class="kw">var</span> book   = <span class="mth">GetBook</span>(ticker);
+        book.<span class="mth">AddOrder</span>(order);
+
+        <span class="cmt">// Try to match immediately</span>
+        <span class="kw">var</span> trades = book.<span class="mth">Match</span>();
+        <span class="kw">foreach</span> (<span class="kw">var</span> trade <span class="kw">in</span> trades)
+        {
+            <span class="cmt">// Apply to buyer's and seller's portfolios</span>
+            <span class="kw">var</span> buyOrder  = _orders[trade.<span class="prop">BuyOrderId</span>];
+            <span class="kw">var</span> sellOrder = _orders[trade.<span class="prop">SellOrderId</span>];
+            <span class="kw">if</span> (_portfolios.<span class="mth">TryGetValue</span>(buyOrder.<span class="prop">AccountId</span>,  <span class="kw">out var</span> buyer))  buyer.<span class="mth">ApplyTrade</span>(trade, <span class="en">OrderSide</span>.Buy);
+            <span class="kw">if</span> (_portfolios.<span class="mth">TryGetValue</span>(sellOrder.<span class="prop">AccountId</span>, <span class="kw">out var</span> seller)) seller.<span class="mth">ApplyTrade</span>(trade, <span class="en">OrderSide</span>.Sell);
+            _feed.<span class="mth">PublishTick</span>(ticker, trade.<span class="prop">Price</span>);
+        }
+
+        <span class="kw">return</span> order;
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ──────────────────────────────────────────────────────</span>
+<span class="kw">var</span> feed    = <span class="kw">new</span> <span class="typ">MarketDataFeed</span>();
+feed.<span class="mth">Subscribe</span>((ticker, price) => Console.<span class="mth">WriteLine</span>($<span class="str">"📡 Tick: {ticker} = ₹{price:F2}"</span>));
+
+<span class="kw">var</span> broker  = <span class="kw">new</span> <span class="typ">BrokerageService</span>(feed);
+
+<span class="kw">var</span> alice   = <span class="kw">new</span> <span class="typ">Portfolio</span>(<span class="str">"Alice"</span>, 100000m);
+<span class="kw">var</span> bob     = <span class="kw">new</span> <span class="typ">Portfolio</span>(<span class="str">"Bob"</span>,   100000m);
+broker.<span class="mth">OpenAccount</span>(alice);
+broker.<span class="mth">OpenAccount</span>(bob);
+
+<span class="cmt">// Bob seeds with INFY shares</span>
+alice.<span class="prop">Holdings</span>[<span class="str">"INFY"</span>] = 100;  alice.<span class="prop">AvgCost</span>[<span class="str">"INFY"</span>] = 1450m;
+alice.<span class="prop">Cash</span> -= 145000m;
+
+<span class="cmt">// Bob places buy limit order, Alice places sell limit order</span>
+broker.<span class="mth">PlaceOrder</span>(bob,   <span class="en">OrderSide</span>.Buy,  <span class="en">OrderType</span>.Limit, <span class="str">"INFY"</span>, 10, limit: 1500m);
+broker.<span class="mth">PlaceOrder</span>(alice, <span class="en">OrderSide</span>.Sell, <span class="en">OrderType</span>.Limit, <span class="str">"INFY"</span>, 10, limit: 1480m);
+<span class="cmt">// ↑ bid 1500 ≥ ask 1480 → MATCH at 1480 (Alice's ask came in second? No — Bob first)</span>
+
+alice.<span class="mth">PrintSummary</span>(feed.<span class="mth">GetAllPrices</span>());
+bob.<span class="mth">PrintSummary</span>(feed.<span class="mth">GetAllPrices</span>());
+</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     06. ESPN CRICINFO
+════════════════════════════════════════ -->
+<section class="system" id="cricinfo">
+  <div class="sys-header">
+    <div class="sys-num">06</div>
+    <div class="sys-meta">
+      <div class="sys-title">ESPN Cricinfo</div>
+      <div class="sys-tags">
+        <span class="sys-tag" style="color:var(--green);border-color:rgba(61,220,132,.3)">Observer (Live Score)</span>
+        <span class="sys-tag" style="color:var(--blue);border-color:rgba(77,159,255,.3)">State (Match Phase)</span>
+        <span class="sys-tag" style="color:var(--amber);border-color:rgba(255,195,65,.3)">Strategy (DLS Method)</span>
+        <span class="sys-tag" style="color:var(--purple);border-color:rgba(183,148,244,.3)">Composite (Scorecard)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--green)">Key Design Decisions</div>
+      <div class="exp-card-body">
+        <ul>
+          <li>Match formats: Test, ODI, T20 — each configures overs, innings, DLS rules</li>
+          <li>Ball-by-ball commentary feeds the Observer pipeline (live updates)</li>
+          <li>Scorecard is a composite: Innings → Over → Ball</li>
+          <li>Player statistics updated incrementally on each ball event</li>
+          <li>DLS target calculation strategy swappable without changing match engine</li>
+          <li>Match phases: PreMatch → Toss → InningsN → Break → Result</li>
+        </ul>
+      </div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-card-title" style="color:var(--blue)">Key Classes</div>
+      <div class="exp-card-body">
+        <ul>
+          <li><strong>Match</strong> — format, teams, innings list, phase state machine</li>
+          <li><strong>Innings</strong> — batting team, overs, current score, wickets</li>
+          <li><strong>Ball</strong> — runs, extras, wicket, commentary text</li>
+          <li><strong>BattingCard / BowlingCard</strong> — per-player stats for an innings</li>
+          <li><strong>IDlsStrategy</strong> — simplified DLS target recalculation</li>
+          <li><strong>IScoreboardObserver</strong> — live push to scoreboards, apps</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="interview-box">
+    <strong>Interviewer will ask:</strong>
+    <span class="q">Q: How do you model ball-by-ball data efficiently?</span>
+    <span style="font-size:12px;color:#a09060">→ Ball is the atomic unit. Innings → Over[] → Ball[]. Each Ball carries: runs scored, extras (wide/no-ball/bye), wicket (type + fielder). Over aggregates 6 legal balls. Innings aggregates runs, wickets, run rate. Totals are computed on read — not stored — to stay consistent.</span>
+    <span class="q">Q: How do live scoreboards get updated?</span>
+    <span style="font-size:12px;color:#a09060">→ After each ball is processed, Match fires an event. ScoreboardObserver, ApiGatewayObserver, and PushNotificationObserver all receive the BallEvent. In production, this is a pub-sub stream (Kafka topic per match). Clients use SSE or WebSockets to receive the push.</span>
+    <span class="q">Q: How does DLS work in your model?</span>
+    <span style="font-size:12px;color:#a09060">→ IDlsStrategy.RecalculateTarget(target, oversRemaining, wicketsLost) returns an adjusted target. The simplified version uses resources remaining %. Real DLS uses precalculated tables. Swapping the strategy doesn't touch any match or innings code.</span>
+  </div>
+
+  <div class="pattern-row">
+    <span class="pattern-label">Patterns:</span>
+    <span class="pat" style="background:rgba(61,220,132,.08);border:1px solid rgba(61,220,132,.2);color:var(--green)">Observer — live scoreboards</span>
+    <span class="pat" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--blue)">State — match phase machine</span>
+    <span class="pat" style="background:rgba(255,195,65,.08);border:1px solid rgba(255,195,65,.2);color:var(--amber)">Strategy — DLS recalculation</span>
+    <span class="pat" style="background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.2);color:var(--purple)">Composite — scorecard tree</span>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      <div class="code-filename">ESPNCricinfo.cs</div>
+      <div class="code-lang">C# 10</div>
+    </div>
+<pre>
+<span class="sec-comment">// ── Enums ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public enum</span> <span class="en">MatchFormat</span>  { Test, ODI, T20 }
+<span class="kw">public enum</span> <span class="en">MatchPhase</span>   { PreMatch, Toss, Innings1, Break, Innings2, Result }
+<span class="kw">public enum</span> <span class="en">DismissalType</span>{ Bowled, Caught, RunOut, LBW, Stumped, HitWicket, NotOut }
+<span class="kw">public enum</span> <span class="en">ExtraType</span>    { None, Wide, NoBall, Bye, LegBye }
+
+<span class="sec-comment">// ── Player ─────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Player</span>
+{
+    <span class="kw">public</span> Guid   <span class="prop">Id</span>   { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public string</span> <span class="prop">Name</span> { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="mth">Player</span>(<span class="kw">string</span> name) => <span class="prop">Name</span> = name;
+}
+
+<span class="sec-comment">// ── Team ───────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Team</span>
+{
+    <span class="kw">public string</span>       <span class="prop">Name</span>    { <span class="kw">get</span>; }
+    <span class="kw">public string</span>       <span class="prop">Code</span>    { <span class="kw">get</span>; }  <span class="cmt">// IND, AUS, ENG…</span>
+    <span class="kw">public</span> List&lt;<span class="typ">Player</span>&gt; <span class="prop">Players</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="mth">Team</span>(<span class="kw">string</span> name, <span class="kw">string</span> code) => (<span class="prop">Name</span>, <span class="prop">Code</span>) = (name, code);
+}
+
+<span class="sec-comment">// ── Ball (atomic unit) ─────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Ball</span>
+{
+    <span class="kw">public int</span>          <span class="prop">OverNumber</span>  { <span class="kw">get</span>; }
+    <span class="kw">public int</span>          <span class="prop">BallNumber</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Player</span>       <span class="prop">Bowler</span>      { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Player</span>       <span class="prop">Batsman</span>     { <span class="kw">get</span>; }
+    <span class="kw">public int</span>          <span class="prop">RunsScored</span>  { <span class="kw">get</span>; }  <span class="cmt">// runs off the bat</span>
+    <span class="kw">public</span> <span class="en">ExtraType</span>   <span class="prop">Extra</span>       { <span class="kw">get</span>; } = <span class="en">ExtraType</span>.None;
+    <span class="kw">public int</span>          <span class="prop">ExtraRuns</span>   { <span class="kw">get</span>; }
+    <span class="kw">public bool</span>         <span class="prop">IsWicket</span>    { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="en">DismissalType</span> <span class="prop">Dismissal</span>  { <span class="kw">get</span>; } = <span class="en">DismissalType</span>.NotOut;
+    <span class="kw">public string</span>       <span class="prop">Commentary</span>  { <span class="kw">get</span>; } = <span class="str">""</span>;
+    <span class="kw">public bool</span>         <span class="prop">IsLegal</span>     => <span class="prop">Extra</span> is <span class="en">ExtraType</span>.None <span class="kw">or</span> <span class="en">ExtraType</span>.Bye <span class="kw">or</span> <span class="en">ExtraType</span>.LegBye;
+    <span class="kw">public int</span>          <span class="prop">TotalRuns</span>   => <span class="prop">RunsScored</span> + <span class="prop">ExtraRuns</span>;
+
+    <span class="kw">public</span> <span class="mth">Ball</span>(<span class="kw">int</span> ov, <span class="kw">int</span> ball, <span class="typ">Player</span> bowler, <span class="typ">Player</span> batsman,
+                <span class="kw">int</span> runs, <span class="en">ExtraType</span> extra = <span class="en">ExtraType</span>.None, <span class="kw">int</span> extraRuns = 0,
+                <span class="kw">bool</span> isWicket = <span class="kw">false</span>, <span class="en">DismissalType</span> dismissal = <span class="en">DismissalType</span>.NotOut,
+                <span class="kw">string</span> commentary = <span class="str">""</span>)
+    {
+        (<span class="prop">OverNumber</span>, <span class="prop">BallNumber</span>, <span class="prop">Bowler</span>, <span class="prop">Batsman</span>) = (ov, ball, bowler, batsman);
+        (<span class="prop">RunsScored</span>, <span class="prop">Extra</span>, <span class="prop">ExtraRuns</span>)             = (runs, extra, extraRuns);
+        (<span class="prop">IsWicket</span>, <span class="prop">Dismissal</span>, <span class="prop">Commentary</span>)            = (isWicket, dismissal, commentary);
+    }
+}
+
+<span class="sec-comment">// ── Batting Card (per player per innings) ──────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">BattingCard</span>
+{
+    <span class="kw">public</span> <span class="typ">Player</span>       <span class="prop">Player</span>      { <span class="kw">get</span>; }
+    <span class="kw">public int</span>          <span class="prop">Runs</span>        { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>          <span class="prop">BallsFaced</span>  { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>          <span class="prop">Fours</span>       { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>          <span class="prop">Sixes</span>       { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="en">DismissalType</span><span class="prop">HowOut</span>      { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="en">DismissalType</span>.NotOut;
+    <span class="kw">public double</span>       <span class="prop">StrikeRate</span>  => <span class="prop">BallsFaced</span> == 0 ? 0 : (<span class="kw">double</span>)<span class="prop">Runs</span> / <span class="prop">BallsFaced</span> * 100;
+    <span class="kw">public</span> <span class="mth">BattingCard</span>(<span class="typ">Player</span> p) => <span class="prop">Player</span> = p;
+}
+
+<span class="sec-comment">// ── Bowling Card (per player per innings) ──────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">BowlingCard</span>
+{
+    <span class="kw">public</span> <span class="typ">Player</span> <span class="prop">Player</span>    { <span class="kw">get</span>; }
+    <span class="kw">public int</span>    <span class="prop">LegalBalls</span>{ <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>    <span class="prop">RunsGiven</span> { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>    <span class="prop">Wickets</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>    <span class="prop">Wides</span>     { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>    <span class="prop">NoBalls</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public double</span> <span class="prop">Economy</span>   => <span class="prop">LegalBalls</span> == 0 ? 0 : (<span class="kw">double</span>)<span class="prop">RunsGiven</span> / <span class="prop">LegalBalls</span> * 6;
+    <span class="kw">public string</span> <span class="prop">OversStr</span>  => $<span class="str">"{LegalBalls / 6}.{LegalBalls % 6}"</span>;
+    <span class="kw">public</span> <span class="mth">BowlingCard</span>(<span class="typ">Player</span> p) => <span class="prop">Player</span> = p;
+}
+
+<span class="sec-comment">// ── Innings ────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">Innings</span>
+{
+    <span class="kw">public</span> <span class="typ">Team</span>                                  <span class="prop">BattingTeam</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Team</span>                                  <span class="prop">BowlingTeam</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">Ball</span>&gt;                            <span class="prop">Balls</span>        { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="typ">BattingCard</span>&gt;        <span class="prop">BattingCards</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> Dictionary&lt;Guid, <span class="typ">BowlingCard</span>&gt;        <span class="prop">BowlingCards</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public bool</span>                                  <span class="prop">IsComplete</span>   { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public int</span>?                                  <span class="prop">Target</span>       { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public int</span>    <span class="prop">TotalRuns</span>    => <span class="prop">Balls</span>.<span class="mth">Sum</span>(b => b.<span class="prop">TotalRuns</span>);
+    <span class="kw">public int</span>    <span class="prop">Wickets</span>      => <span class="prop">Balls</span>.<span class="mth">Count</span>(b => b.<span class="prop">IsWicket</span>);
+    <span class="kw">public int</span>    <span class="prop">LegalBalls</span>   => <span class="prop">Balls</span>.<span class="mth">Count</span>(b => b.<span class="prop">IsLegal</span>);
+    <span class="kw">public double</span> <span class="prop">Overs</span>        => <span class="prop">LegalBalls</span> / 6.0;
+    <span class="kw">public double</span> <span class="prop">RunRate</span>      => <span class="prop">Overs</span> == 0 ? 0 : <span class="prop">TotalRuns</span> / <span class="prop">Overs</span>;
+    <span class="kw">public string</span> <span class="prop">Score</span>        => $<span class="str">"{TotalRuns}/{Wickets} ({LegalBalls / 6}.{LegalBalls % 6} ov)"</span>;
+
+    <span class="kw">public</span> <span class="mth">Innings</span>(<span class="typ">Team</span> batting, <span class="typ">Team</span> bowling) => (<span class="prop">BattingTeam</span>, <span class="prop">BowlingTeam</span>) = (batting, bowling);
+
+    <span class="kw">public void</span> <span class="mth">AddBall</span>(<span class="typ">Ball</span> ball)
+    {
+        <span class="prop">Balls</span>.<span class="mth">Add</span>(ball);
+
+        <span class="cmt">// Update batting stats</span>
+        <span class="kw">if</span> (!<span class="prop">BattingCards</span>.<span class="mth">ContainsKey</span>(ball.<span class="prop">Batsman</span>.<span class="prop">Id</span>))
+            <span class="prop">BattingCards</span>[ball.<span class="prop">Batsman</span>.<span class="prop">Id</span>] = <span class="kw">new</span>(ball.<span class="prop">Batsman</span>);
+        <span class="kw">var</span> bc = <span class="prop">BattingCards</span>[ball.<span class="prop">Batsman</span>.<span class="prop">Id</span>];
+        bc.<span class="prop">Runs</span>       += ball.<span class="prop">RunsScored</span>;
+        bc.<span class="prop">BallsFaced</span> += ball.<span class="prop">IsLegal</span> ? 1 : 0;
+        bc.<span class="prop">Fours</span>      += ball.<span class="prop">RunsScored</span> == 4 ? 1 : 0;
+        bc.<span class="prop">Sixes</span>      += ball.<span class="prop">RunsScored</span> == 6 ? 1 : 0;
+        <span class="kw">if</span> (ball.<span class="prop">IsWicket</span>) bc.<span class="prop">HowOut</span> = ball.<span class="prop">Dismissal</span>;
+
+        <span class="cmt">// Update bowling stats</span>
+        <span class="kw">if</span> (!<span class="prop">BowlingCards</span>.<span class="mth">ContainsKey</span>(ball.<span class="prop">Bowler</span>.<span class="prop">Id</span>))
+            <span class="prop">BowlingCards</span>[ball.<span class="prop">Bowler</span>.<span class="prop">Id</span>] = <span class="kw">new</span>(ball.<span class="prop">Bowler</span>);
+        <span class="kw">var</span> bwl = <span class="prop">BowlingCards</span>[ball.<span class="prop">Bowler</span>.<span class="prop">Id</span>];
+        bwl.<span class="prop">LegalBalls</span> += ball.<span class="prop">IsLegal</span> ? 1 : 0;
+        bwl.<span class="prop">RunsGiven</span>  += ball.<span class="prop">TotalRuns</span>;
+        bwl.<span class="prop">Wickets</span>    += ball.<span class="prop">IsWicket</span> ? 1 : 0;
+        bwl.<span class="prop">Wides</span>      += ball.<span class="prop">Extra</span> == <span class="en">ExtraType</span>.Wide ? 1 : 0;
+        bwl.<span class="prop">NoBalls</span>    += ball.<span class="prop">Extra</span> == <span class="en">ExtraType</span>.NoBall ? 1 : 0;
+    }
+}
+
+<span class="sec-comment">// ── DLS Strategy ───────────────────────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IDlsStrategy</span>
+{
+    <span class="kw">int</span> <span class="mth">RecalculateTarget</span>(<span class="kw">int</span> originalTarget, <span class="kw">double</span> oversRemaining, <span class="kw">int</span> wicketsLost);
+}
+
+<span class="kw">public class</span> <span class="typ">SimplifiedDls</span> : <span class="iface">IDlsStrategy</span>
+{
+    <span class="cmt">// Resource percentage table (simplified — real DLS uses full tables)</span>
+    <span class="kw">private static readonly</span> <span class="kw">double</span>[] _resourcePct = { 0, 7.6, 17.2, 28.6, 40.9, 52.4, 62.7, 71.8, 79.9, 87.2, 93.8, 100 };
+
+    <span class="kw">public int</span> <span class="mth">RecalculateTarget</span>(<span class="kw">int</span> originalTarget, <span class="kw">double</span> oversRemaining, <span class="kw">int</span> wicketsLost)
+    {
+        <span class="kw">int</span>    idx              = Math.<span class="mth">Min</span>((<span class="kw">int</span>)oversRemaining, 11);
+        <span class="kw">double</span> resourcesRemaining = _resourcePct[idx] * (1.0 - wicketsLost * 0.09);
+        <span class="kw">int</span>    adjustedTarget   = (<span class="kw">int</span>)(originalTarget * resourcesRemaining / 100) + 1;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🌧️  DLS: {oversRemaining:F1} overs left, {wicketsLost} wkts down. New target: {adjustedTarget}"</span>);
+        <span class="kw">return</span> adjustedTarget;
+    }
+}
+
+<span class="sec-comment">// ── Scoreboard Observer ────────────────────────────────────────────────</span>
+<span class="kw">public interface</span> <span class="iface">IScoreboardObserver</span>
+{
+    <span class="kw">void</span> <span class="mth">OnBall</span>(<span class="typ">Innings</span> innings, <span class="typ">Ball</span> ball);
+    <span class="kw">void</span> <span class="mth">OnPhaseChanged</span>(<span class="en">MatchPhase</span> newPhase);
+}
+
+<span class="kw">public class</span> <span class="typ">LiveScoreboardObserver</span> : <span class="iface">IScoreboardObserver</span>
+{
+    <span class="kw">public void</span> <span class="mth">OnBall</span>(<span class="typ">Innings</span> inn, <span class="typ">Ball</span> b)
+    {
+        <span class="kw">string</span> ballDesc = b.<span class="prop">IsWicket</span> ? <span class="str">"OUT!"</span>
+                        : b.<span class="prop">Extra</span> != <span class="en">ExtraType</span>.None ? $<span class="str">"{b.Extra}+{b.ExtraRuns}"</span>
+                        : $<span class="str">"{b.RunsScored}"</span>;
+        Console.<span class="mth">WriteLine</span>($<span class="str">"🏏 {inn.BattingTeam.Code} {b.OverNumber}.{b.BallNumber}: {ballDesc} | {inn.Score} | RR:{inn.RunRate:F2}"</span>);
+        <span class="kw">if</span> (b.<span class="prop">Commentary</span> != <span class="str">""</span>) Console.<span class="mth">WriteLine</span>($<span class="str">"   💬 {b.Commentary}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">OnPhaseChanged</span>(<span class="en">MatchPhase</span> p) =>
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n══ Phase: {p} ══"</span>);
+}
+
+<span class="sec-comment">// ── Match ──────────────────────────────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="typ">CricketMatch</span>
+{
+    <span class="kw">public</span> Guid         <span class="prop">Id</span>      { <span class="kw">get</span>; } = Guid.<span class="mth">NewGuid</span>();
+    <span class="kw">public</span> <span class="en">MatchFormat</span>  <span class="prop">Format</span>  { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Team</span>         <span class="prop">HomeTeam</span>{ <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">Team</span>         <span class="prop">AwayTeam</span>{ <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="typ">DateTime</span>     <span class="prop">Date</span>    { <span class="kw">get</span>; }
+    <span class="kw">public string</span>       <span class="prop">Venue</span>   { <span class="kw">get</span>; }
+    <span class="kw">public</span> List&lt;<span class="typ">Innings</span>&gt; <span class="prop">Innings</span> { <span class="kw">get</span>; } = <span class="kw">new</span>();
+    <span class="kw">public</span> <span class="en">MatchPhase</span>   <span class="prop">Phase</span>   { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="en">MatchPhase</span>.PreMatch;
+    <span class="kw">public string</span>       <span class="prop">Result</span>  { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="str">""</span>;
+    <span class="kw">public int</span>          <span class="prop">MaxOvers</span>{ <span class="kw">get</span>; }
+
+    <span class="kw">private readonly</span> List&lt;<span class="iface">IScoreboardObserver</span>&gt; _observers = <span class="kw">new</span>();
+    <span class="kw">private readonly</span> <span class="iface">IDlsStrategy</span>             _dls;
+
+    <span class="kw">public</span> <span class="mth">CricketMatch</span>(<span class="en">MatchFormat</span> format, <span class="typ">Team</span> home, <span class="typ">Team</span> away, <span class="typ">DateTime</span> date, <span class="kw">string</span> venue, <span class="iface">IDlsStrategy</span>? dls = <span class="kw">null</span>)
+    {
+        (<span class="prop">Format</span>, <span class="prop">HomeTeam</span>, <span class="prop">AwayTeam</span>, <span class="prop">Date</span>, <span class="prop">Venue</span>) = (format, home, away, date, venue);
+        <span class="prop">MaxOvers</span> = format == <span class="en">MatchFormat</span>.T20 ? 20 : format == <span class="en">MatchFormat</span>.ODI ? 50 : 0;
+        _dls = dls ?? <span class="kw">new</span> <span class="typ">SimplifiedDls</span>();
+    }
+
+    <span class="kw">public void</span> <span class="mth">Subscribe</span>(<span class="iface">IScoreboardObserver</span> obs) => _observers.<span class="mth">Add</span>(obs);
+
+    <span class="kw">public</span> <span class="typ">Innings</span> <span class="mth">StartInnings</span>(<span class="typ">Team</span> batting, <span class="typ">Team</span> bowling)
+    {
+        <span class="kw">var</span> phase = <span class="prop">Innings</span>.<span class="prop">Count</span> == 0 ? <span class="en">MatchPhase</span>.Innings1 : <span class="en">MatchPhase</span>.Innings2;
+        <span class="mth">ChangePhase</span>(phase);
+        <span class="kw">var</span> innings = <span class="kw">new</span> <span class="typ">Innings</span>(batting, bowling);
+        <span class="kw">if</span> (<span class="prop">Innings</span>.<span class="prop">Count</span> > 0) innings.<span class="prop">Target</span> = <span class="prop">Innings</span>[0].<span class="prop">TotalRuns</span> + 1;
+        <span class="prop">Innings</span>.<span class="mth">Add</span>(innings);
+        <span class="kw">return</span> innings;
+    }
+
+    <span class="kw">public void</span> <span class="mth">DeliverBall</span>(<span class="typ">Innings</span> innings, <span class="typ">Ball</span> ball)
+    {
+        innings.<span class="mth">AddBall</span>(ball);
+        <span class="kw">foreach</span> (<span class="kw">var</span> obs <span class="kw">in</span> _observers) obs.<span class="mth">OnBall</span>(innings, ball);
+    }
+
+    <span class="kw">public void</span> <span class="mth">ApplyRainInterruption</span>(<span class="typ">Innings</span> innings, <span class="kw">double</span> oversLost)
+    {
+        <span class="kw">double</span> remaining = <span class="prop">MaxOvers</span> - innings.<span class="prop">Overs</span> - oversLost;
+        <span class="kw">if</span> (innings.<span class="prop">Target</span>.HasValue)
+            innings.<span class="prop">Target</span> = _dls.<span class="mth">RecalculateTarget</span>(innings.<span class="prop">Target</span>.<span class="prop">Value</span>, remaining, innings.<span class="prop">Wickets</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">DeclareResult</span>(<span class="kw">string</span> result)
+    {
+        <span class="prop">Result</span> = result;
+        <span class="mth">ChangePhase</span>(<span class="en">MatchPhase</span>.Result);
+        Console.<span class="mth">WriteLine</span>($<span class="str">"\n🏆 RESULT: {result}"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mth">PrintScorecard</span>()
+    {
+        <span class="kw">foreach</span> (<span class="kw">var</span> inn <span class="kw">in</span> <span class="prop">Innings</span>)
+        {
+            Console.<span class="mth">WriteLine</span>($<span class="str">"\n📋 {inn.BattingTeam.Name} — {inn.Score}"</span>);
+            Console.<span class="mth">WriteLine</span>(<span class="str">"  Batting:"</span>);
+            <span class="kw">foreach</span> (<span class="kw">var</span> bc <span class="kw">in</span> inn.<span class="prop">BattingCards</span>.<span class="prop">Values</span>)
+                Console.<span class="mth">WriteLine</span>($<span class="str">"  {bc.Player.Name,-20} {bc.Runs,4} ({bc.BallsFaced}b) {bc.Fours}×4 {bc.Sixes}×6 SR:{bc.StrikeRate:F1} [{bc.HowOut}]"</span>);
+            Console.<span class="mth">WriteLine</span>(<span class="str">"  Bowling:"</span>);
+            <span class="kw">foreach</span> (<span class="kw">var</span> bw <span class="kw">in</span> inn.<span class="prop">BowlingCards</span>.<span class="prop">Values</span>)
+                Console.<span class="mth">WriteLine</span>($<span class="str">"  {bw.Player.Name,-20} {bw.OversStr,5} ov  {bw.Wickets}/{bw.RunsGiven}  Econ:{bw.Economy:F2}"</span>);
+        }
+    }
+
+    <span class="kw">private void</span> <span class="mth">ChangePhase</span>(<span class="en">MatchPhase</span> p)
+    {
+        <span class="prop">Phase</span> = p;
+        <span class="kw">foreach</span> (<span class="kw">var</span> obs <span class="kw">in</span> _observers) obs.<span class="mth">OnPhaseChanged</span>(p);
+    }
+}
+
+<span class="sec-comment">// ── Setup & Usage ──────────────────────────────────────────────────────</span>
+<span class="kw">var</span> india     = <span class="kw">new</span> <span class="typ">Team</span>(<span class="str">"India"</span>,     <span class="str">"IND"</span>);
+<span class="kw">var</span> australia = <span class="kw">new</span> <span class="typ">Team</span>(<span class="str">"Australia"</span>, <span class="str">"AUS"</span>);
+
+<span class="kw">var</span> rohit  = <span class="kw">new</span> <span class="typ">Player</span>(<span class="str">"Rohit Sharma"</span>);
+<span class="kw">var</span> virat  = <span class="kw">new</span> <span class="typ">Player</span>(<span class="str">"Virat Kohli"</span>);
+<span class="kw">var</span> bumrah = <span class="kw">new</span> <span class="typ">Player</span>(<span class="str">"Jasprit Bumrah"</span>);
+<span class="kw">var</span> warner = <span class="kw">new</span> <span class="typ">Player</span>(<span class="str">"David Warner"</span>);
+<span class="kw">var</span> starc  = <span class="kw">new</span> <span class="typ">Player</span>(<span class="str">"Mitchell Starc"</span>);
+
+india.<span class="prop">Players</span>.<span class="mth">AddRange</span>(<span class="kw">new</span>[] { rohit, virat, bumrah });
+australia.<span class="prop">Players</span>.<span class="mth">AddRange</span>(<span class="kw">new</span>[] { warner, starc });
+
+<span class="kw">var</span> match = <span class="kw">new</span> <span class="typ">CricketMatch</span>(<span class="en">MatchFormat</span>.T20, india, australia,
+    <span class="typ">DateTime</span>.<span class="mth">Today</span>, <span class="str">"Wankhede Stadium"</span>);
+match.<span class="mth">Subscribe</span>(<span class="kw">new</span> <span class="typ">LiveScoreboardObserver</span>());
+
+<span class="cmt">// India bats first</span>
+<span class="kw">var</span> inn1 = match.<span class="mth">StartInnings</span>(india, australia);
+
+match.<span class="mth">DeliverBall</span>(inn1, <span class="kw">new</span> <span class="typ">Ball</span>(1, 1, starc, rohit,  6, commentary: <span class="str">"HUGE six over long-on!"</span>));
+match.<span class="mth">DeliverBall</span>(inn1, <span class="kw">new</span> <span class="typ">Ball</span>(1, 2, starc, rohit,  4, commentary: <span class="str">"Drives through covers."</span>));
+match.<span class="mth">DeliverBall</span>(inn1, <span class="kw">new</span> <span class="typ">Ball</span>(1, 3, starc, rohit,  1));
+match.<span class="mth">DeliverBall</span>(inn1, <span class="kw">new</span> <span class="typ">Ball</span>(1, 4, starc, virat,  0,
+    isWicket: <span class="kw">true</span>, dismissal: <span class="en">DismissalType</span>.Caught, commentary: <span class="str">"Caught at mid-off! Virat goes for a duck."</span>));
+match.<span class="mth">DeliverBall</span>(inn1, <span class="kw">new</span> <span class="typ">Ball</span>(1, 5, starc, virat,  0,  <span class="en">ExtraType</span>.Wide, 1));
+match.<span class="mth">DeliverBall</span>(inn1, <span class="kw">new</span> <span class="typ">Ball</span>(1, 6, starc, rohit,  2));
+
+inn1.<span class="prop">IsComplete</span> = <span class="kw">true</span>;
+
+<span class="cmt">// Australia chases — rain interruption applies DLS</span>
+<span class="kw">var</span> inn2 = match.<span class="mth">StartInnings</span>(australia, india);
+match.<span class="mth">DeliverBall</span>(inn2, <span class="kw">new</span> <span class="typ">Ball</span>(1, 1, bumrah, warner, 4));
+match.<span class="mth">DeliverBall</span>(inn2, <span class="kw">new</span> <span class="typ">Ball</span>(1, 2, bumrah, warner, 0,
+    isWicket: <span class="kw">true</span>, dismissal: <span class="en">DismissalType</span>.Bowled, commentary: <span class="str">"Bowled him! Warner's timber flies!"</span>));
+
+match.<span class="mth">ApplyRainInterruption</span>(inn2, oversLost: 5); <span class="cmt">// rain takes 5 overs</span>
+match.<span class="mth">DeclareResult</span>($<span class="str">"India won by 18 runs (DLS method)"</span>);
+match.<span class="mth">PrintScorecard</span>();
+</pre>
+  </div>
+</section>
+
+</main>
+</div><!-- end layout -->
+
+<script>
+const sections = document.querySelectorAll('.system');
+const sbItems  = document.querySelectorAll('.sb-item[href]');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      sbItems.forEach(i => i.classList.remove('active'));
+      const id = e.target.id;
+      const active = document.querySelector(`.sb-item[href="#${id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.2 });
+sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>
