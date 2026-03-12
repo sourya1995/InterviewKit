@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Senior Performance Guide — .NET & React</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --surface: #fffdf8;
+      --surface2: #f0ebe0;
+      --border: #ddd5c4;
+      --dotnet: #512bd4;
+      --dotnet-light: #ede8fb;
+      --react: #0d7c66;
+      --react-light: #e0f5f0;
+      --warn: #b45309;
+      --warn-light: #fef3c7;
+      --good: #166534;
+      --good-light: #dcfce7;
+      --text: #1c1917;
+      --text-muted: #78716c;
+      --text-dim: #a8a29e;
+      --code-bg: #1c1917;
+      --code-text: #e7e5e4;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh; }
+
+    .sidebar { position: fixed; top: 0; left: 0; width: 272px; height: 100vh; background: var(--surface); border-right: 2px solid var(--border); overflow-y: auto; z-index: 100; }
+    .sidebar-brand { padding: 28px 24px 20px; border-bottom: 2px solid var(--border); }
+    .sidebar-brand .eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .sidebar-brand h2 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 900; line-height: 1.2; }
+    .sidebar-brand h2 em { font-style: italic; font-weight: 300; }
+    .nav-group { padding: 16px 12px 4px; }
+    .nav-group-label { font-size: 9px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; padding: 0 10px; margin-bottom: 6px; }
+    .nav-group-label.dotnet { color: var(--dotnet); }
+    .nav-group-label.react  { color: var(--react); }
+    .nav-item { display: block; padding: 6px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--text-muted); text-decoration: none; cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active-dotnet { background: var(--dotnet-light); color: var(--dotnet); border-left-color: var(--dotnet); }
+    .nav-item.active-react  { background: var(--react-light);  color: var(--react);  border-left-color: var(--react); }
+
+    .main { margin-left: 272px; padding: 0 56px 100px; max-width: 1100px; }
+
+    .hero { padding: 64px 0 52px; border-bottom: 2px solid var(--border); margin-bottom: 64px; position: relative; overflow: hidden; }
+    .hero::before { content: "PERF"; position: absolute; right: -20px; top: 10px; font-family: 'Fraunces', serif; font-weight: 900; font-size: 180px; color: var(--border); opacity: 0.5; line-height: 1; pointer-events: none; user-select: none; }
+    .hero .eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+    .hero h1 { font-family: 'Fraunces', serif; font-size: 58px; font-weight: 900; line-height: 1.05; letter-spacing: -1px; margin-bottom: 20px; }
+    .hero h1 em { font-style: italic; font-weight: 300; }
+    .hero-desc { font-size: 15.5px; color: var(--text-muted); max-width: 540px; line-height: 1.9; }
+    .hero-pills { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+    .pill { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; border: 1.5px solid; }
+    .pill-dotnet { color: var(--dotnet); border-color: var(--dotnet); background: var(--dotnet-light); }
+    .pill-react  { color: var(--react);  border-color: var(--react);  background: var(--react-light); }
+    .pill-gray   { color: var(--text-muted); border-color: var(--border); background: var(--surface2); }
+
+    .chapter-divider { margin: 72px 0 60px; display: flex; align-items: center; gap: 20px; }
+    .chapter-divider::before, .chapter-divider::after { content: ""; flex: 1; height: 2px; background: var(--border); }
+    .chapter-divider-inner { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 900; white-space: nowrap; }
+    .chapter-divider-inner.dotnet-color { color: var(--dotnet); }
+    .chapter-divider-inner.react-color  { color: var(--react); }
+
+    .section { margin-bottom: 76px; scroll-margin-top: 24px; }
+    .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--border); }
+    .section-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot-dotnet { background: var(--dotnet); }
+    .dot-react  { background: var(--react); }
+    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+    .label-dotnet { color: var(--dotnet); }
+    .label-react  { color: var(--react); }
+    .section-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; letter-spacing: -0.5px; }
+
+    .topic { margin-bottom: 24px; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--border); background: var(--surface); }
+    .topic-header { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; transition: background 0.15s; user-select: none; }
+    .topic-header:hover { background: var(--surface2); }
+    .topic-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); flex-shrink: 0; width: 26px; }
+    .topic-title { font-weight: 600; font-size: 15px; flex: 1; }
+    .topic-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .tag-gc     { background: #fce7f3; color: #9d174d; }
+    .tag-alloc  { background: #fef3c7; color: #92400e; }
+    .tag-async  { background: var(--dotnet-light); color: var(--dotnet); }
+    .tag-hot    { background: #fee2e2; color: #991b1b; }
+    .tag-query  { background: #e0f2fe; color: #0369a1; }
+    .tag-render { background: var(--react-light); color: var(--react); }
+    .tag-bundle { background: #f3e8ff; color: #6b21a8; }
+    .tag-arch   { background: #f0fdf4; color: #166534; }
+    .tag-conc   { background: #fff7ed; color: #c2410c; }
+    .tag-fiber  { background: #ecfdf5; color: #065f46; }
+    .tag-profil { background: #f1f5f9; color: #334155; }
+    .chevron { font-size: 11px; color: var(--text-dim); transition: transform 0.2s; margin-left: 4px; }
+    .topic.open .chevron { transform: rotate(180deg); }
+    .topic-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
+    .topic.open .topic-body { display: block; }
+
+    .concept { font-size: 14.5px; color: var(--text-muted); line-height: 1.88; padding: 16px 0 10px; }
+    .concept strong { color: var(--text); }
+    .concept code { font-family: 'DM Mono', monospace; font-size: 12.5px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--text); }
+
+    .callout { border-radius: 8px; padding: 13px 16px; font-size: 13.5px; line-height: 1.8; margin: 10px 0; border-left: 3px solid; }
+    .callout code { font-family: 'DM Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.07); padding: 1px 5px; border-radius: 3px; }
+    .callout-bad  { background: #fff1f2; border-color: #f43f5e; color: #881337; }
+    .callout-good { background: var(--good-light); border-color: #16a34a; color: var(--good); }
+    .callout-info { background: #f0f9ff; border-color: #0284c7; color: #0c4a6e; }
+    .callout-warn { background: var(--warn-light); border-color: #d97706; color: var(--warn); }
+    .callout-dark { background: #1c1917; border-color: #57534e; color: #e7e5e4; }
+    .callout-label { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 5px; opacity: 0.7; }
+
+    .code-wrap { margin: 14px 0; border-radius: 8px; overflow: hidden; border: 1px solid #2d2926; }
+    .code-bar { background: #2d2926; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; }
+    .code-filename { font-family: 'DM Mono', monospace; font-size: 10px; color: #a8a29e; }
+    .copy-btn { font-family: 'DM Mono', monospace; font-size: 9px; color: #a8a29e; background: none; border: 1px solid #44403c; border-radius: 4px; padding: 2px 8px; cursor: pointer; transition: all 0.15s; }
+    .copy-btn:hover { background: #44403c; color: #e7e5e4; }
+    pre { background: var(--code-bg); color: var(--code-text); font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.72; padding: 16px; overflow-x: auto; tab-size: 2; }
+    .kw  { color: #c084fc; }
+    .fn  { color: #67e8f9; }
+    .str { color: #86efac; }
+    .cm  { color: #6b7280; font-style: italic; }
+    .num { color: #fda4af; }
+    .cls { color: #fcd34d; }
+    .attr{ color: #fdba74; }
+    .jsx { color: #93c5fd; }
+    .op  { color: #e7e5e4; }
+    .type{ color: #34d399; }
+
+    .rule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .rule-card { border-radius: 8px; padding: 13px 15px; font-size: 13px; line-height: 1.75; }
+    .rule-card code { font-family: 'DM Mono', monospace; font-size: 11.5px; }
+    .rule-card.bad  { background: #fff1f2; border: 1px solid #fda4af; }
+    .rule-card.good { background: var(--good-light); border: 1px solid #86efac; }
+    .rule-card .rule-label { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    .rule-card.bad  .rule-label { color: #dc2626; }
+    .rule-card.good .rule-label { color: var(--good); }
+
+    .tradeoff-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .tradeoff-card { border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.7; border: 1px solid var(--border); background: var(--surface2); }
+    .tradeoff-card .tc-label { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px; }
+    .tradeoff-card strong { color: var(--text); font-size: 13.5px; }
+
+    .checklist { list-style: none; margin-top: 12px; }
+    .checklist li { font-size: 13.5px; padding: 7px 0; border-bottom: 1px solid var(--surface2); display: flex; align-items: flex-start; gap: 10px; line-height: 1.75; }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; }
+    .checklist li::before { content: "✓"; color: var(--good); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .checklist li.warn::before { content: "⚠"; color: var(--warn); }
+    .checklist li.critical::before { content: "★"; color: var(--dotnet); }
+    .checklist li.react-critical::before { content: "★"; color: var(--react); }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 0 20px 80px; }
+      .hero h1 { font-size: 36px; }
+      .rule-grid, .tradeoff-grid { grid-template-columns: 1fr; }
+      .hero::before { font-size: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="eyebrow">8+ Years SDE · Interview Prep</div>
+    <h2>Senior-Level<br><em>Performance</em></h2>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label dotnet">● .NET</div>
+    <a class="nav-item" href="#dn-gc">GC Internals &amp; Tuning</a>
+    <a class="nav-item" href="#dn-alloc">Allocation Strategies</a>
+    <a class="nav-item" href="#dn-async">Async at Scale</a>
+    <a class="nav-item" href="#dn-linq">LINQ &amp; Data Access</a>
+    <a class="nav-item" href="#dn-ef">EF Core Deep Dive</a>
+    <a class="nav-item" href="#dn-threading">Threading &amp; Contention</a>
+    <a class="nav-item" href="#dn-profiling">.NET Profiling Strategy</a>
+    <a class="nav-item" href="#dn-checklist">.NET Checklist</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label react">● React</div>
+    <a class="nav-item" href="#re-reconciler">Reconciler &amp; Fiber</a>
+    <a class="nav-item" href="#re-concurrency">Concurrent Features</a>
+    <a class="nav-item" href="#re-renders">Re-render Root Causes</a>
+    <a class="nav-item" href="#re-state">State Architecture</a>
+    <a class="nav-item" href="#re-bundle">Bundle &amp; Loading</a>
+    <a class="nav-item" href="#re-runtime">Runtime Bottlenecks</a>
+    <a class="nav-item" href="#re-profiling">React Profiling Strategy</a>
+    <a class="nav-item" href="#re-checklist">React Checklist</a>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <p class="eyebrow">Senior SDE — Performance Interview Prep</p>
+    <h1>Code-Level<br><em>Performance</em></h1>
+    <p class="hero-desc">Deep-dive reference covering topics a senior engineer must reason about from first principles — GC internals, async scheduling, Fiber reconciliation, concurrent rendering, contention patterns, and architectural tradeoffs at scale.</p>
+    <div class="hero-pills">
+      <span class="pill pill-dotnet">.NET / C#</span>
+      <span class="pill pill-react">React 18+</span>
+      <span class="pill pill-gray">8+ Years</span>
+    </div>
+  </div>
+
+  <!-- ══ PART 1 — .NET ══ -->
+  <div class="chapter-divider"><span class="chapter-divider-inner dotnet-color">Part 1 — .NET Performance</span></div>
+
+  <!-- GC INTERNALS -->
+  <section class="section" id="dn-gc">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">01</span>
+      <h2 class="section-title">GC Internals &amp; Tuning</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.1</span>
+        <span class="topic-title">What Actually Causes GC Pauses in Production</span>
+        <div class="topic-tags"><span class="tag tag-gc">GC</span><span class="tag tag-hot">latency</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Gen 0/1 collections are sub-millisecond and triggered frequently. <strong>Gen 2 and LOH (Large Object Heap) collections are stop-the-world and are what causes latency spikes.</strong> A Gen 2 collection fires when Gen 1 survivors fill Gen 2 — typically because short-lived objects live long enough to be promoted (the "mid-life crisis" problem: large request-scoped collections, deserialised DTOs stored in caches).
+          <br><br>
+          The <strong>LOH</strong> holds allocations ≥85,000 bytes and is not compacted by default — fragmentation grows over time. In .NET 5+, trigger compaction explicitly. <strong>Server GC</strong> (default in ASP.NET Core) uses one heap per logical CPU for higher throughput but higher baseline memory. Monitor <code>gen-2-gc-count</code> and <code>loh-size</code> with <code>dotnet-counters</code> before reaching for GC knobs.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">gc-tuning.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// SustainedLowLatency — suppresses Gen 2 for time-critical sections.</span>
+<span class="cm">// Use only in bounded critical sections; always restore in finally.</span>
+GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+<span class="kw">try</span>   { <span class="cm">/* real-time work */</span> }
+<span class="kw">finally</span> { GCSettings.LatencyMode = GCLatencyMode.Interactive; }
+
+<span class="cm">// Force LOH compaction before next Gen 2 — use sparingly</span>
+GCSettings.LargeObjectHeapCompactionMode =
+    GCLargeObjectHeapCompactionMode.CompactOnce;
+GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: <span class="kw">true</span>);</pre>
+        </div>
+        <div class="callout callout-dark">
+          <span class="callout-label">Interview signal</span>
+          Be able to explain why promoting an object from Gen 0 to Gen 2 is more expensive than just the extra collection cycle — it also increases GC roots, extends mark phase, and can fragment the heap.
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.2</span>
+        <span class="topic-title">Finalizers — The Two-Cycle Penalty and SafeHandle</span>
+        <div class="topic-tags"><span class="tag tag-gc">GC</span><span class="tag tag-alloc">alloc</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Objects with finalizers cannot be collected in their first eligible GC. The GC promotes them to the <strong>finalization queue</strong>; a dedicated finalizer thread runs the destructor, then the object is collected in the <em>next</em> cycle — two full GC cycles per finalizable object. Under load, the finalizer queue can back up, delaying collection indefinitely.
+          <br><br>
+          The fix: implement <code>IDisposable</code>, call <code>GC.SuppressFinalize(this)</code> in <code>Dispose()</code>. Only add a finalizer if you hold <em>unmanaged</em> resources directly — which is rare since <code>SafeHandle</code> wraps OS handles and provides critical finalization correctly.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">safe-handle.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Prefer SafeHandle — runtime manages finalization; no raw finalizer needed</span>
+<span class="kw">public class</span> <span class="cls">NativeBuffer</span> : SafeHandle
+{
+    <span class="kw">public</span> <span class="fn">NativeBuffer</span>(<span class="kw">int</span> size) : <span class="kw">base</span>(IntPtr.Zero, ownsHandle: <span class="kw">true</span>)
+        => SetHandle(Marshal.AllocHGlobal(size));
+
+    <span class="kw">public override bool</span> IsInvalid => handle == IntPtr.Zero;
+
+    <span class="kw">protected override bool</span> <span class="fn">ReleaseHandle</span>()
+    {
+        Marshal.FreeHGlobal(handle);
+        <span class="kw">return true</span>;
+    }
+    <span class="cm">// Critical finalizer provided by SafeHandle — no ~NativeBuffer() needed</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.3</span>
+        <span class="topic-title">Object Pooling — ObjectPool&lt;T&gt; and RecyclableMemoryStream</span>
+        <div class="topic-tags"><span class="tag tag-gc">GC</span><span class="tag tag-alloc">alloc</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          For objects expensive to construct and frequently recycled (parsers, serializers, <code>StringBuilder</code>), an object pool eliminates the alloc + GC cycle entirely. ASP.NET Core's <code>ObjectPool&lt;T&gt;</code> (from <code>Microsoft.Extensions.ObjectPool</code>) is the standard approach.
+          <br><br>
+          For streams: <strong>Microsoft.IO.RecyclableMemoryStream</strong> eliminates LOH allocations by chunking large streams into pooled small buffers — critical for services that serialize large payloads per-request.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">object-pool.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Register — pool is singleton, instances are transient</span>
+services.AddSingleton&lt;ObjectPool&lt;<span class="type">StringBuilder</span>&gt;&gt;(sp =>
+    sp.GetRequiredService&lt;ObjectPoolProvider&gt;()
+      .CreateStringBuilderPool());
+
+<span class="kw">public class</span> <span class="cls">ReportService</span>(ObjectPool&lt;<span class="type">StringBuilder</span>&gt; pool)
+{
+    <span class="kw">public string</span> <span class="fn">Build</span>(IEnumerable&lt;<span class="type">Row</span>&gt; rows)
+    {
+        <span class="kw">var</span> sb = pool.Get();
+        <span class="kw">try</span>   { <span class="kw">foreach</span> (<span class="kw">var</span> r <span class="kw">in</span> rows) sb.AppendLine(r.ToString()); <span class="kw">return</span> sb.ToString(); }
+        <span class="kw">finally</span> { pool.Return(sb); }   <span class="cm">// policy calls sb.Clear()</span>
+    }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALLOCATION STRATEGIES -->
+  <section class="section" id="dn-alloc">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">02</span>
+      <h2 class="section-title">Allocation Strategies</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.1</span>
+        <span class="topic-title">Span&lt;T&gt;, Memory&lt;T&gt;, and the Ownership Model</span>
+        <div class="topic-tags"><span class="tag tag-alloc">alloc</span><span class="tag tag-hot">zero-copy</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <code>Span&lt;T&gt;</code> is a <code>ref struct</code> — compiler-enforced to live on the stack only. It cannot be stored in fields, boxed, or cross <code>await</code> boundaries. This constraint is what makes it safe over stack-allocated and unmanaged memory.
+          <br><br>
+          <code>Memory&lt;T&gt;</code> is the heap-compatible counterpart: storable in fields, safe across <code>await</code>, sliceable to <code>Span&lt;T&gt;</code> at call sites via <code>.Span</code>. Use <code>Memory&lt;T&gt;</code> in async pipelines, <code>Span&lt;T&gt;</code> in synchronous hot paths.
+          <br><br>
+          <strong>IMemoryOwner&lt;T&gt;</strong> adds lifecycle: the owner <code>Dispose()</code>s the memory back to a pool. This is the pattern used internally by <strong>System.IO.Pipelines</strong> — zero-copy I/O where data is written directly into memory the reader examines without a copy. Kestrel uses this for HTTP/2 framing.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">memory-ownership.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Span — synchronous only, stack-constrained, zero alloc</span>
+<span class="kw">static int</span> <span class="fn">ParseFirstInt</span>(ReadOnlySpan&lt;<span class="kw">char</span>&gt; text)
+{
+    <span class="kw">int</span> sep = text.IndexOf(<span class="str">','</span>);
+    <span class="kw">return int</span>.Parse(sep &gt; -<span class="num">1</span> ? text[..sep] : text);
+}
+
+<span class="cm">// Memory — async-safe, can be stored and awaited</span>
+<span class="kw">async</span> ValueTask <span class="fn">ProcessAsync</span>(IMemoryOwner&lt;<span class="kw">byte</span>&gt; owner)
+{
+    <span class="kw">await</span> socket.<span class="fn">SendAsync</span>(owner.Memory, SocketFlags.None);
+    owner.Dispose();   <span class="cm">// returns to pool</span>
+}
+
+<span class="cm">// System.IO.Pipelines — zero-copy network I/O at scale</span>
+<span class="kw">var</span> pipe = <span class="kw">new</span> Pipe();
+<span class="kw">await</span> Task.WhenAll(<span class="fn">FillPipeAsync</span>(socket, pipe.Writer),
+                   <span class="fn">ReadPipeAsync</span>(pipe.Reader));</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.2</span>
+        <span class="topic-title">Struct Layout — Cache Lines and False Sharing</span>
+        <div class="topic-tags"><span class="tag tag-alloc">alloc</span><span class="tag tag-hot">CPU cache</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          The CLR pads struct fields to natural alignment. A <code>bool, long, bool</code> struct consumes 24 bytes (not 10) due to padding. For hot data structures iterated in tight loops, this wastes cache lines and slows throughput.
+          <br><br>
+          More critically: in multi-threaded code, two threads writing to fields that share a 64-byte cache line cause <strong>false sharing</strong> — constant cache-line invalidation across cores. Pad hot concurrent structs to exactly 64 bytes to isolate them.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">struct-layout.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ 24 bytes: bool(1)+pad(7)+long(8)+bool(1)+pad(7)</span>
+<span class="kw">struct</span> <span class="cls">Bad</span> { <span class="kw">bool</span> A; <span class="kw">long</span> B; <span class="kw">bool</span> C; }
+
+<span class="cm">// ✅ Reorder by descending size — 10 bytes, no wasted padding</span>
+<span class="kw">struct</span> <span class="cls">Good</span> { <span class="kw">long</span> B; <span class="kw">bool</span> A; <span class="kw">bool</span> C; }
+
+<span class="cm">// ✅ Pad to 64 bytes to prevent false sharing across CPU cores</span>
+[StructLayout(LayoutKind.Explicit, Size = <span class="num">64</span>)]
+<span class="kw">struct</span> <span class="cls">PaddedCounter</span>
+{
+    [FieldOffset(<span class="num">0</span>)] <span class="kw">public long</span> Value;
+    <span class="cm">// Remaining 56 bytes padding — each counter isolated to its own cache line</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.3</span>
+        <span class="topic-title">Source Generators — Eliminating Reflection Overhead at Runtime</span>
+        <div class="topic-tags"><span class="tag tag-alloc">alloc</span><span class="tag tag-hot">AOT</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Reflection-based serialization uses <code>MethodInfo.Invoke</code> — boxes value types, allocates parameter arrays, prevents JIT inlining. Source generators (System.Text.Json <code>[JsonSerializable]</code>, Mapster codegen) emit direct property access at compile time: zero reflection, JIT-friendly, NativeAOT-compatible.
+          <br><br>
+          Critical for cold-start performance in Lambda/serverless and for services with strict startup SLAs.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">source-gen-json.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Compiled at build time — zero reflection at runtime</span>
+[JsonSerializable(<span class="kw">typeof</span>(OrderDto))]
+[JsonSerializable(<span class="kw">typeof</span>(List&lt;<span class="type">OrderDto</span>&gt;))]
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+<span class="kw">internal partial class</span> <span class="cls">AppJsonContext</span> : JsonSerializerContext { }
+
+<span class="cm">// Usage — uses generated type metadata, not reflection</span>
+<span class="kw">string</span> json  = JsonSerializer.Serialize(order,  AppJsonContext.Default.<span class="type">OrderDto</span>);
+<span class="type">OrderDto</span> dto = JsonSerializer.Deserialize(json, AppJsonContext.Default.<span class="type">OrderDto</span>);</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASYNC AT SCALE -->
+  <section class="section" id="dn-async">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">03</span>
+      <h2 class="section-title">Async at Scale</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.1</span>
+        <span class="topic-title">State Machine Overhead — When async Costs More Than It Saves</span>
+        <div class="topic-tags"><span class="tag tag-async">async</span><span class="tag tag-alloc">alloc</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          The C# compiler transforms every <code>async</code> method into a state machine struct. When the method actually suspends (hits an incomplete <code>await</code>), the struct is <strong>boxed onto the heap</strong>. When it completes synchronously, no boxing occurs — but the state machine overhead still exists.
+          <br><br>
+          <strong>Implication:</strong> marking a method <code>async</code> that rarely suspends pays the state machine cost on every call for a capability rarely used. Prefer returning completed tasks or <code>ValueTask</code> for methods that are synchronous on the hot path. Avoid thin wrapper <code>async</code> methods that just <code>await</code> and return — pass the Task directly.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">async-cost.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Unnecessary state machine — never suspends, but pays the cost</span>
+<span class="kw">public async</span> Task&lt;<span class="kw">int</span>&gt; <span class="fn">GetCountAsync</span>() => _items.Count;
+
+<span class="cm">// ✅ Zero overhead — completed Task, no state machine</span>
+<span class="kw">public</span> Task&lt;<span class="kw">int</span>&gt; <span class="fn">GetCountAsync</span>() => Task.FromResult(_items.Count);
+
+<span class="cm">// ✅ ValueTask — zero alloc on sync path, alloc only on actual async path</span>
+<span class="kw">public</span> ValueTask&lt;<span class="type">User</span>&gt; <span class="fn">GetUserAsync</span>(<span class="kw">int</span> id) =>
+    _cache.TryGetValue(id, <span class="kw">out var</span> u)
+        ? <span class="kw">new</span> ValueTask&lt;<span class="type">User</span>&gt;(u)            <span class="cm">// sync — no alloc</span>
+        : <span class="kw">new</span> ValueTask&lt;<span class="type">User</span>&gt;(<span class="fn">FetchAsync</span>(id)); <span class="cm">// async — alloc once</span></pre>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-label">ValueTask caution</span>
+          Never <code>await</code> a <code>ValueTask</code> more than once. Never store it across <code>await</code> boundaries or use it in <code>Task.WhenAll</code>. Convert to <code>Task</code> with <code>.AsTask()</code> if you need to fan-out.
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.2</span>
+        <span class="topic-title">Thread Pool Starvation — Diagnosing Root Causes</span>
+        <div class="topic-tags"><span class="tag tag-async">async</span><span class="tag tag-conc">contention</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Thread pool starvation occurs when all pool threads are blocked — typically by synchronous waits over async I/O. The pool starts with <code>ProcessorCount</code> threads and injects one new thread per second when demand exceeds supply. Starvation can take tens of seconds to self-heal; during that time, latency spikes and requests queue up while CPU utilisation looks deceptively low.
+          <br><br>
+          <strong>Root causes in production:</strong> (1) <code>.Result</code> / <code>.Wait()</code> in middleware or services, (2) <code>Task.Run()</code> flooding the pool with CPU-bound work, (3) <code>SemaphoreSlim.Wait()</code> instead of <code>WaitAsync()</code>. Diagnose with <code>dotnet-counters</code> — watch for <code>ThreadPool Queue Length</code> and <code>Thread Count</code> rising together.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">starvation.sh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm"># Watch live — starvation: queue grows faster than thread count</span>
+dotnet-counters monitor -p &lt;PID&gt; \
+  System.Runtime[threadpool-queue-length] \
+  System.Runtime[threadpool-thread-count]
+
+<span class="cm"># Capture dump during starvation — look for blocked threads</span>
+dotnet-dump collect -p &lt;PID&gt;
+dotnet-dump analyze &lt;dump&gt; -c "clrthreads -live" -c "syncblk"</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.3</span>
+        <span class="topic-title">CancellationToken Propagation — Correctness and Resource Recovery</span>
+        <div class="topic-tags"><span class="tag tag-async">async</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Missing token propagation means cancelled HTTP requests still execute their full pipeline — hitting the database, allocating memory, and computing results for a response that will be discarded. At scale, this wastes thread pool threads and database connections on abandoned work.
+          <br><br>
+          Pass the token at every I/O boundary: EF queries, <code>HttpClient</code> calls, <code>Channel</code> reads, <code>SemaphoreSlim.WaitAsync</code>. Combine with a per-operation timeout using <code>CreateLinkedTokenSource</code>.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">cancellation.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">public async</span> Task&lt;<span class="type">Report</span>&gt; <span class="fn">GenerateAsync</span>(CancellationToken ct)
+{
+    <span class="cm">// Combine caller cancellation with a hard 5-second timeout</span>
+    <span class="kw">using var</span> cts = CancellationTokenSource.<span class="fn">CreateLinkedTokenSource</span>(ct);
+    cts.CancelAfter(TimeSpan.FromSeconds(<span class="num">5</span>));
+
+    <span class="kw">var</span> data = <span class="kw">await</span> _db.Orders
+        .AsNoTracking()
+        .Where(o => o.Date > DateTime.UtcNow.AddDays(-<span class="num">30</span>))
+        .ToListAsync(cts.Token);          <span class="cm">// token cancels SQL command mid-flight</span>
+
+    <span class="kw">var</span> enriched = <span class="kw">await</span> _client.<span class="fn">EnrichAsync</span>(data, cts.Token); <span class="cm">// cancels HTTP call</span>
+
+    <span class="kw">return</span> <span class="fn">BuildReport</span>(enriched);
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LINQ & DATA ACCESS -->
+  <section class="section" id="dn-linq">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">04</span>
+      <h2 class="section-title">LINQ &amp; Data Access</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">4.1</span>
+        <span class="topic-title">IEnumerable vs IQueryable — The Silent Full-Table Scan</span>
+        <div class="topic-tags"><span class="tag tag-query">query</span><span class="tag tag-hot">SQL</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <code>IQueryable.Where()</code> builds an expression tree translated to a SQL <code>WHERE</code> clause. <code>IEnumerable.Where()</code> runs a delegate in-process — after materialising the full result set. A single <code>AsEnumerable()</code> mid-chain silently pulls every row from the database before your filter runs.
+          <br><br>
+          This is the most common performance bug found in repository patterns: exposing <code>IEnumerable&lt;T&gt;</code> from a repository method forces callers to load all rows. Expose <code>IQueryable&lt;T&gt;</code> so callers compose their filters before materialisation.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">queryable.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ AsEnumerable() materialises ALL rows, then filters in-process</span>
+<span class="kw">var</span> result = _db.Orders
+    .AsEnumerable()                  <span class="cm">// ← full table load here</span>
+    .Where(o => o.Total > <span class="num">1000</span>)     <span class="cm">// ← runs in-process on ALL rows</span>
+    .ToList();
+
+<span class="cm">// ✅ Filter stays in SQL — single round-trip</span>
+<span class="kw">var</span> result = <span class="kw">await</span> _db.Orders
+    .Where(o => o.Total > <span class="num">1000</span>)
+    .AsNoTracking()
+    .ToListAsync(ct);
+
+<span class="cm">// ❌ Repository returning IEnumerable — caller loads all rows</span>
+<span class="kw">public</span> IEnumerable&lt;<span class="type">Order</span>&gt; <span class="fn">GetOrders</span>() => _db.Orders;
+
+<span class="cm">// ✅ Repository returning IQueryable — caller composes, one SQL generated</span>
+<span class="kw">public</span> IQueryable&lt;<span class="type">Order</span>&gt; <span class="fn">GetOrders</span>() => _db.Orders.AsNoTracking();</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">4.2</span>
+        <span class="topic-title">LINQ in Hot Paths — The Delegate and Iterator Tax</span>
+        <div class="topic-tags"><span class="tag tag-query">LINQ</span><span class="tag tag-hot">hot path</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          In-memory LINQ overhead comes from: iterator state machines (heap allocation per chain step), delegate invocations (no cross-site inlining), and inability to use <code>Span&lt;T&gt;</code>. For in-memory collections called >100k times/second, explicit <code>for</code> loops with direct indexing are 3–10× faster.
+          <br><br>
+          <strong>PLINQ pitfall:</strong> <code>.AsParallel()</code> on collections under ~10,000 items is typically slower than sequential LINQ due to partitioning and synchronization overhead. Profile with BenchmarkDotNet before reaching for PLINQ.
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-label">Don't speculate</span>
+          Never drop LINQ for raw loops without benchmarking. The JIT can often inline and vectorise LINQ chains at steady state. Measure first — the crossover point depends on collection size, chain complexity, and whether the data fits in L1/L2 cache.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EF CORE DEEP DIVE -->
+  <section class="section" id="dn-ef">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">05</span>
+      <h2 class="section-title">EF Core Deep Dive</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.1</span>
+        <span class="topic-title">Change Tracker Cost — Set NoTracking Globally</span>
+        <div class="topic-tags"><span class="tag tag-query">EF</span><span class="tag tag-alloc">alloc</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          The change tracker maintains a snapshot of original values for every tracked entity (<code>EntityEntry</code>, <code>PropertyEntry</code> objects). A 1,000-row query creates 1,000 entity entries plus property snapshots — all heap-allocated and alive until the <code>DbContext</code> is disposed. For read-heavy APIs, this is pure overhead.
+          <br><br>
+          Best practice: set <code>QueryTrackingBehavior.NoTracking</code> globally on the <code>DbContext</code> options and opt back in with <code>.AsTracking()</code> only for write paths.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">ef-notracking.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Set globally — flips the default for all queries on this context</span>
+services.AddDbContext&lt;<span class="type">AppDbContext</span>&gt;(opts =>
+    opts.UseSqlServer(conn)
+        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+
+<span class="cm">// Opt in for write operations only</span>
+<span class="kw">var</span> order = <span class="kw">await</span> _db.Orders
+    .AsTracking()
+    .FirstAsync(o => o.Id == id, ct);
+
+order.Status = OrderStatus.Shipped;
+<span class="kw">await</span> _db.SaveChangesAsync(ct);</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.2</span>
+        <span class="topic-title">EF Core 7+ Bulk Mutations — ExecuteUpdate/ExecuteDelete</span>
+        <div class="topic-tags"><span class="tag tag-query">EF</span><span class="tag tag-hot">bulk</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Pre-EF7, updating 10,000 rows required loading them all, modifying in-memory, then emitting 10,000 individual <code>UPDATE</code> statements in <code>SaveChanges</code>. EF Core 7 introduced <code>ExecuteUpdateAsync</code> and <code>ExecuteDeleteAsync</code> — set-based SQL operations that translate to a single <code>UPDATE ... WHERE</code> or <code>DELETE ... WHERE</code>. No entity materialisation, no change tracker involvement.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">ef-bulk.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Pre-EF7: loads all rows + emits N UPDATE statements</span>
+<span class="kw">var</span> stale = <span class="kw">await</span> _db.Sessions.Where(s => s.LastActivity < cutoff).ToListAsync(ct);
+<span class="kw">foreach</span> (<span class="kw">var</span> s <span class="kw">in</span> stale) s.IsExpired = <span class="kw">true</span>;
+<span class="kw">await</span> _db.SaveChangesAsync(ct);
+
+<span class="cm">// ✅ EF Core 7+: single SQL UPDATE — no materialisation</span>
+<span class="kw">await</span> _db.Sessions
+    .Where(s => s.LastActivity < cutoff)
+    .ExecuteUpdateAsync(s => s.<span class="fn">SetProperty</span>(x => x.IsExpired, <span class="kw">true</span>), ct);
+
+<span class="cm">// ✅ Single SQL DELETE</span>
+<span class="kw">await</span> _db.AuditLogs
+    .Where(l => l.CreatedAt < DateTime.UtcNow.AddYears(-<span class="num">1</span>))
+    .ExecuteDeleteAsync(ct);</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.3</span>
+        <span class="topic-title">Cartesian Explosion and AsSplitQuery</span>
+        <div class="topic-tags"><span class="tag tag-query">EF</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Including multiple collection navigations in a single query generates JOINs that produce a Cartesian product. 100 orders × 5 items × 3 tags = 1,500 rows transmitted from SQL for 100 logical entities. <code>AsSplitQuery()</code> issues separate SELECTs per collection, eliminating the explosion at the cost of multiple round-trips (and non-atomic reads).
+        </div>
+        <div class="tradeoff-grid">
+          <div class="tradeoff-card">
+            <span class="tc-label">Single Query</span>
+            <strong>One round-trip.</strong> Cartesian product multiplies with each collection. Best when collections are small.
+          </div>
+          <div class="tradeoff-card">
+            <span class="tc-label">Split Query</span>
+            <strong>N round-trips.</strong> No row multiplication. Not atomic — beware consistency under concurrent writes.
+          </div>
+          <div class="tradeoff-card">
+            <span class="tc-label">Manual Projection</span>
+            <strong>Maximum control.</strong> <code>Select(new DTO)</code> pulls only needed columns. Best for read-heavy DTO APIs.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THREADING & CONTENTION -->
+  <section class="section" id="dn-threading">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">06</span>
+      <h2 class="section-title">Threading &amp; Lock Contention</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">6.1</span>
+        <span class="topic-title">Contention — Detection and Elimination Strategies</span>
+        <div class="topic-tags"><span class="tag tag-conc">contention</span><span class="tag tag-hot">latency</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          A <code>lock</code> under high concurrency causes threads to queue in the OS kernel — each context switch is ~1–5µs. Under thousands of concurrent requests, a single hot lock serialises throughput entirely. Escalation path:
+          <br><br>
+          <strong>(1) Reduce lock scope</strong> — move computation outside the lock, lock only the mutation. <strong>(2) Reader/writer separation</strong> — <code>ReaderWriterLockSlim</code> for read-dominant workloads. <strong>(3) Lock-free</strong> — <code>Interlocked</code> for counters, <code>ConcurrentDictionary</code> with <code>GetOrAdd</code>. <strong>(4) Sharding</strong> — partition state into N independent locks, each thread hashes to its shard.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">lock-strategies.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Lock held during expensive computation — serialises all threads</span>
+<span class="kw">lock</span> (_sync) { result = <span class="fn">ExpensiveCompute</span>(); _cache[key] = result; }
+
+<span class="cm">// ✅ Compute outside lock; lock only the write</span>
+<span class="kw">var</span> result = <span class="fn">ExpensiveCompute</span>();
+<span class="kw">lock</span> (_sync) { _cache.TryAdd(key, result); }
+
+<span class="cm">// ✅ Lock-free atomic increment — no kernel involvement</span>
+Interlocked.Increment(<span class="kw">ref</span> _requestCount);
+
+<span class="cm">// ✅ ConcurrentDictionary.GetOrAdd — striped internal locks</span>
+<span class="kw">var</span> val = _dict.GetOrAdd(key, k => <span class="kw">new</span> LazyLoader(k));
+<span class="cm">// ⚠ Factory may run on multiple threads if key absent simultaneously;</span>
+<span class="cm">// wrap value in Lazy&lt;T&gt; if construction must be exactly once.</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">6.2</span>
+        <span class="topic-title">Channel&lt;T&gt; — Backpressure-Aware Async Pipelines</span>
+        <div class="topic-tags"><span class="tag tag-conc">concurrency</span><span class="tag tag-async">async</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <code>System.Threading.Channels</code> is the modern replacement for <code>BlockingCollection</code> and manual queue-plus-lock patterns. Bounded channels exert <strong>backpressure</strong> on producers when the consumer falls behind, preventing unbounded memory growth under load — critical for ingestion pipelines.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">channels.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">var</span> channel = Channel.CreateBounded&lt;<span class="type">WorkItem</span>&gt;(
+    <span class="kw">new</span> BoundedChannelOptions(<span class="num">1000</span>)
+    {
+        FullMode     = BoundedChannelFullMode.Wait, <span class="cm">// backpressure on producer</span>
+        SingleWriter = <span class="kw">false</span>,
+        SingleReader = <span class="kw">true</span>   <span class="cm">// enables internal reader-path optimisation</span>
+    });
+
+<span class="cm">// Producer — awaits if channel is full (backpressure)</span>
+<span class="kw">await</span> channel.Writer.WriteAsync(item, ct);
+
+<span class="cm">// Consumer — IAsyncEnumerable, completes when writer closes</span>
+<span class="kw">await foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> channel.Reader.ReadAllAsync(ct))
+    <span class="kw">await</span> <span class="fn">ProcessAsync</span>(item, ct);</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- .NET PROFILING -->
+  <section class="section" id="dn-profiling">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">07</span>
+      <h2 class="section-title">.NET Profiling Strategy</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">7.1</span>
+        <span class="topic-title">Choosing the Right Tool for the Symptom</span>
+        <div class="topic-tags"><span class="tag tag-profil">profiling</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          The senior mistake is jumping straight to a profiler on a dev box. Start with <strong>metrics in production</strong> to confirm the hypothesis, then scope with tracing, then isolate with benchmarking.
+        </div>
+        <div class="tradeoff-grid">
+          <div class="tradeoff-card">
+            <span class="tc-label">High CPU / Slow endpoint</span>
+            <strong>dotnet-trace</strong> CPU sampling → SpeedScope flamegraph. Or JetBrains dotTrace for wall-clock timeline with call trees.
+          </div>
+          <div class="tradeoff-card">
+            <span class="tc-label">GC pauses / Memory growth</span>
+            <strong>dotnet-counters</strong> live + <strong>dotnet-dump</strong> heap snapshot. PerfView or dotMemory for retained-root analysis.
+          </div>
+          <div class="tradeoff-card">
+            <span class="tc-label">Micro-benchmark validation</span>
+            <strong>BenchmarkDotNet</strong> — median/P99, auto-warmup, <code>[MemoryDiagnoser]</code> reports allocs/invocation. Always measure before and after.
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">dotnet-profiling.sh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm"># CPU flamegraph — 10 sec trace → open in SpeedScope</span>
+dotnet-trace collect -p &lt;PID&gt; --profile cpu-sampling --duration 00:00:10
+dotnet-trace convert trace.nettrace --format Speedscope
+
+<span class="cm"># Live GC + thread pool counters — negligible overhead</span>
+dotnet-counters monitor -p &lt;PID&gt; System.Runtime
+
+<span class="cm"># Allocation hot-path trace</span>
+dotnet-trace collect -p &lt;PID&gt; --profile gc-verbose --duration 00:00:10</pre>
+        </div>
+        <div class="callout callout-dark">
+          <span class="callout-label">Interview signal</span>
+          "I confirm the symptom with <code>dotnet-counters</code> in production, capture a flamegraph with <code>dotnet-trace</code> to identify the hot path, write a targeted BenchmarkDotNet test to validate the fix in isolation, then ship and verify the metric drops." This demonstrates systematic diagnosis, not speculative tuning.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- .NET CHECKLIST -->
+  <section class="section" id="dn-checklist">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">08</span>
+      <h2 class="section-title">.NET Senior Performance Checklist</h2>
+    </div>
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">—</span>
+        <span class="topic-title">Architecture &amp; Code Review Level</span>
+        <div class="topic-tags"><span class="tag tag-hot">senior</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <ul class="checklist">
+          <li class="critical">Monitor Gen 2 GC count and LOH size in production with <code>dotnet-counters</code> before any GC config changes.</li>
+          <li class="critical">Never call <code>.Result</code>, <code>.Wait()</code>, or <code>.GetAwaiter().GetResult()</code> on a Task in request-handling code — risk of thread pool starvation and deadlock.</li>
+          <li>Use <code>SafeHandle</code> for unmanaged resources — avoids raw finalizers and their two-cycle GC penalty.</li>
+          <li>Use <code>ObjectPool&lt;T&gt;</code> or <code>RecyclableMemoryStream</code> for frequently constructed objects and large buffers.</li>
+          <li>Use <code>Memory&lt;T&gt;</code> in async pipelines; <code>Span&lt;T&gt;</code> in synchronous hot paths — never cross <code>await</code> with Span.</li>
+          <li>Consider <code>System.IO.Pipelines</code> for high-throughput stream processing — eliminates double-buffering used by Kestrel internally.</li>
+          <li>Use source-generated JSON serialization (<code>[JsonSerializable]</code>) in hot paths — eliminates reflection, NativeAOT-compatible.</li>
+          <li>Return <code>ValueTask</code> from methods that are synchronous on the hot path. Never <code>await</code> a <code>ValueTask</code> more than once.</li>
+          <li>Avoid <code>async</code> on methods that never suspend — return <code>Task.FromResult()</code> or a completed <code>ValueTask</code> directly.</li>
+          <li>Propagate <code>CancellationToken</code> to all I/O boundaries. Use <code>CreateLinkedTokenSource</code> for per-operation timeouts.</li>
+          <li>Set <code>QueryTrackingBehavior.NoTracking</code> globally on read-heavy <code>DbContext</code>s; opt in with <code>.AsTracking()</code> for writes.</li>
+          <li>Use <code>ExecuteUpdateAsync</code> / <code>ExecuteDeleteAsync</code> (EF Core 7+) for bulk mutations — no entity materialisation.</li>
+          <li>Expose <code>IQueryable&lt;T&gt;</code> from repositories, not <code>IEnumerable&lt;T&gt;</code> — keeps filter composition in SQL.</li>
+          <li>Avoid calling <code>.AsEnumerable()</code> mid-LINQ-chain on EF queries — it materialises the full result set.</li>
+          <li>Evaluate <code>AsSplitQuery()</code> when including multiple large collection navigations.</li>
+          <li>Move expensive computation outside lock scope; lock only the state mutation.</li>
+          <li>Use <code>Channel&lt;T&gt;</code> bounded with <code>FullMode.Wait</code> for producer/consumer pipelines — built-in backpressure.</li>
+          <li class="warn">Pad hot concurrent structs to 64 bytes to prevent false sharing across CPU cache lines.</li>
+          <li class="warn">Profile with BenchmarkDotNet (<code>[MemoryDiagnoser]</code>) before and after any micro-optimisation. Never speculate.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PART 2 — REACT ══ -->
+  <div class="chapter-divider"><span class="chapter-divider-inner react-color">Part 2 — React Performance</span></div>
+
+  <!-- RECONCILER & FIBER -->
+  <section class="section" id="re-reconciler">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">01</span>
+      <h2 class="section-title">Reconciler &amp; Fiber Internals</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.1</span>
+        <span class="topic-title">How Fiber Works — Interruptible, Prioritised Reconciliation</span>
+        <div class="topic-tags"><span class="tag tag-fiber">fiber</span><span class="tag tag-render">render</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          React Fiber is a singly-linked tree of fiber nodes, each representing a unit of work. Unlike the stack-based reconciler (React 15), Fiber can <strong>pause, resume, reuse, or abort</strong> work mid-tree. Reconciliation splits into two phases:
+          <br><br>
+          <strong>Render phase</strong> (pure, async-interruptible) — runs component functions, builds the work-in-progress tree. Can be paused for higher-priority work (user input). May run multiple times per commit in Strict Mode — never put side effects in render.
+          <br><br>
+          <strong>Commit phase</strong> (synchronous, always runs to completion) — flushes DOM mutations, runs <code>useLayoutEffect</code>, then <code>useEffect</code>. Understanding this split is the foundation for reasoning about <code>useTransition</code>, <code>useDeferredValue</code>, and Suspense.
+        </div>
+        <div class="callout callout-info">
+          <span class="callout-label">Lane model</span>
+          Each state update is enqueued with a <strong>priority lane</strong>. User input gets SyncLane (highest). <code>useTransition</code> updates get TransitionLane (low). The scheduler processes higher lanes first — the render phase can be interrupted mid-tree, the current work-in-progress thrown away, and a higher-priority update processed instead.
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.2</span>
+        <span class="topic-title">Reconciliation Heuristics — Keys, Types, and Intentional Remounts</span>
+        <div class="topic-tags"><span class="tag tag-fiber">fiber</span><span class="tag tag-render">render</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          React's O(n) diffing relies on two assumptions: <strong>(1)</strong> Elements of different types produce different trees — React unmounts rather than reconciling across type boundaries. <strong>(2)</strong> Keys identify stable elements across renders.
+          <br><br>
+          Index keys on sortable/filterable lists cause React to reuse DOM nodes for different data — incorrect state retention, stale refs, and unnecessary re-renders. Use stable, data-derived keys.
+          <br><br>
+          <strong>Intentional key change is a valid pattern:</strong> changing a <code>key</code> forces a full unmount and remount, resetting all state and refs cleanly — often cleaner than multi-effect reset sequences.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">keys.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Index key on sortable list — stale state retained after sort</span>
+{items.map((item, i) => <span class="jsx">&lt;Row</span> <span class="attr">key</span>=<span class="op">{</span>i<span class="op">}</span> <span class="attr">item</span>=<span class="op">{</span>item<span class="op">}</span> <span class="jsx">/&gt;</span>)}
+
+<span class="cm">// ✅ Stable data key — reconciler correctly skips unchanged nodes</span>
+{items.map(item => <span class="jsx">&lt;Row</span> <span class="attr">key</span>=<span class="op">{</span>item.id<span class="op">}</span> <span class="attr">item</span>=<span class="op">{</span>item<span class="op">}</span> <span class="jsx">/&gt;</span>)}
+
+<span class="cm">// ✅ Intentional remount to reset all state — cleaner than multi-effect reset</span>
+<span class="jsx">&lt;UserProfileForm</span> <span class="attr">key</span>=<span class="op">{</span>selectedUserId<span class="op">}</span> <span class="attr">userId</span>=<span class="op">{</span>selectedUserId<span class="op">}</span> <span class="jsx">/&gt;</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCURRENT FEATURES -->
+  <section class="section" id="re-concurrency">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">02</span>
+      <h2 class="section-title">React 18 Concurrent Features</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.1</span>
+        <span class="topic-title">useTransition — Interruptible Low-Priority Updates</span>
+        <div class="topic-tags"><span class="tag tag-fiber">concurrent</span><span class="tag tag-render">render</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <code>useTransition</code> marks a state update as non-urgent (TransitionLane). React starts rendering it at low priority. If a higher-priority update arrives (user keystroke), React <strong>abandons the in-progress transition render</strong> (throws away the work-in-progress tree), handles the urgent update, then restarts the transition. The UI always feels responsive.
+          <br><br>
+          This is distinct from debouncing: debouncing delays when work starts; transitions let React start the work immediately but interrupt it if something more important arrives.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">use-transition.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">const</span> [isPending, startTransition] = <span class="fn">useTransition</span>();
+
+<span class="kw">function</span> <span class="fn">handleChange</span>(e) {
+    <span class="fn">setQuery</span>(e.target.value);                <span class="cm">// SyncLane — updates input immediately</span>
+    <span class="fn">startTransition</span>(() => {
+        <span class="fn">setResults</span>(<span class="fn">filterItems</span>(e.target.value)); <span class="cm">// TransitionLane — interruptible</span>
+    });
+}
+
+<span class="cm">// isPending: true while transition is in-flight — show stale/dimmed content</span>
+<span class="kw">return</span> (
+    <span class="jsx">&lt;&gt;</span>
+        <span class="jsx">&lt;input</span> <span class="attr">value</span>=<span class="op">{</span>query<span class="op">}</span> <span class="attr">onChange</span>=<span class="op">{</span>handleChange<span class="op">}</span> <span class="jsx">/&gt;</span>
+        <span class="jsx">&lt;ResultList</span> <span class="attr">items</span>=<span class="op">{</span>results<span class="op">}</span> <span class="attr">dim</span>=<span class="op">{</span>isPending<span class="op">}</span> <span class="jsx">/&gt;</span>
+    <span class="jsx">&lt;/&gt;</span>
+);</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.2</span>
+        <span class="topic-title">useDeferredValue + memo — Defer Without Owning the Setter</span>
+        <div class="topic-tags"><span class="tag tag-fiber">concurrent</span><span class="tag tag-render">render</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <code>useDeferredValue</code> is the consumer-side equivalent of transitions — for props you don't control. During an urgent render, it returns the <em>previous</em> value; the new value is scheduled at low priority. <strong>Combine with <code>React.memo</code>:</strong> the deferred value doesn't change during the urgent render, so the memo comparison skips the expensive subtree entirely — the slow component simply isn't re-rendered until the deferred render fires.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">deferred-value.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">function</span> <span class="fn">SearchPage</span>({ query }) {
+    <span class="kw">const</span> deferredQuery = <span class="fn">useDeferredValue</span>(query);
+
+    <span class="cm">// During urgent render: deferredQuery === prev value → memo skips ResultList</span>
+    <span class="cm">// After deferred render fires: deferredQuery === new value → ResultList re-renders</span>
+    <span class="kw">return</span> (
+        <span class="jsx">&lt;&gt;</span>
+            <span class="jsx">&lt;SearchInput</span> <span class="attr">value</span>=<span class="op">{</span>query<span class="op">}</span> <span class="jsx">/&gt;</span>
+            <span class="jsx">&lt;MemoizedResultList</span> <span class="attr">query</span>=<span class="op">{</span>deferredQuery<span class="op">}</span> <span class="jsx">/&gt;</span>
+        <span class="jsx">&lt;/&gt;</span>
+    );
+}
+
+<span class="kw">const</span> <span class="cls">MemoizedResultList</span> = React.memo(<span class="fn">ResultList</span>);
+<span class="cm">// Comparison: prev deferredQuery === next deferredQuery</span>
+<span class="cm">// During urgent render → same → expensive subtree skipped entirely</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.3</span>
+        <span class="topic-title">Automatic Batching — React 18 Breaking Behaviour Change</span>
+        <div class="topic-tags"><span class="tag tag-fiber">concurrent</span><span class="tag tag-render">render</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          React 17 batched updates only inside React event handlers. Updates inside <code>setTimeout</code>, Promises, and native event listeners triggered separate renders. React 18 with <code>createRoot</code> batches <em>all</em> updates regardless of origin — a single render per event-loop tick. This is a <strong>breaking change</strong> for code relying on sequential renders between updates. Use <code>flushSync</code> to opt out for DOM measurement between two state sets.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">batching.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// React 18 — both setStates batched → one render (was two in React 17)</span>
+setTimeout(() => {
+    setCount(c => c + 1);
+    setFlag(true);
+    // single re-render
+}, 0);
+
+<span class="cm">// Opt out — flushSync forces synchronous render between calls</span>
+<span class="kw">import</span> { flushSync } <span class="kw">from</span> <span class="str">'react-dom'</span>;
+
+flushSync(() => setCount(c => c + 1));   <span class="cm">// renders synchronously here</span>
+<span class="cm">// read DOM layout...</span>
+flushSync(() => setFlag(true));           <span class="cm">// renders synchronously here</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RE-RENDER ROOT CAUSES -->
+  <section class="section" id="re-renders">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">03</span>
+      <h2 class="section-title">Re-render Root Causes</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.1</span>
+        <span class="topic-title">Referential Instability — The Invisible Performance Leak</span>
+        <div class="topic-tags"><span class="tag tag-render">render</span><span class="tag tag-fiber">fiber</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <code>React.memo</code> uses shallow equality. Object literals, array literals, and inline functions are new references on every render — defeating memo entirely. A single context provider value re-creating an object literal per render cascades re-renders to every consumer in the entire tree.
+          <br><br>
+          This is the most common cause of unexpected re-render regressions in large React codebases. The fix is referential stability: module-level constants for truly static data, <code>useMemo</code> for dynamic objects, <code>useCallback</code> for callbacks passed to memoized children.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">referential-stability.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ New object reference every render — memo on Chart is useless</span>
+<span class="jsx">&lt;Chart</span> <span class="attr">options</span>=<span class="op">{{</span> color: <span class="str">'blue'</span>, grid: <span class="kw">true</span> <span class="op">}}</span> <span class="jsx">/&gt;</span>
+
+<span class="cm">// ✅ Module-level constant — stable reference forever</span>
+<span class="kw">const</span> CHART_OPTIONS = { color: <span class="str">'blue'</span>, grid: <span class="kw">true</span> };
+<span class="jsx">&lt;Chart</span> <span class="attr">options</span>=<span class="op">{</span>CHART_OPTIONS<span class="op">}</span> <span class="jsx">/&gt;</span>
+
+<span class="cm">// ❌ Context value re-creates on every AuthProvider render</span>
+<span class="jsx">&lt;AuthCtx.Provider</span> <span class="attr">value</span>=<span class="op">{{</span> user, login, logout <span class="op">}}</span><span class="jsx">&gt;</span>
+
+<span class="cm">// ✅ Memoized — consumers only re-render when user/login/logout changes</span>
+<span class="kw">const</span> value = <span class="fn">useMemo</span>(() => ({ user, login, logout }), [user, login, logout]);
+<span class="jsx">&lt;AuthCtx.Provider</span> <span class="attr">value</span>=<span class="op">{</span>value<span class="op">}</span><span class="jsx">&gt;</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.2</span>
+        <span class="topic-title">Context Propagation — Split by Frequency, Not Domain</span>
+        <div class="topic-tags"><span class="tag tag-render">render</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Context triggers a re-render in every consumer when <em>any</em> value it holds changes — React performs no property-level diffing inside context values. The correct split is by <strong>update frequency</strong>, not domain.
+          <br><br>
+          A <code>UserContext</code> holding both the user object (changes rarely) and a cart counter (changes per interaction) re-renders every user-aware component on every cart update. Split by frequency: <code>UserIdentityContext</code> and <code>CartContext</code>.
+          <br><br>
+          For high-frequency shared state consumed by many components at different tree depths, Zustand or Jotai outperform Context — they use subscription-based updates that re-render only components subscribed to the specific slice that changed.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATE ARCHITECTURE -->
+  <section class="section" id="re-state">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">04</span>
+      <h2 class="section-title">State Architecture at Scale</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">4.1</span>
+        <span class="topic-title">React Query Internals — Structural Sharing and Select</span>
+        <div class="topic-tags"><span class="tag tag-render">server state</span><span class="tag tag-arch">architecture</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Multiple components calling <code>useQuery</code> with the same key share a single cache entry — <strong>automatic request deduplication</strong>. On mount, a stale query refetches in the background while consumers render stale data immediately (stale-while-revalidate).
+          <br><br>
+          <strong>Structural sharing:</strong> React Query deep-compares responses and returns the same object reference for unchanged data. Components only re-render if their specific slice changed — even if the full query refetched.
+          <br><br>
+          <strong><code>select</code> option:</strong> subscribe to a derived slice — the component re-renders only when that derived value changes, not on every query update.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">react-query.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Select — re-renders only when cart item count changes (not full cart object)</span>
+<span class="kw">const</span> { data: count } = <span class="fn">useQuery</span>({
+    queryKey: [<span class="str">'cart'</span>],
+    queryFn:  fetchCart,
+    select: cart => cart.items.length,
+});
+
+<span class="cm">// Optimistic update — update cache immediately, revert on error</span>
+<span class="kw">const</span> mutation = <span class="fn">useMutation</span>({
+    mutationFn: updateItem,
+    onMutate: <span class="kw">async</span> (updated) => {
+        <span class="kw">await</span> queryClient.<span class="fn">cancelQueries</span>({ queryKey: [<span class="str">'cart'</span>] });
+        <span class="kw">const</span> prev = queryClient.<span class="fn">getQueryData</span>([<span class="str">'cart'</span>]);
+        queryClient.<span class="fn">setQueryData</span>([<span class="str">'cart'</span>], old =>
+            ({ ...old, items: old.items.map(i => i.id === updated.id ? updated : i) })
+        );
+        <span class="kw">return</span> { prev };
+    },
+    onError:   (_, __, ctx) => queryClient.<span class="fn">setQueryData</span>([<span class="str">'cart'</span>], ctx.prev),
+    onSettled: ()           => queryClient.<span class="fn">invalidateQueries</span>({ queryKey: [<span class="str">'cart'</span>] }),
+});</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">4.2</span>
+        <span class="topic-title">useReducer + Dispatch Context — Stable References Without useCallback</span>
+        <div class="topic-tags"><span class="tag tag-render">render</span><span class="tag tag-arch">architecture</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <code>useReducer</code>'s <code>dispatch</code> has a <strong>stable identity across renders</strong> — React guarantees it never changes. Passing dispatch through context or to memoized children requires no <code>useCallback</code>. The canonical pattern: one context for state (changes frequently), one context for dispatch (never changes). Components that only dispatch actions don't re-render when state changes.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">reducer-context.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">const</span> StateCtx    = createContext(<span class="kw">null</span>);
+<span class="kw">const</span> DispatchCtx = createContext(<span class="kw">null</span>);  <span class="cm">// stable — never causes re-render</span>
+
+<span class="kw">function</span> <span class="fn">StoreProvider</span>({ children }) {
+    <span class="kw">const</span> [state, dispatch] = <span class="fn">useReducer</span>(reducer, initialState);
+    <span class="kw">return</span> (
+        <span class="jsx">&lt;DispatchCtx.Provider</span> <span class="attr">value</span>=<span class="op">{</span>dispatch<span class="op">}</span><span class="jsx">&gt;</span>
+            <span class="jsx">&lt;StateCtx.Provider</span> <span class="attr">value</span>=<span class="op">{</span>state<span class="op">}</span><span class="jsx">&gt;</span>{children}<span class="jsx">&lt;/StateCtx.Provider&gt;</span>
+        <span class="jsx">&lt;/DispatchCtx.Provider&gt;</span>
+    );
+}
+
+<span class="cm">// ActionButton only consumes dispatch — never re-renders when state changes</span>
+<span class="kw">const</span> <span class="cls">ActionButton</span> = React.memo(() => {
+    <span class="kw">const</span> dispatch = <span class="fn">useContext</span>(DispatchCtx);
+    <span class="kw">return</span> <span class="jsx">&lt;button</span> <span class="attr">onClick</span>=<span class="op">{</span>() => <span class="fn">dispatch</span>({ type: <span class="str">'INCREMENT'</span> })<span class="op">}</span><span class="jsx">&gt;</span>+<span class="jsx">&lt;/button&gt;</span>;
+});</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUNDLE & LOADING -->
+  <section class="section" id="re-bundle">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">05</span>
+      <h2 class="section-title">Bundle &amp; Loading Strategy</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.1</span>
+        <span class="topic-title">Module Federation — Shared Singletons in Micro-frontends</span>
+        <div class="topic-tags"><span class="tag tag-bundle">bundle</span><span class="tag tag-arch">architecture</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          In a micro-frontend setup (Module Federation, single-spa), React and ReactDOM must be declared as <strong>shared singletons</strong>. Without this, each micro-frontend bundles its own React copy — causing hook constraint violations (hooks require a single React instance), broken context across app boundaries, and duplicate bundle weight.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">module-federation.js</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// webpack.config.js — host declares React as a shared singleton</span>
+<span class="kw">new</span> ModuleFederationPlugin({
+    name: <span class="str">'shell'</span>,
+    shared: {
+        react:        { singleton: <span class="kw">true</span>, requiredVersion: deps.react },
+        <span class="str">'react-dom'</span>:  { singleton: <span class="kw">true</span>, requiredVersion: deps[<span class="str">'react-dom'</span>] },
+        <span class="cm">// Version mismatch → remote falls back to own copy, logs warning</span>
+        <span class="cm">// strictVersion: true → throws on mismatch instead</span>
+    },
+});</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.2</span>
+        <span class="topic-title">Prefetch and Preload — Eliminating Lazy-Load Waterfalls</span>
+        <div class="topic-tags"><span class="tag tag-bundle">bundle</span><span class="tag tag-hot">LCP</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Code splitting introduces a waterfall: main bundle loads → executes → discovers lazy import → network request for chunk. Prefetching eliminates this by loading chunks during idle time before they're needed. <strong>Prefetch</strong> (<code>&lt;link rel="prefetch"&gt;</code>) is low-priority, idle-time. <strong>Preload</strong> (<code>&lt;link rel="preload"&gt;</code>) is high-priority, in-parallel — use for chunks needed immediately after the current one.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">prefetch.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Prefetch on hover — chunk in cache before user clicks</span>
+<span class="kw">const</span> <span class="fn">handleHover</span> = () => {
+    <span class="kw">import</span>(<span class="cm">/* webpackPrefetch: true */</span> <span class="str">'./pages/Dashboard'</span>);
+};
+
+<span class="cm">// Preload — needed immediately after current chunk (e.g. checkout after cart)</span>
+<span class="kw">const</span> Checkout = lazy(() =>
+    <span class="kw">import</span>(<span class="cm">/* webpackPreload: true */</span> <span class="str">'./pages/Checkout'</span>));</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RUNTIME BOTTLENECKS -->
+  <section class="section" id="re-runtime">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">06</span>
+      <h2 class="section-title">Runtime Bottlenecks</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">6.1</span>
+        <span class="topic-title">Long Tasks and Main-Thread Yielding</span>
+        <div class="topic-tags"><span class="tag tag-render">main thread</span><span class="tag tag-fiber">scheduler</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          A Long Task is any main-thread task exceeding 50ms — it blocks user input, animations, and React's own scheduler. React's concurrent scheduler yields to the browser every 5ms when using <code>createRoot</code>, but <strong>synchronous user code inside renders does not automatically yield</strong>. For CPU-bound work (large file parsing, heavy data transforms), manually chunk and yield between chunks.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">yielding.js</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Chunk processing with yield — avoids Long Tasks blocking input/paint</span>
+<span class="kw">async function</span> <span class="fn">processInChunks</span>(items) {
+    <span class="kw">const</span> CHUNK = <span class="num">100</span>;
+    <span class="kw">const</span> results = [];
+    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < items.length; i += CHUNK) {
+        results.push(...items.slice(i, i + CHUNK).map(<span class="fn">expensiveTransform</span>));
+        <span class="kw">await new</span> Promise(r => setTimeout(r, <span class="num">0</span>)); <span class="cm">// yield to browser</span>
+    }
+    <span class="kw">return</span> results;
+}
+
+<span class="cm">// Chrome 115+ / modern — higher priority than setTimeout(0)</span>
+<span class="kw">for</span> (<span class="kw">const</span> chunk <span class="kw">of</span> chunks) {
+    <span class="fn">processChunk</span>(chunk);
+    <span class="kw">await</span> scheduler.yield();
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">6.2</span>
+        <span class="topic-title">Web Workers with Comlink — Offload CPU to a Separate Thread</span>
+        <div class="topic-tags"><span class="tag tag-render">main thread</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Web Workers run on a separate OS thread with no DOM access. Ideal for: cryptographic operations, large data transformations, WASM execution, and binary parsing. <strong>Comlink</strong> wraps the <code>postMessage</code> API in a transparent async proxy, making cross-thread calls look like normal function calls.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">web-worker.js</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// worker.js — separate thread, no DOM access</span>
+<span class="kw">import</span> * <span class="kw">as</span> Comlink <span class="kw">from</span> <span class="str">'comlink'</span>;
+Comlink.expose({ parseCSV: (raw) => <span class="fn">heavyParse</span>(raw) });
+
+<span class="cm">// main.js — transparent async proxy</span>
+<span class="kw">const</span> worker = <span class="kw">new</span> Worker(<span class="kw">new</span> URL(<span class="str">'./worker.js'</span>, <span class="kw">import</span>.meta.url));
+<span class="kw">const</span> remote = Comlink.wrap(worker);
+
+<span class="cm">// Runs off main thread — no jank</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> remote.parseCSV(fileContents);
+setData(rows);</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REACT PROFILING -->
+  <section class="section" id="re-profiling">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">07</span>
+      <h2 class="section-title">React Profiling Strategy</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">7.1</span>
+        <span class="topic-title">React DevTools Profiler — Reading Flame Charts Correctly</span>
+        <div class="topic-tags"><span class="tag tag-profil">profiling</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          The Profiler shows <strong>why</strong> each component rendered (prop change, hook change, context change, parent render) and its self-render time. Grey bars rendered but committed without DOM changes — often wasted renders worth eliminating.
+          <br><br>
+          The <strong>Ranked chart</strong> sorts by self render time — look for components taking >16ms per interaction. The <strong>Timeline</strong> (React 18+) shows concurrent rendering slices and interaction attribution, correlating Long Tasks with specific user events.
+        </div>
+        <div class="callout callout-dark">
+          <span class="callout-label">Systematic profiling workflow</span>
+          1. Record a specific interaction (one keystroke, one click).<br>
+          2. Ranked chart → identify the slowest committing component.<br>
+          3. Click it → "Why did this render?" shows the exact prop/hook/context that changed.<br>
+          4. Fix: stabilise the reference, memoize the value, or split the context.<br>
+          5. Record again — verify the component no longer appears in the ranked list.
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">7.2</span>
+        <span class="topic-title">Core Web Vitals as Code-Level Signals</span>
+        <div class="topic-tags"><span class="tag tag-profil">profiling</span><span class="tag tag-hot">LCP · INP · CLS</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">Understanding the causal chain from code pattern to Core Web Vital metric is a senior-level expectation.</div>
+        <div class="tradeoff-grid">
+          <div class="tradeoff-card">
+            <span class="tc-label">LCP — Largest Contentful Paint</span>
+            <strong>Target &lt;2.5s.</strong> Caused by unoptimised hero images, render-blocking JS, large initial bundles. Fix: <code>preload</code> LCP image, SSR/SSG above-fold content, code-split.
+          </div>
+          <div class="tradeoff-card">
+            <span class="tc-label">INP — Interaction to Next Paint</span>
+            <strong>Target &lt;200ms.</strong> Replaced FID in March 2024. Caused by Long Tasks blocking response to input. Fix: <code>useTransition</code>, chunk Long Tasks, Web Workers.
+          </div>
+          <div class="tradeoff-card">
+            <span class="tc-label">CLS — Cumulative Layout Shift</span>
+            <strong>Target &lt;0.1.</strong> Caused by images without dimensions, dynamically injected content above fold, font FOUT. Fix: CSS <code>aspect-ratio</code>, skeleton screens, <code>font-display: swap</code>.
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">web-vitals.js</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">import</span> { onLCP, onINP, onCLS } <span class="kw">from</span> <span class="str">'web-vitals'</span>; <span class="cm">// v3+</span>
+
+<span class="cm">// INP replaced FID in March 2024 — update metric collection accordingly</span>
+onINP(({ name, value, rating, attribution }) => {
+    analytics.track(<span class="str">'web-vital'</span>, {
+        name, value, rating,
+        element:            attribution.interactionTarget,
+        longAnimationFrames: attribution.longAnimationFrameEntries,
+    });
+});</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REACT CHECKLIST -->
+  <section class="section" id="re-checklist">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">08</span>
+      <h2 class="section-title">React Senior Performance Checklist</h2>
+    </div>
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">—</span>
+        <span class="topic-title">Architecture &amp; Code Review Level</span>
+        <div class="topic-tags"><span class="tag tag-render">senior</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <ul class="checklist">
+          <li class="react-critical">Understand the Fiber render vs. commit phase split. Never put side effects in render — the render phase can be run multiple times and thrown away.</li>
+          <li class="react-critical">Use <code>useTransition</code> for state updates that trigger expensive renders — updates become interruptible, not just deferred.</li>
+          <li class="react-critical">Use <code>useDeferredValue</code> + <code>React.memo</code> to defer expensive subtrees when you don't own the setter.</li>
+          <li>Know that React 18 automatic batching is a breaking change — use <code>flushSync</code> for DOM measurement between state updates.</li>
+          <li>Use stable, data-derived keys. Never use array index on sortable or filterable lists.</li>
+          <li>Intentionally change a <code>key</code> to force component remount and state reset — cleaner than multi-effect reset patterns.</li>
+          <li>Audit inline object/array literals in JSX and context provider values — these are the most common cause of memo-defeating re-renders.</li>
+          <li>Split contexts by update frequency, not domain. Use Zustand/Jotai for high-frequency shared state consumed at many tree depths.</li>
+          <li>Separate state context from dispatch context — <code>dispatch</code> identity is stable and never causes consumer re-renders.</li>
+          <li>Use React Query's <code>select</code> option to subscribe to derived slices — component re-renders only when the derived value changes.</li>
+          <li>Implement optimistic updates with rollback: <code>onMutate</code> sets cache, <code>onError</code> reverts, <code>onSettled</code> invalidates.</li>
+          <li>Declare React and ReactDOM as shared singletons in Module Federation — prevents duplicate instances and broken context across app boundaries.</li>
+          <li>Use <code>webpackPrefetch</code> to preload chunks during idle time and eliminate lazy-load waterfalls.</li>
+          <li>Identify Long Tasks (&gt;50ms) in the Performance panel — break them with <code>scheduler.yield()</code> or chunk + <code>setTimeout(0)</code>.</li>
+          <li>Offload CPU-intensive work (CSV parsing, crypto, WASM) to Web Workers via Comlink.</li>
+          <li class="warn">INP replaced FID as a Core Web Vital in March 2024 — update web-vitals library to v3+ and switch tracking from <code>onFID</code> to <code>onINP</code>.</li>
+          <li class="warn">Profile with React DevTools Profiler before adding <code>useMemo</code>/<code>useCallback</code> — verify the render is actually slow and that the memo comparison cost is lower than the render cost.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggle(header) { header.closest('.topic').classList.toggle('open'); }
+
+  const sections = document.querySelectorAll('.section[id]');
+  const navItems = document.querySelectorAll('.nav-item[href]');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        const isDotnet = id.startsWith('dn-');
+        navItems.forEach(a => {
+          a.classList.remove('active-dotnet', 'active-react');
+          if (a.getAttribute('href') === '#' + id)
+            a.classList.add(isDotnet ? 'active-dotnet' : 'active-react');
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-60px 0px -55% 0px' });
+  sections.forEach(s => obs.observe(s));
+
+  function copyCode(btn) {
+    navigator.clipboard.writeText(btn.closest('.code-wrap').querySelector('pre').innerText)
+      .then(() => { btn.textContent = 'copied!'; setTimeout(() => btn.textContent = 'copy', 1500); });
+  }
+</script>
+</body>
+</html>

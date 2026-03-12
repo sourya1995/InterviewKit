@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Senior Security Guide — .NET & React</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #161b27;
+      --surface2: #1e2535;
+      --border: #262f44;
+      --dotnet: #7c6dfa;
+      --dotnet-light: rgba(124,109,250,0.12);
+      --react: #22d3a0;
+      --react-light: rgba(34,211,160,0.1);
+      --danger: #f87171;
+      --danger-light: rgba(248,113,113,0.1);
+      --warn: #fbbf24;
+      --warn-light: rgba(251,191,36,0.1);
+      --good: #4ade80;
+      --good-light: rgba(74,222,128,0.1);
+      --info: #60a5fa;
+      --info-light: rgba(96,165,250,0.1);
+      --text: #e2e8f0;
+      --text-muted: #7d8fa8;
+      --text-dim: #4a5568;
+      --code-bg: #0a0d14;
+      --code-text: #e2e8f0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar { position: fixed; top: 0; left: 0; width: 272px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; }
+    .sidebar-brand { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-brand .eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .sidebar-brand h2 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 900; line-height: 1.2; color: var(--text); }
+    .sidebar-brand h2 em { font-style: italic; font-weight: 300; color: var(--danger); }
+    .nav-group { padding: 16px 12px 4px; }
+    .nav-group-label { font-size: 9px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; padding: 0 10px; margin-bottom: 6px; }
+    .nav-group-label.dotnet { color: var(--dotnet); }
+    .nav-group-label.react  { color: var(--react); }
+    .nav-item { display: block; padding: 6px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--text-muted); text-decoration: none; cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active-dotnet { background: var(--dotnet-light); color: var(--dotnet); border-left-color: var(--dotnet); }
+    .nav-item.active-react  { background: var(--react-light);  color: var(--react);  border-left-color: var(--react); }
+
+    /* MAIN */
+    .main { margin-left: 272px; padding: 0 56px 100px; max-width: 1100px; }
+
+    /* HERO */
+    .hero { padding: 64px 0 52px; border-bottom: 1px solid var(--border); margin-bottom: 64px; position: relative; overflow: hidden; }
+    .hero::before { content: "SEC"; position: absolute; right: -10px; top: 0px; font-family: 'Fraunces', serif; font-weight: 900; font-size: 200px; color: var(--danger); opacity: 0.04; line-height: 1; pointer-events: none; user-select: none; }
+    .hero .eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+    .hero h1 { font-family: 'Fraunces', serif; font-size: 58px; font-weight: 900; line-height: 1.05; letter-spacing: -1px; margin-bottom: 20px; color: var(--text); }
+    .hero h1 em { font-style: italic; font-weight: 300; color: var(--danger); }
+    .hero-desc { font-size: 15.5px; color: var(--text-muted); max-width: 540px; line-height: 1.9; }
+    .hero-pills { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+    .pill { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; border: 1px solid; }
+    .pill-dotnet { color: var(--dotnet); border-color: var(--dotnet); background: var(--dotnet-light); }
+    .pill-react  { color: var(--react);  border-color: var(--react);  background: var(--react-light); }
+    .pill-gray   { color: var(--text-muted); border-color: var(--border); background: var(--surface2); }
+    .pill-danger { color: var(--danger); border-color: var(--danger); background: var(--danger-light); }
+
+    /* CHAPTER DIVIDER */
+    .chapter-divider { margin: 72px 0 60px; display: flex; align-items: center; gap: 20px; }
+    .chapter-divider::before, .chapter-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    .chapter-divider-inner { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 900; white-space: nowrap; }
+    .chapter-divider-inner.dotnet-color { color: var(--dotnet); }
+    .chapter-divider-inner.react-color  { color: var(--react); }
+
+    /* SECTION */
+    .section { margin-bottom: 76px; scroll-margin-top: 24px; }
+    .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .section-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot-dotnet { background: var(--dotnet); box-shadow: 0 0 10px var(--dotnet); }
+    .dot-react  { background: var(--react);  box-shadow: 0 0 10px var(--react); }
+    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+    .label-dotnet { color: var(--dotnet); }
+    .label-react  { color: var(--react); }
+    .section-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; letter-spacing: -0.5px; }
+
+    /* TOPIC CARDS */
+    .topic { margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); }
+    .topic-header { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; transition: background 0.15s; user-select: none; }
+    .topic-header:hover { background: var(--surface2); }
+    .topic-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); flex-shrink: 0; width: 26px; }
+    .topic-title { font-weight: 600; font-size: 15px; flex: 1; color: var(--text); }
+    .topic-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .tag-critical { background: rgba(248,113,113,0.15); color: #fca5a5; border: 1px solid rgba(248,113,113,0.3); }
+    .tag-owasp    { background: rgba(251,191,36,0.12); color: #fcd34d; border: 1px solid rgba(251,191,36,0.25); }
+    .tag-auth     { background: var(--dotnet-light); color: var(--dotnet); border: 1px solid rgba(124,109,250,0.25); }
+    .tag-crypto   { background: rgba(34,211,160,0.1); color: #6ee7b7; border: 1px solid rgba(34,211,160,0.2); }
+    .tag-network  { background: rgba(96,165,250,0.1); color: #93c5fd; border: 1px solid rgba(96,165,250,0.2); }
+    .tag-input    { background: rgba(248,113,113,0.1); color: #fca5a5; border: 1px solid rgba(248,113,113,0.2); }
+    .tag-browser  { background: rgba(34,211,160,0.08); color: #5eead4; border: 1px solid rgba(34,211,160,0.18); }
+    .tag-supply   { background: rgba(251,191,36,0.08); color: #fde68a; border: 1px solid rgba(251,191,36,0.2); }
+    .chevron { font-size: 11px; color: var(--text-dim); transition: transform 0.2s; margin-left: 4px; }
+    .topic.open .chevron { transform: rotate(180deg); }
+    .topic-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
+    .topic.open .topic-body { display: block; }
+
+    .concept { font-size: 14.5px; color: var(--text-muted); line-height: 1.9; padding: 16px 0 10px; }
+    .concept strong { color: var(--text); }
+    .concept code { font-family: 'DM Mono', monospace; font-size: 12.5px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: #93c5fd; }
+
+    .callout { border-radius: 8px; padding: 13px 16px; font-size: 13.5px; line-height: 1.85; margin: 10px 0; border-left: 3px solid; }
+    .callout code { font-family: 'DM Mono', monospace; font-size: 12px; padding: 1px 5px; border-radius: 3px; background: rgba(255,255,255,0.07); }
+    .callout-danger { background: var(--danger-light); border-color: var(--danger); color: #fca5a5; }
+    .callout-good   { background: var(--good-light);   border-color: var(--good);   color: #86efac; }
+    .callout-warn   { background: var(--warn-light);   border-color: var(--warn);   color: #fde68a; }
+    .callout-info   { background: var(--info-light);   border-color: var(--info);   color: #93c5fd; }
+    .callout-dark   { background: #0a0d14; border-color: var(--border); color: var(--text-muted); }
+    .callout-label  { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 5px; opacity: 0.75; }
+
+    .code-wrap { margin: 14px 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .code-bar { background: #0a0d14; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .code-filename { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); }
+    .copy-btn { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); background: none; border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; cursor: pointer; transition: all 0.15s; }
+    .copy-btn:hover { background: var(--surface2); color: var(--text-muted); }
+    pre { background: var(--code-bg); color: var(--code-text); font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.72; padding: 16px; overflow-x: auto; tab-size: 2; }
+    .kw   { color: #c084fc; }
+    .fn   { color: #67e8f9; }
+    .str  { color: #86efac; }
+    .cm   { color: #4a5568; font-style: italic; }
+    .num  { color: #fda4af; }
+    .cls  { color: #fcd34d; }
+    .attr { color: #fdba74; }
+    .jsx  { color: #93c5fd; }
+    .op   { color: #e2e8f0; }
+    .type { color: #34d399; }
+    .bad  { color: #f87171; }
+    .good { color: #4ade80; }
+
+    .rule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .rule-card { border-radius: 8px; padding: 13px 15px; font-size: 13px; line-height: 1.8; }
+    .rule-card code { font-family: 'DM Mono', monospace; font-size: 11.5px; }
+    .rule-card.bad  { background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.25); }
+    .rule-card.good { background: rgba(74,222,128,0.07);  border: 1px solid rgba(74,222,128,0.25); }
+    .rule-card .rule-label { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    .rule-card.bad  .rule-label { color: var(--danger); }
+    .rule-card.good .rule-label { color: var(--good); }
+
+    .threat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .threat-card { border-radius: 8px; padding: 13px 15px; font-size: 13px; line-height: 1.75; border: 1px solid var(--border); background: var(--surface2); }
+    .threat-card .tc-label { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); display: block; margin-bottom: 5px; }
+    .threat-card strong { color: var(--text); font-size: 13.5px; }
+
+    .checklist { list-style: none; margin-top: 12px; }
+    .checklist li { font-size: 13.5px; padding: 7px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 10px; line-height: 1.8; color: var(--text-muted); }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: #93c5fd; }
+    .checklist li::before { content: "✓"; color: var(--good); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .checklist li.critical::before { content: "★"; color: var(--danger); }
+    .checklist li.warn::before     { content: "⚠"; color: var(--warn); }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 0 20px 80px; }
+      .hero h1 { font-size: 36px; }
+      .rule-grid, .threat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="eyebrow">8+ Years SDE · App Security</div>
+    <h2>Application<br><em>Security</em></h2>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label dotnet">● .NET</div>
+    <a class="nav-item" href="#dn-authn">Authentication &amp; JWT</a>
+    <a class="nav-item" href="#dn-authz">Authorization &amp; RBAC</a>
+    <a class="nav-item" href="#dn-injection">Injection &amp; Validation</a>
+    <a class="nav-item" href="#dn-crypto">Cryptography</a>
+    <a class="nav-item" href="#dn-headers">Security Headers &amp; CORS</a>
+    <a class="nav-item" href="#dn-secrets">Secrets Management</a>
+    <a class="nav-item" href="#dn-logging">Secure Logging &amp; Audit</a>
+    <a class="nav-item" href="#dn-checklist">.NET Checklist</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label react">● React</div>
+    <a class="nav-item" href="#re-xss">XSS &amp; DOM Injection</a>
+    <a class="nav-item" href="#re-csrf">CSRF &amp; State Tokens</a>
+    <a class="nav-item" href="#re-storage">Client Storage Security</a>
+    <a class="nav-item" href="#re-csp">Content Security Policy</a>
+    <a class="nav-item" href="#re-deps">Dependency &amp; Supply Chain</a>
+    <a class="nav-item" href="#re-auth">Auth Token Handling</a>
+    <a class="nav-item" href="#re-rendering">Secure Rendering Patterns</a>
+    <a class="nav-item" href="#re-checklist">React Checklist</a>
+  </div>
+</nav>
+
+<main class="main">
+
+  <div class="hero">
+    <p class="eyebrow">Senior SDE — Security Interview Prep</p>
+    <h1>Application-Level<br><em>Security</em></h1>
+    <p class="hero-desc">App-level security for senior engineers — covering the threat models, implementation details, and architectural decisions that separate secure-by-design systems from bolt-on security theater.</p>
+    <div class="hero-pills">
+      <span class="pill pill-dotnet">.NET / ASP.NET Core</span>
+      <span class="pill pill-react">React 18+</span>
+      <span class="pill pill-danger">OWASP Top 10</span>
+      <span class="pill pill-gray">8+ Years</span>
+    </div>
+  </div>
+
+  <!-- ══ PART 1 — .NET ══ -->
+  <div class="chapter-divider"><span class="chapter-divider-inner dotnet-color">Part 1 — .NET Application Security</span></div>
+
+  <!-- AUTHN & JWT -->
+  <section class="section" id="dn-authn">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">01</span>
+      <h2 class="section-title">Authentication &amp; JWT</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.1</span>
+        <span class="topic-title">JWT — What the Spec Allows and What You Must Lock Down</span>
+        <div class="topic-tags"><span class="tag tag-auth">auth</span><span class="tag tag-critical">critical</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          JWT vulnerabilities arise almost entirely from <strong>trusting the token's own claims</strong> about how to validate it. The classic attacks:
+          <br><br>
+          <strong>Algorithm confusion (alg:none):</strong> Early JWT libraries accepted <code>"alg":"none"</code> in the header and skipped signature verification entirely. Always whitelist exactly the algorithms you use — reject everything else.
+          <br><br>
+          <strong>RS256 → HS256 downgrade:</strong> If a server using RSA (public key verifies) is tricked into using HMAC with the public key as the secret, the attacker who knows the public key can forge tokens. Explicitly specify the expected algorithm.
+          <br><br>
+          <strong>Missing <code>aud</code> / <code>iss</code> validation:</strong> A token issued by your auth server for Service A is also valid for Service B if B doesn't validate <code>aud</code>. Always validate both.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">jwt-validation.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre>services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opts =>
+    {
+        opts.TokenValidationParameters = <span class="kw">new</span> TokenValidationParameters
+        {
+            <span class="cm">// Whitelist — never trust alg from token header</span>
+            ValidAlgorithms       = [SecurityAlgorithms.RsaSha256],
+            ValidateIssuerSigningKey = <span class="kw">true</span>,
+            IssuerSigningKey      = rsaPublicKey,
+
+            <span class="cm">// Always validate issuer AND audience</span>
+            ValidateIssuer   = <span class="kw">true</span>,
+            ValidIssuer      = <span class="str">"https://auth.example.com"</span>,
+            ValidateAudience = <span class="kw">true</span>,
+            ValidAudience    = <span class="str">"api.example.com"</span>,
+
+            <span class="cm">// Clock skew: 0 in strict environments; default is 5 min (too loose)</span>
+            ClockSkew        = TimeSpan.Zero,
+
+            <span class="cm">// Short-lived tokens — force refresh, limit blast radius on leak</span>
+            ValidateLifetime = <span class="kw">true</span>,
+        };
+
+        <span class="cm">// Reject tokens with no expiry claim</span>
+        opts.TokenValidationParameters.RequireExpirationTime = <span class="kw">true</span>;
+    });</pre>
+        </div>
+        <div class="callout callout-danger">
+          <span class="callout-label">Common production mistake</span>
+          Setting <code>ClockSkew = TimeSpan.FromMinutes(5)</code> (the default) means a stolen token that should have expired 4 minutes ago is still accepted. Set it to <code>TimeSpan.Zero</code> for APIs. Only allow skew when cross-region clock drift is a confirmed operational issue.
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.2</span>
+        <span class="topic-title">Refresh Token Rotation and Revocation</span>
+        <div class="topic-tags"><span class="tag tag-auth">auth</span><span class="tag tag-critical">critical</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Access tokens should be short-lived (5–15 minutes). Refresh tokens are longer-lived and <strong>must be revocable</strong> — JWTs are stateless and cannot be revoked without a server-side store. Use opaque refresh tokens stored in your database with a family-tracking scheme.
+          <br><br>
+          <strong>Refresh token rotation:</strong> each use of a refresh token issues a new one and invalidates the old one. <strong>Refresh token reuse detection:</strong> if an already-used token is presented again, it indicates theft — invalidate the entire family immediately and force re-authentication.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">refresh-token.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">public async</span> Task&lt;<span class="type">TokenPair</span>&gt; <span class="fn">RotateAsync</span>(<span class="kw">string</span> refreshToken, CancellationToken ct)
+{
+    <span class="kw">var</span> stored = <span class="kw">await</span> _db.RefreshTokens
+        .Include(r => r.Family)
+        .FirstOrDefaultAsync(r => r.TokenHash == <span class="fn">Hash</span>(refreshToken), ct);
+
+    <span class="kw">if</span> (stored <span class="kw">is null</span>)
+        <span class="kw">throw new</span> SecurityException(<span class="str">"Token not found"</span>);
+
+    <span class="kw">if</span> (stored.IsRevoked)
+    {
+        <span class="cm">// Reuse detected — invalidate ENTIRE family (theft indicator)</span>
+        <span class="kw">await</span> _db.RefreshTokens
+            .Where(r => r.FamilyId == stored.FamilyId)
+            .ExecuteUpdateAsync(r => r.<span class="fn">SetProperty</span>(x => x.IsRevoked, <span class="kw">true</span>), ct);
+        <span class="kw">throw new</span> SecurityException(<span class="str">"Token reuse detected — family revoked"</span>);
+    }
+
+    <span class="cm">// Revoke used token, issue new one in same family</span>
+    stored.IsRevoked = <span class="kw">true</span>;
+    <span class="kw">var</span> newRefresh = <span class="fn">IssueRefreshToken</span>(stored.FamilyId);
+    <span class="kw">var</span> newAccess  = <span class="fn">IssueAccessToken</span>(stored.UserId);
+    _db.RefreshTokens.Add(newRefresh);
+    <span class="kw">await</span> _db.SaveChangesAsync(ct);
+
+    <span class="kw">return new</span> TokenPair(newAccess, newRefresh.Token);
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.3</span>
+        <span class="topic-title">Password Hashing — PBKDF2, BCrypt, and Argon2</span>
+        <div class="topic-tags"><span class="tag tag-crypto">crypto</span><span class="tag tag-critical">critical</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Never store plaintext or fast-hashed (MD5, SHA-256) passwords. Fast hash algorithms are designed for throughput — an attacker with a GPU can try billions of hashes per second. Password hashing must be <strong>computationally expensive and tunable</strong>.
+          <br><br>
+          <strong>ASP.NET Core Identity</strong> defaults to PBKDF2-HMAC-SHA512 with 600,000 iterations (v3 hasher) — acceptable baseline. <strong>Argon2id</strong> (via the <code>Konscious.Security.Cryptography</code> package) is the 2015 Password Hashing Competition winner and preferred where possible — it's memory-hard, resisting GPU and ASIC parallelism.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">password-hashing.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ASP.NET Core Identity — configure to use Argon2id via custom hasher</span>
+services.AddIdentity&lt;<span class="type">AppUser</span>, <span class="type">IdentityRole</span>&gt;()
+    .AddDefaultTokenProviders();
+services.AddScoped&lt;IPasswordHasher&lt;<span class="type">AppUser</span>&gt;, Argon2PasswordHasher&lt;<span class="type">AppUser</span>&gt;&gt;();
+
+<span class="cm">// Argon2id implementation — tune parameters for ~300ms on target hardware</span>
+<span class="kw">public class</span> <span class="cls">Argon2PasswordHasher</span>&lt;T&gt; : IPasswordHasher&lt;T&gt; <span class="kw">where</span> T : <span class="kw">class</span>
+{
+    <span class="kw">public string</span> <span class="fn">HashPassword</span>(T user, <span class="kw">string</span> password)
+    {
+        <span class="kw">var</span> salt = RandomNumberGenerator.GetBytes(<span class="num">16</span>);
+        <span class="kw">using var</span> hasher = <span class="kw">new</span> Argon2id(Encoding.UTF8.GetBytes(password))
+        {
+            Salt            = salt,
+            DegreeOfParallelism = <span class="num">1</span>,
+            MemorySize      = <span class="num">65536</span>,   <span class="cm">// 64MB — resists GPU parallelism</span>
+            Iterations      = <span class="num">3</span>,
+        };
+        <span class="kw">return</span> Convert.ToBase64String(salt.Concat(hasher.GetBytes(<span class="num">32</span>)).ToArray());
+    }
+}</pre>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-label">Iteration count drift</span>
+          Tune hashing parameters so verification takes ~200–300ms on your production hardware. Re-tune every major hardware generation. ASP.NET Core Identity supports automatic re-hashing on login when a user's hash was created with older parameters — use <code>PasswordHasherCompatibilityMode</code>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTHZ & RBAC -->
+  <section class="section" id="dn-authz">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">02</span>
+      <h2 class="section-title">Authorization &amp; Access Control</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.1</span>
+        <span class="topic-title">Policy-Based Authorization — Beyond [Authorize(Roles="Admin")]</span>
+        <div class="topic-tags"><span class="tag tag-auth">authz</span><span class="tag tag-owasp">OWASP A01</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Role-based checks hardcoded in attributes are brittle — roles proliferate, business rules get duplicated across controllers, and changes require redeployment. ASP.NET Core's <strong>policy-based authorization</strong> externalises rules into composable, testable handlers.
+          <br><br>
+          <strong>Resource-based authorization</strong> is the critical missing layer: a user may have the <code>Editor</code> role but should only be able to edit their own documents. This must be enforced in-handler, not at the routing layer, because the resource identity is only known after the request is parsed.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">authorization.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Register policy — encapsulates business rule, independently testable</span>
+services.AddAuthorization(opts =>
+{
+    opts.AddPolicy(<span class="str">"SeniorEditor"</span>, policy => policy
+        .RequireClaim(<span class="str">"department"</span>, <span class="str">"editorial"</span>)
+        .RequireClaim(<span class="str">"seniority_years"</span>)
+        .AddRequirements(<span class="kw">new</span> MinSeniorityRequirement(<span class="num">3</span>)));
+});
+
+<span class="cm">// Resource-based check — enforce INSIDE the handler, not at routing</span>
+[HttpPut(<span class="str">"{id}"</span>)]
+<span class="kw">public async</span> Task&lt;IActionResult&gt; <span class="fn">UpdateDocument</span>(<span class="kw">int</span> id, <span class="type">DocumentDto</span> dto)
+{
+    <span class="kw">var</span> doc = <span class="kw">await</span> _docs.<span class="fn">FindAsync</span>(id);
+    <span class="kw">if</span> (doc <span class="kw">is null</span>) <span class="kw">return</span> NotFound();
+
+    <span class="cm">// Resource-based: check ownership AFTER loading the resource</span>
+    <span class="kw">var</span> auth = <span class="kw">await</span> _authorizationService
+        .<span class="fn">AuthorizeAsync</span>(User, doc, <span class="str">"DocumentEditPolicy"</span>);
+    <span class="kw">if</span> (!auth.Succeeded) <span class="kw">return</span> Forbid();
+
+    <span class="cm">// proceed with update</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.2</span>
+        <span class="topic-title">IDOR — Insecure Direct Object Reference</span>
+        <div class="topic-tags"><span class="tag tag-critical">critical</span><span class="tag tag-owasp">OWASP A01</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          IDOR is the most common access control vulnerability: an authenticated user increments an ID in the URL and accesses another user's data. The fix is always the same — <strong>scope every data query to the current user's tenant or identity</strong>. Never trust the ID from the request to prove ownership.
+        </div>
+        <div class="rule-grid">
+          <div class="rule-card bad">
+            <span class="rule-label">❌ IDOR — trusts request ID</span>
+            <code>GET /api/orders/7891</code><br><br>
+            <code>var order = await _db.Orders<br>.FindAsync(id); // any user can access any order</code>
+          </div>
+          <div class="rule-card good">
+            <span class="rule-label">✅ Scoped to authenticated user</span>
+            <code>var order = await _db.Orders<br>.Where(o => o.Id == id<br>  && o.UserId == currentUserId)<br>.FirstOrDefaultAsync(ct);</code>
+          </div>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-label">Multi-tenant systems</span>
+          In multi-tenant apps, always include the <code>TenantId</code> in every query. Consider a global query filter on the DbContext that automatically appends the tenant scope — prevents accidental cross-tenant data leaks from missing WHERE clauses.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">global-tenant-filter.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// DbContext — global query filter automatically scopes all queries</span>
+<span class="kw">protected override void</span> <span class="fn">OnModelCreating</span>(ModelBuilder builder)
+{
+    builder.Entity&lt;<span class="type">Order</span>&gt;()
+        .HasQueryFilter(o => o.TenantId == _tenantId);
+    builder.Entity&lt;<span class="type">Customer</span>&gt;()
+        .HasQueryFilter(c => c.TenantId == _tenantId);
+    <span class="cm">// All queries automatically scoped — must use .IgnoreQueryFilters() to bypass</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.3</span>
+        <span class="topic-title">Mass Assignment — Over-Posting and Model Binding</span>
+        <div class="topic-tags"><span class="tag tag-input">input</span><span class="tag tag-owasp">OWASP A08</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Mass assignment (over-posting) occurs when model binding maps request fields directly onto a domain entity, allowing attackers to set fields the API never intended to expose — e.g. <code>IsAdmin=true</code>, <code>Balance=99999</code>. Always bind to a dedicated <strong>DTO</strong> that only exposes the fields the API accepts, then map to the domain model.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">mass-assignment.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Binds directly to entity — attacker can POST IsAdmin=true</span>
+[HttpPost] <span class="kw">public</span> IActionResult <span class="fn">Create</span>([FromBody] <span class="type">User</span> user) { ... }
+
+<span class="cm">// ✅ Bind to DTO — only fields the API explicitly accepts</span>
+<span class="kw">public record</span> <span class="cls">CreateUserDto</span>(
+    [Required, MaxLength(<span class="num">100</span>)] <span class="kw">string</span> Name,
+    [Required, EmailAddress]    <span class="kw">string</span> Email,
+    [Required, MinLength(<span class="num">8</span>)]   <span class="kw">string</span> Password
+);
+
+[HttpPost]
+<span class="kw">public async</span> Task&lt;IActionResult&gt; <span class="fn">Create</span>([FromBody] <span class="type">CreateUserDto</span> dto)
+{
+    <span class="kw">var</span> user = <span class="kw">new</span> User
+    {
+        Name     = dto.Name,
+        Email    = dto.Email.ToLowerInvariant(),
+        IsAdmin  = <span class="kw">false</span>,  <span class="cm">// ← always set server-side, never from input</span>
+        TenantId = _tenantId <span class="cm">// ← always set from authenticated context</span>
+    };
+    user.PasswordHash = _hasher.<span class="fn">HashPassword</span>(user, dto.Password);
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INJECTION & VALIDATION -->
+  <section class="section" id="dn-injection">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">03</span>
+      <h2 class="section-title">Injection &amp; Input Validation</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.1</span>
+        <span class="topic-title">SQL Injection — Parameterisation and ORM Pitfalls</span>
+        <div class="topic-tags"><span class="tag tag-critical">critical</span><span class="tag tag-owasp">OWASP A03</span><span class="tag tag-input">injection</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          SQL injection is fully prevented by parameterised queries. EF Core always parameterises LINQ queries. The vulnerabilities arise in two specific cases: <strong>raw SQL methods</strong> (<code>FromSqlRaw</code>, <code>ExecuteSqlRaw</code>) with string interpolation, and <strong>dynamic ORDER BY / column names</strong> which cannot be parameterised by the database driver and must be whitelisted manually.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">sql-injection.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ String interpolation in raw SQL — injectable</span>
+<span class="kw">var</span> result = _db.Users.FromSqlRaw($<span class="str">"SELECT * FROM Users WHERE Name = '{name}'"</span>);
+
+<span class="cm">// ✅ Use FormattableString overload — EF Core parameterises it</span>
+<span class="kw">var</span> result = _db.Users.FromSql($<span class="str">"SELECT * FROM Users WHERE Name = {name}"</span>);
+
+<span class="cm">// ✅ Explicit SqlParameter</span>
+<span class="kw">var</span> result = _db.Users.FromSqlRaw(
+    <span class="str">"SELECT * FROM Users WHERE Name = @name"</span>,
+    <span class="kw">new</span> SqlParameter(<span class="str">"@name"</span>, name));
+
+<span class="cm">// ✅ Dynamic ORDER BY — whitelist column names, never interpolate raw input</span>
+<span class="kw">private static readonly</span> HashSet&lt;<span class="kw">string</span>&gt; _allowedSortCols =
+    [<span class="str">"Name"</span>, <span class="str">"CreatedAt"</span>, <span class="str">"Status"</span>];
+
+<span class="kw">if</span> (!_allowedSortCols.Contains(sortBy))
+    <span class="kw">throw new</span> ArgumentException(<span class="str">"Invalid sort column"</span>);
+
+<span class="kw">var</span> result = _db.Orders.FromSqlRaw(
+    $<span class="str">"SELECT * FROM Orders ORDER BY [{sortBy}] {(descending ? "DESC" : "ASC")}"</span>);</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.2</span>
+        <span class="topic-title">Input Validation — FluentValidation and Defence in Depth</span>
+        <div class="topic-tags"><span class="tag tag-input">validation</span><span class="tag tag-owasp">OWASP A03</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Data annotations (<code>[Required]</code>, <code>[MaxLength]</code>) are a first-pass UI hint, not a security boundary — they can be bypassed by sending a raw HTTP request. <strong>FluentValidation</strong> enforces rules at the application layer, after model binding. Combine with server-side validation that is always exercised regardless of client state.
+          <br><br>
+          Critical: validate <strong>file uploads</strong> by magic bytes (not MIME type from the Content-Type header, which is attacker-controlled), enforce size limits, and never derive storage paths from user-supplied filenames.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">validation.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">public class</span> <span class="cls">CreateOrderValidator</span> : AbstractValidator&lt;<span class="type">CreateOrderDto</span>&gt;
+{
+    <span class="kw">public</span> <span class="fn">CreateOrderValidator</span>()
+    {
+        RuleFor(x => x.CustomerId)
+            .NotEmpty()
+            .MustAsync(<span class="kw">async</span> (id, ct) => <span class="kw">await</span> _customerService.<span class="fn">ExistsAsync</span>(id, ct))
+            .WithMessage(<span class="str">"Customer not found"</span>);
+
+        RuleFor(x => x.Items)
+            .NotEmpty()
+            .ForEach(item =>
+            {
+                item.ChildRules(i =>
+                {
+                    i.RuleFor(x => x.Quantity).InclusiveBetween(<span class="num">1</span>, <span class="num">100</span>);
+                    i.RuleFor(x => x.UnitPrice).GreaterThan(<span class="num">0</span>);
+                });
+            });
+
+        <span class="cm">// File upload — validate by magic bytes, not Content-Type</span>
+        RuleFor(x => x.Attachment)
+            .Must(file => <span class="fn">IsValidPdf</span>(file))
+            .WithMessage(<span class="str">"Only PDF attachments accepted"</span>);
+    }
+
+    <span class="kw">private static bool</span> <span class="fn">IsValidPdf</span>(IFormFile file)
+    {
+        <span class="kw">var</span> magic = <span class="kw">new byte</span>[<span class="num">4</span>];
+        file.OpenReadStream().Read(magic);
+        <span class="kw">return</span> magic.SequenceEqual(<span class="kw">new byte</span>[] { <span class="num">0x25</span>, <span class="num">0x50</span>, <span class="num">0x44</span>, <span class="num">0x46</span> }); <span class="cm">// %PDF</span>
+    }
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.3</span>
+        <span class="topic-title">Path Traversal and File Upload Security</span>
+        <div class="topic-tags"><span class="tag tag-input">injection</span><span class="tag tag-critical">critical</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Path traversal (<code>../../../etc/passwd</code>) occurs when user input is used to construct file system paths. Never construct a path from user input directly. Generate a server-side UUID filename, store the original name as metadata only.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">file-upload.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Path traversal — attacker sends filename = "../../appsettings.json"</span>
+<span class="kw">var</span> path = Path.Combine(_uploadDir, file.FileName);
+
+<span class="cm">// ✅ Generate server-side name — user-supplied name stored as metadata only</span>
+<span class="kw">var</span> storedName = $<span class="str">"{Guid.NewGuid():N}{Path.GetExtension(file.FileName)}"</span>;
+<span class="kw">var</span> fullPath   = Path.GetFullPath(Path.Combine(_uploadDir, storedName));
+
+<span class="cm">// Canonicalise and ensure the path stays within the upload directory</span>
+<span class="kw">if</span> (!fullPath.StartsWith(Path.GetFullPath(_uploadDir), StringComparison.OrdinalIgnoreCase))
+    <span class="kw">throw new</span> SecurityException(<span class="str">"Path traversal detected"</span>);
+
+<span class="kw">await using var</span> stream = File.Create(fullPath);
+<span class="kw">await</span> file.CopyToAsync(stream, ct);</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRYPTOGRAPHY -->
+  <section class="section" id="dn-crypto">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">04</span>
+      <h2 class="section-title">Cryptography</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">4.1</span>
+        <span class="topic-title">Encryption — AES-GCM vs AES-CBC and When to Use Each</span>
+        <div class="topic-tags"><span class="tag tag-crypto">crypto</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <strong>AES-CBC</strong> provides confidentiality only — it does not authenticate the ciphertext. An attacker can flip bits in the ciphertext to predictably flip bits in the plaintext (padding oracle attacks, CBC bit-flipping). Never use CBC without a separate MAC (Encrypt-then-MAC).
+          <br><br>
+          <strong>AES-GCM</strong> (Galois/Counter Mode) provides authenticated encryption — confidentiality + integrity in a single primitive. The authentication tag detects any tampering. <strong>Use AES-GCM for all new symmetric encryption.</strong> Critical: the nonce (IV) must be unique per encryption operation — reusing a nonce with the same key destroys both confidentiality and the authentication tag.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">aes-gcm.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">public static</span> (byte[] ciphertext, byte[] nonce, byte[] tag) <span class="fn">Encrypt</span>(
+    ReadOnlySpan&lt;byte&gt; plaintext, byte[] key)
+{
+    <span class="kw">var</span> nonce      = <span class="kw">new byte</span>[AesGcm.NonceByteSizes.MaxSize]; <span class="cm">// 12 bytes</span>
+    <span class="kw">var</span> ciphertext = <span class="kw">new byte</span>[plaintext.Length];
+    <span class="kw">var</span> tag        = <span class="kw">new byte</span>[AesGcm.TagByteSizes.MaxSize];   <span class="cm">// 16 bytes</span>
+
+    RandomNumberGenerator.Fill(nonce); <span class="cm">// cryptographically random nonce — never reuse</span>
+
+    <span class="kw">using var</span> aes = <span class="kw">new</span> AesGcm(key, tag.Length);
+    aes.Encrypt(nonce, plaintext, ciphertext, tag);
+
+    <span class="kw">return</span> (ciphertext, nonce, tag);
+}
+
+<span class="kw">public static byte</span>[] <span class="fn">Decrypt</span>(
+    ReadOnlySpan&lt;byte&gt; ciphertext, byte[] key, byte[] nonce, byte[] tag)
+{
+    <span class="kw">var</span> plaintext = <span class="kw">new byte</span>[ciphertext.Length];
+    <span class="kw">using var</span> aes = <span class="kw">new</span> AesGcm(key, tag.Length);
+    aes.Decrypt(nonce, ciphertext, tag, plaintext);
+    <span class="cm">// Throws AuthenticationTagMismatchException if ciphertext was tampered</span>
+    <span class="kw">return</span> plaintext;
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">4.2</span>
+        <span class="topic-title">Data Protection API — Secure Token and Cookie Encryption</span>
+        <div class="topic-tags"><span class="tag tag-crypto">crypto</span><span class="tag tag-auth">auth</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          ASP.NET Core's <strong>Data Protection API</strong> handles key management, rotation, and authenticated encryption for application-layer tokens (anti-forgery tokens, password reset links, cookie values). Use it instead of rolling your own AES wrapper for app-level secrets. In distributed deployments, configure a shared key ring via Azure Key Vault, Redis, or a database — otherwise tokens encrypted on one instance cannot be decrypted on another.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">data-protection.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Configure shared key ring for distributed deployments</span>
+services.AddDataProtection()
+    .PersistKeysToAzureBlobStorage(blobClient)
+    .ProtectKeysWithAzureKeyVault(keyVaultKeyId, new DefaultAzureCredential())
+    .SetApplicationName(<span class="str">"MyApp"</span>)                <span class="cm">// isolates from other apps</span>
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(<span class="num">90</span>)); <span class="cm">// rotate keys every 90 days</span>
+
+<span class="cm">// Use for password reset tokens — purpose-scoped, tamper-evident</span>
+<span class="kw">var</span> protector = _dataProtection.CreateProtector(<span class="str">"PasswordReset.v1"</span>);
+<span class="kw">var</span> token     = protector.Protect($<span class="str">"{userId}:{expiry:O}"</span>);
+
+<span class="cm">// Verify — decryption fails if tampered or wrong purpose</span>
+<span class="kw">var</span> payload = protector.Unprotect(token); <span class="cm">// throws CryptographicException if invalid</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY HEADERS & CORS -->
+  <section class="section" id="dn-headers">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">05</span>
+      <h2 class="section-title">Security Headers &amp; CORS</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.1</span>
+        <span class="topic-title">CORS Misconfiguration — The Wildcard and Origin Reflection Traps</span>
+        <div class="topic-tags"><span class="tag tag-network">CORS</span><span class="tag tag-critical">critical</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Two CORS misconfigurations are especially dangerous:
+          <br><br>
+          <strong>Wildcard + credentials:</strong> <code>Access-Control-Allow-Origin: *</code> cannot be combined with <code>Access-Control-Allow-Credentials: true</code> — browsers reject it. Developers sometimes work around this by <em>reflecting the Origin header</em> dynamically (<code>Allow-Origin: &lt;whatever the request said&gt;</code>), effectively allowing any origin to make authenticated cross-origin requests. Attackers exploit this from any domain.
+          <br><br>
+          <strong>Null origin:</strong> some implementations allow <code>Origin: null</code> — sent by sandboxed iframes, <code>file://</code>, and data URIs. An attacker using a sandboxed iframe can trigger cross-origin requests from <code>null</code> origin.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">cors.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre>builder.Services.AddCors(opts =>
+{
+    opts.AddPolicy(<span class="str">"Frontend"</span>, policy => policy
+        <span class="cm">// ✅ Explicit allowlist — never reflect Origin dynamically</span>
+        .WithOrigins(<span class="str">"https://app.example.com"</span>, <span class="str">"https://www.example.com"</span>)
+        .WithMethods(<span class="str">"GET"</span>, <span class="str">"POST"</span>, <span class="str">"PUT"</span>, <span class="str">"DELETE"</span>)
+        .WithHeaders(<span class="str">"Authorization"</span>, <span class="str">"Content-Type"</span>)
+        .AllowCredentials()   <span class="cm">// safe only with explicit origins above</span>
+        .SetPreflightMaxAge(TimeSpan.FromMinutes(<span class="num">10</span>)));
+});
+
+<span class="cm">// ❌ Never do this — reflects arbitrary Origin</span>
+<span class="cm">// .AllowAnyOrigin().AllowCredentials()  ← not possible; browsers block it</span>
+<span class="cm">// Workaround people use (dangerous):</span>
+<span class="cm">// context.Response.Headers["Access-Control-Allow-Origin"] = context.Request.Headers["Origin"];</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.2</span>
+        <span class="topic-title">Security Response Headers — HSTS, CSP, and Friends</span>
+        <div class="topic-tags"><span class="tag tag-network">headers</span><span class="tag tag-browser">browser</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Security headers are defence-in-depth browser controls — they limit the blast radius of other vulnerabilities. Senior engineers know which header does what and why.
+        </div>
+        <div class="threat-grid">
+          <div class="threat-card">
+            <span class="tc-label">HSTS</span>
+            <strong>Strict-Transport-Security</strong> — forces HTTPS for <code>max-age</code> seconds. Include <code>includeSubDomains</code> and submit to the HSTS preload list for new domains.
+          </div>
+          <div class="threat-card">
+            <span class="tc-label">X-Content-Type-Options</span>
+            <strong>nosniff</strong> — prevents browsers from MIME-sniffing a response away from the declared Content-Type. Stops script execution from uploaded files served as <code>text/plain</code>.
+          </div>
+          <div class="threat-card">
+            <span class="tc-label">X-Frame-Options / CSP frame-ancestors</span>
+            <strong>Clickjacking prevention.</strong> <code>DENY</code> or <code>SAMEORIGIN</code>. Prefer CSP <code>frame-ancestors</code> — X-Frame-Options is superseded and less granular.
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">security-headers.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre>app.Use(<span class="kw">async</span> (context, next) =>
+{
+    <span class="kw">var</span> headers = context.Response.Headers;
+    headers.Append(<span class="str">"Strict-Transport-Security"</span>,
+        <span class="str">"max-age=63072000; includeSubDomains; preload"</span>);
+    headers.Append(<span class="str">"X-Content-Type-Options"</span>,    <span class="str">"nosniff"</span>);
+    headers.Append(<span class="str">"X-Frame-Options"</span>,            <span class="str">"DENY"</span>);
+    headers.Append(<span class="str">"Referrer-Policy"</span>,
+        <span class="str">"strict-origin-when-cross-origin"</span>);
+    headers.Append(<span class="str">"Permissions-Policy"</span>,
+        <span class="str">"camera=(), microphone=(), geolocation=()"</span>);
+    <span class="cm">// CSP set separately per environment — see React section for detail</span>
+    <span class="kw">await</span> next(context);
+});</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.3</span>
+        <span class="topic-title">Rate Limiting and Anti-Enumeration</span>
+        <div class="topic-tags"><span class="tag tag-network">network</span><span class="tag tag-auth">auth</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Rate limiting belongs at the application layer, not just the gateway — a misconfigured gateway or a direct-access path bypasses gateway limits entirely. ASP.NET Core 7+ includes built-in rate limiting middleware. Critical patterns:
+          <br><br>
+          <strong>Credential stuffing prevention:</strong> rate-limit login by IP and by username independently — an attacker rotating IPs but targeting the same account should still be blocked. <strong>Enumeration prevention:</strong> login, forgot-password, and account-existence endpoints must return identical responses and take identical time for found vs. not-found users — otherwise attackers enumerate valid accounts.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">rate-limiting.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre>services.AddRateLimiter(opts =>
+{
+    <span class="cm">// Sliding window on login — per IP</span>
+    opts.AddSlidingWindowLimiter(<span class="str">"login"</span>, limiterOpts =>
+    {
+        limiterOpts.PermitLimit         = <span class="num">5</span>;
+        limiterOpts.Window              = TimeSpan.FromMinutes(<span class="num">15</span>);
+        limiterOpts.SegmentsPerWindow   = <span class="num">3</span>;
+        limiterOpts.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOpts.QueueLimit          = <span class="num">0</span>;
+    });
+
+    opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
+<span class="cm">// Anti-enumeration — identical timing regardless of user existence</span>
+<span class="kw">public async</span> Task&lt;IActionResult&gt; <span class="fn">Login</span>(<span class="type">LoginDto</span> dto)
+{
+    <span class="kw">var</span> user = <span class="kw">await</span> _users.<span class="fn">FindByEmailAsync</span>(dto.Email);
+
+    <span class="cm">// Always verify hash — even if user not found (prevent timing oracle)</span>
+    <span class="kw">var</span> dummyHash = <span class="str">"$argon2id$..."</span>; <span class="cm">// pre-computed dummy</span>
+    <span class="kw">var</span> hashToCheck = user?.PasswordHash ?? dummyHash;
+    <span class="kw">var</span> valid = _hasher.<span class="fn">VerifyPassword</span>(hashToCheck, dto.Password);
+
+    <span class="kw">if</span> (user <span class="kw">is null</span> || !valid) <span class="kw">return</span> Unauthorized(); <span class="cm">// same response</span>
+    <span class="kw">return</span> Ok(<span class="kw">await</span> <span class="fn">IssueTokensAsync</span>(user));
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECRETS MANAGEMENT -->
+  <section class="section" id="dn-secrets">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">06</span>
+      <h2 class="section-title">Secrets Management</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">6.1</span>
+        <span class="topic-title">Never in Code, Never in Config Files — Managed Identity First</span>
+        <div class="topic-tags"><span class="tag tag-critical">critical</span><span class="tag tag-owasp">OWASP A02</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Secrets in <code>appsettings.json</code>, environment variables in Dockerfiles, or connection strings in config files are routinely leaked via Git history, log files, error pages, and container image layers. The architecture goal is <strong>zero secrets in application code or config</strong>.
+          <br><br>
+          <strong>Managed Identity</strong> (Azure) / <strong>IAM roles</strong> (AWS) / <strong>Workload Identity</strong> (GCP) allow the compute resource itself to authenticate to other services without any credential. The platform manages token issuance and rotation. Use this for: database connections, storage accounts, message queues, and vault access.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">managed-identity.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Azure — no connection string, no password; Managed Identity authenticates</span>
+services.AddDbContext&lt;<span class="type">AppDbContext</span>&gt;(opts =>
+    opts.UseSqlServer(builder.Configuration.GetConnectionString(<span class="str">"Db"</span>),
+        sql => sql.UseAzureActiveDirectoryAuthentication(
+            <span class="kw">new</span> DefaultAzureCredential()))); <span class="cm">// no password in config</span>
+
+<span class="cm">// Azure Key Vault — load secrets at startup via Managed Identity</span>
+builder.Configuration.AddAzureKeyVault(
+    <span class="kw">new</span> Uri($<span class="str">"https://{vaultName}.vault.azure.net"</span>),
+    <span class="kw">new</span> DefaultAzureCredential());
+<span class="cm">// Secrets now available via IConfiguration["MySecret"]</span>
+<span class="cm">// Rotation: Key Vault reloads secret on each Configuration.Reload()</span></pre>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-label">Secret rotation</span>
+          Secrets that cannot be rotated without downtime are a liability. Design connection strings and API keys to support <strong>dual-active rotation</strong>: load both current and next secret, try both on failure, retire old after rotation completes. Key Vault versioning supports this natively.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURE LOGGING -->
+  <section class="section" id="dn-logging">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">07</span>
+      <h2 class="section-title">Secure Logging &amp; Audit</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">7.1</span>
+        <span class="topic-title">Log Injection, PII Leakage, and What Not to Log</span>
+        <div class="topic-tags"><span class="tag tag-input">injection</span><span class="tag tag-owasp">OWASP A09</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          <strong>Log injection:</strong> if user-supplied strings containing newlines are logged unsanitised, attackers can forge log entries — fabricating events, hiding real ones, or injecting malicious data into log aggregation systems. Always sanitise or structure-log untrusted data.
+          <br><br>
+          <strong>PII and secret leakage in logs</strong> is a compliance and security incident waiting to happen. Common culprits: logging the full request body (which may contain passwords or payment data), exception messages that include query strings with tokens, and structured log serialization that deep-serializes objects containing credential fields.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">secure-logging.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Logs raw user input — injectable, may contain PII</span>
+_logger.LogInformation(<span class="str">"User searched for: {query}"</span>, rawUserInput);
+
+<span class="cm">// ✅ Sanitise: strip control characters before logging untrusted data</span>
+<span class="kw">var</span> safe = Regex.Replace(rawUserInput, @<span class="str">"[\r\n\t]"</span>, <span class="str">" "</span>)[..<span class="kw">Math</span>.Min(rawUserInput.Length, <span class="num">200</span>)];
+_logger.LogInformation(<span class="str">"User searched for: {query}"</span>, safe);
+
+<span class="cm">// ✅ Structured logging with explicit field inclusion — no object deep-serialize</span>
+_logger.LogInformation(<span class="str">"Order placed {OrderId} by {UserId} for {TotalAmount}"</span>,
+    order.Id, order.UserId, order.Total);
+<span class="cm">// Never: _logger.LogInformation("Order {order}", order); — may log card data</span>
+
+<span class="cm">// ✅ Audit log — separate, tamper-evident, append-only store</span>
+<span class="kw">await</span> _auditLog.WriteAsync(<span class="kw">new</span> AuditEntry
+{
+    Action    = <span class="str">"OrderCancelled"</span>,
+    UserId    = User.GetUserId(),
+    IpAddress = context.Connection.RemoteIpAddress?.ToString(),
+    Timestamp = DateTimeOffset.UtcNow,
+    EntityId  = orderId.ToString(),
+    <span class="cm">// No sensitive field values in audit log — just the action and identity</span>
+});</pre>
+        </div>
+        <div class="callout callout-danger">
+          <span class="callout-label">Never log</span>
+          Passwords, API keys, JWT tokens, credit card numbers, SSNs, full request bodies for auth endpoints, session cookies, or any field marked as sensitive in your data classification schema.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- .NET CHECKLIST -->
+  <section class="section" id="dn-checklist">
+    <div class="section-header">
+      <span class="section-dot dot-dotnet"></span>
+      <span class="section-label label-dotnet">08</span>
+      <h2 class="section-title">.NET Security Checklist</h2>
+    </div>
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">—</span>
+        <span class="topic-title">Application &amp; Architecture Level</span>
+        <div class="topic-tags"><span class="tag tag-critical">senior</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <ul class="checklist">
+          <li class="critical">Whitelist JWT algorithms explicitly — never trust <code>alg</code> from the token header. Reject <code>none</code> and unexpected algorithms.</li>
+          <li class="critical">Validate <code>iss</code>, <code>aud</code>, <code>exp</code> on every JWT. Set <code>ClockSkew = TimeSpan.Zero</code> for strict environments.</li>
+          <li class="critical">Implement refresh token rotation with reuse detection — on reuse, invalidate the entire token family.</li>
+          <li class="critical">Scope every data query to the authenticated user/tenant — never trust a resource ID from the request to prove ownership (IDOR).</li>
+          <li class="critical">Use DTOs for model binding — never bind request data directly onto domain entities (mass assignment / over-posting).</li>
+          <li class="critical">Use <code>FromSql($"")</code> (interpolated overload) or explicit <code>SqlParameter</code> — never string-interpolate into <code>FromSqlRaw</code>.</li>
+          <li>Hash passwords with Argon2id or PBKDF2 ≥600k iterations. Tune to ~200–300ms on production hardware. Re-hash on login when parameters are outdated.</li>
+          <li>Use AES-GCM for symmetric encryption — never AES-CBC without a separate MAC. Generate a fresh random nonce per encryption.</li>
+          <li>Use ASP.NET Core Data Protection API for app-layer tokens. Configure shared key ring for distributed deployments.</li>
+          <li>Configure CORS with an explicit origin allowlist. Never dynamically reflect the Origin header.</li>
+          <li>Set HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, and Permissions-Policy on all responses.</li>
+          <li>Apply rate limiting at the application layer (not only gateway) — limit by IP and by username independently on auth endpoints.</li>
+          <li>Make login/forgot-password endpoints timing-constant — always hash even for non-existent users to prevent enumeration.</li>
+          <li>Use Managed Identity / IAM roles for service-to-service auth — zero secrets in config or environment variables.</li>
+          <li>Load secrets from a vault (Key Vault, AWS Secrets Manager) — design for rotation without downtime via dual-active secret loading.</li>
+          <li>Validate file uploads by magic bytes, not Content-Type header. Generate server-side filenames — never use user-supplied names for storage paths.</li>
+          <li>Sanitise user input in log messages (strip <code>\r\n\t</code>). Never log passwords, tokens, card numbers, or full request bodies of auth endpoints.</li>
+          <li class="warn">Apply global EF Core query filters per tenant. Audit any use of <code>.IgnoreQueryFilters()</code> — it bypasses all tenant/soft-delete scoping.</li>
+          <li class="warn">Review exception handling: never return stack traces, SQL error messages, or internal paths in API error responses.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PART 2 — REACT ══ -->
+  <div class="chapter-divider"><span class="chapter-divider-inner react-color">Part 2 — React Application Security</span></div>
+
+  <!-- XSS & DOM INJECTION -->
+  <section class="section" id="re-xss">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">01</span>
+      <h2 class="section-title">XSS &amp; DOM Injection</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.1</span>
+        <span class="topic-title">React's XSS Model — What It Prevents and What It Doesn't</span>
+        <div class="topic-tags"><span class="tag tag-critical">critical</span><span class="tag tag-owasp">OWASP A03</span><span class="tag tag-browser">browser</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          React automatically HTML-encodes all values interpolated in JSX — <code>{userInput}</code> renders as text, not HTML, so a string like <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> is displayed literally. This prevents reflected and stored XSS through JSX rendering.
+          <br><br>
+          What React does <strong>not</strong> protect against:
+          <br><br>
+          <strong>1. <code>dangerouslySetInnerHTML</code></strong> — bypasses React's encoding entirely. Raw HTML is injected into the DOM. Only use with output from a trusted server-side HTML sanitizer.
+          <br><br>
+          <strong>2. <code>href</code> with <code>javascript:</code> URLs</strong> — React does not sanitize URL-scheme attributes. An attacker-controlled URL of <code>javascript:alert(document.cookie)</code> executes JavaScript when clicked.
+          <br><br>
+          <strong>3. DOM-based XSS via <code>eval</code>, <code>innerHTML</code>, or template literals</strong> — imperative DOM manipulation outside React's rendering pipeline is entirely unprotected.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">xss.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ✅ Safe — React HTML-encodes this automatically</span>
+<span class="jsx">&lt;p&gt;</span>{userInput}<span class="jsx">&lt;/p&gt;</span>
+
+<span class="cm">// ❌ Dangerous — bypasses encoding; attacker-controlled HTML injected</span>
+<span class="jsx">&lt;div</span> <span class="attr">dangerouslySetInnerHTML</span>=<span class="op">{{</span> __html: userContent <span class="op">}}</span> <span class="jsx">/&gt;</span>
+
+<span class="cm">// ✅ Only use with DOMPurify output from a trusted sanitiser</span>
+<span class="kw">import</span> DOMPurify <span class="kw">from</span> <span class="str">'dompurify'</span>;
+<span class="kw">const</span> clean = DOMPurify.sanitize(userContent, {
+    ALLOWED_TAGS:  [<span class="str">'b'</span>, <span class="str">'i'</span>, <span class="str">'em'</span>, <span class="str">'strong'</span>, <span class="str">'a'</span>, <span class="str">'p'</span>],
+    ALLOWED_ATTR:  [<span class="str">'href'</span>, <span class="str">'title'</span>],
+    ALLOW_DATA_ATTR: <span class="kw">false</span>,
+});
+<span class="jsx">&lt;div</span> <span class="attr">dangerouslySetInnerHTML</span>=<span class="op">{{</span> __html: clean <span class="op">}}</span> <span class="jsx">/&gt;</span>
+
+<span class="cm">// ❌ javascript: URL — executes on click</span>
+<span class="jsx">&lt;a</span> <span class="attr">href</span>=<span class="op">{</span>userUrl<span class="op">}</span><span class="jsx">&gt;</span>Click<span class="jsx">&lt;/a&gt;</span>
+
+<span class="cm">// ✅ Validate URL scheme before rendering</span>
+<span class="kw">function</span> <span class="fn">SafeLink</span>({ url, children }) {
+    <span class="kw">const</span> safe = url.startsWith(<span class="str">'https://'</span>) || url.startsWith(<span class="str">'http://'</span>);
+    <span class="kw">return</span> safe
+        ? <span class="jsx">&lt;a</span> <span class="attr">href</span>=<span class="op">{</span>url<span class="op">}</span> <span class="attr">rel</span>=<span class="str">"noopener noreferrer"</span><span class="jsx">&gt;</span>{children}<span class="jsx">&lt;/a&gt;</span>
+        : <span class="jsx">&lt;span&gt;</span>{children}<span class="jsx">&lt;/span&gt;</span>;
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">1.2</span>
+        <span class="topic-title">Server-Side Rendering XSS — State Hydration Injection</span>
+        <div class="topic-tags"><span class="tag tag-critical">critical</span><span class="tag tag-browser">SSR</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          SSR introduces a specific XSS vector: when server-side Redux/React Query state is serialized into a <code>&lt;script&gt;</code> tag for hydration, user-controlled strings containing <code>&lt;/script&gt;</code> break out of the script context.
+        </div>
+        <div class="rule-grid">
+          <div class="rule-card bad">
+            <span class="rule-label">❌ Script injection via JSON</span>
+            <code>// Server renders:<br>&lt;script&gt;<br>window.__STATE__ = {"user":"&lt;/script&gt;&lt;script&gt;alert(1)"}<br>&lt;/script&gt;</code>
+          </div>
+          <div class="rule-card good">
+            <span class="rule-label">✅ Escape &lt;/script&gt; in JSON</span>
+            <code>const safeJson = JSON.stringify(state)<br>  .replace(/&lt;\/script/gi,<br>    '&lt;\\/script');<br>// Or use serialize-javascript package</code>
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">ssr-hydration.ts</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="kw">import</span> serialize <span class="kw">from</span> <span class="str">'serialize-javascript'</span>;
+
+<span class="cm">// serialize-javascript escapes &lt;/script&gt;, &lt;!--, and other HTML-unsafe sequences</span>
+<span class="kw">const</span> html = <span class="str">`
+  &lt;script&gt;
+    window.__REDUX_STATE__ = ${serialize(store.getState(), { isJSON: true })};
+  &lt;/script&gt;
+`</span>;
+
+<span class="cm">// On the client — parse, don't eval</span>
+<span class="kw">const</span> preloadedState = JSON.parse(
+    document.getElementById(<span class="str">'__REDUX_STATE__'</span>).textContent
+);</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSRF & STATE TOKENS -->
+  <section class="section" id="re-csrf">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">02</span>
+      <h2 class="section-title">CSRF &amp; Request Forgery</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">2.1</span>
+        <span class="topic-title">CSRF — When It Applies and the SameSite Cookie Nuance</span>
+        <div class="topic-tags"><span class="tag tag-owasp">OWASP A01</span><span class="tag tag-browser">CSRF</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          CSRF exploits the browser's automatic cookie attachment on cross-origin requests. It only applies when your API authenticates via cookies. <strong>APIs that authenticate via Authorization header (Bearer tokens stored in memory, not cookies) are not vulnerable to CSRF</strong> — cross-origin requests cannot read or set the Authorization header.
+          <br><br>
+          <code>SameSite=Strict</code> cookies are never sent on cross-origin requests — completely prevents CSRF but breaks legitimate cross-origin flows (OAuth redirects, links from emails). <code>SameSite=Lax</code> allows top-level navigations (GET) but blocks cross-origin POSTs — good default. <code>SameSite=None; Secure</code> must be combined with an explicit CSRF token.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">csrf.tsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ✅ If using cookie auth: read CSRF token from a non-HttpOnly cookie</span>
+<span class="cm">// and attach it as a custom header — browsers block cross-origin custom headers</span>
+<span class="kw">const</span> <span class="fn">getCsrfToken</span> = () =>
+    document.cookie
+        .split(<span class="str">';'</span>)
+        .find(c => c.trim().startsWith(<span class="str">'csrf='</span>))
+        ?.split(<span class="str">'='</span>)[<span class="num">1</span>];
+
+<span class="kw">const</span> apiClient = axios.create({ withCredentials: <span class="kw">true</span> });
+apiClient.interceptors.request.use(config => {
+    <span class="kw">if</span> ([<span class="str">'post'</span>, <span class="str">'put'</span>, <span class="str">'patch'</span>, <span class="str">'delete'</span>].includes(config.method!)) {
+        config.headers[<span class="str">'X-CSRF-Token'</span>] = <span class="fn">getCsrfToken</span>() ?? <span class="str">''</span>;
+    }
+    <span class="kw">return</span> config;
+});
+
+<span class="cm">// ✅ Preferred: Bearer tokens in memory — zero CSRF exposure</span>
+<span class="cm">// httpClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`</span>
+<span class="cm">// No cookie → no CSRF → no CSRF token needed</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENT STORAGE -->
+  <section class="section" id="re-storage">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">03</span>
+      <h2 class="section-title">Client Storage Security</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">3.1</span>
+        <span class="topic-title">Where to Store Tokens — The XSS vs CSRF Tradeoff</span>
+        <div class="topic-tags"><span class="tag tag-critical">critical</span><span class="tag tag-browser">storage</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          There is no perfectly safe place to store tokens in the browser — only different threat profiles. Senior engineers must articulate the tradeoff explicitly.
+        </div>
+        <div class="threat-grid">
+          <div class="threat-card">
+            <span class="tc-label">localStorage / sessionStorage</span>
+            <strong>XSS risk.</strong> Any injected script reads tokens with <code>localStorage.getItem()</code>. Not accessible to HttpOnly cookies. Use only for low-sensitivity, short-lived tokens in environments with strict CSP.
+          </div>
+          <div class="threat-card">
+            <span class="tc-label">HttpOnly Cookie</span>
+            <strong>XSS-resistant, CSRF risk.</strong> Script cannot read it. Requires CSRF token mitigation if not using SameSite=Strict. Best for access tokens when SSR is involved.
+          </div>
+          <div class="threat-card">
+            <span class="tc-label">In-memory (module variable / closure)</span>
+            <strong>Best for access tokens.</strong> Not persistent across page refresh — use a refresh token in HttpOnly cookie to rehydrate. No XSS access, no CSRF surface. Clears on tab close.
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">token-storage.ts</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre"><span class="cm">// In-memory token store — XSS cannot access, CSRF not applicable</span>
+<span class="kw">let</span> accessToken: <span class="kw">string</span> | <span class="kw">null</span> = <span class="kw">null</span>;
+
+<span class="kw">export const</span> tokenStore = {
+    set:   (t: <span class="kw">string</span>) => { accessToken = t; },
+    get:   ()            => accessToken,
+    clear: ()            => { accessToken = <span class="kw">null</span>; },
+};
+
+<span class="cm">// On app init: silently refresh using HttpOnly cookie holding refresh token</span>
+<span class="kw">async function</span> <span class="fn">initAuth</span>() {
+    <span class="kw">try</span> {
+        <span class="kw">const</span> { accessToken } = <span class="kw">await</span> api.<span class="fn">post</span>(<span class="str">'/auth/refresh'</span>);
+        <span class="cm">// withCredentials: true — browser sends HttpOnly refresh cookie automatically</span>
+        tokenStore.set(accessToken);
+    } <span class="kw">catch</span> { <span class="cm">/* unauthenticated — prompt login */</span> }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CSP -->
+  <section class="section" id="re-csp">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">04</span>
+      <h2 class="section-title">Content Security Policy</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">4.1</span>
+        <span class="topic-title">CSP — Nonce-Based vs Hash-Based vs unsafe-inline</span>
+        <div class="topic-tags"><span class="tag tag-browser">CSP</span><span class="tag tag-owasp">OWASP A05</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          CSP is the last line of defence against XSS — it restricts what the browser will execute even if an attacker injects a script tag. The challenge for SPAs is that React typically requires inline scripts for hydration and dynamic imports.
+          <br><br>
+          <strong><code>unsafe-inline</code></strong> defeats the entire purpose of CSP — allows any inline script. <strong>Nonce-based CSP</strong> generates a server-side random nonce per request, adds it to the header, and only allows script tags bearing that nonce — dynamic, but requires server-side rendering or a middleware layer. <strong>Hash-based CSP</strong> precomputes SHA-256 hashes of known inline scripts — works for static inline scripts but breaks if the content changes.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">csp.ts</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// Next.js middleware — nonce-based CSP per request</span>
+<span class="kw">import</span> { NextResponse } <span class="kw">from</span> <span class="str">'next/server'</span>;
+<span class="kw">import</span> { randomBytes } <span class="kw">from</span> <span class="str">'crypto'</span>;
+
+<span class="kw">export function</span> <span class="fn">middleware</span>(request: Request) {
+    <span class="kw">const</span> nonce = randomBytes(<span class="num">16</span>).toString(<span class="str">'base64'</span>);
+
+    <span class="kw">const</span> csp = [
+        <span class="str">`default-src 'self'`</span>,
+        <span class="str">`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`</span>,
+        <span class="cm">// strict-dynamic: trusted nonce'd scripts can load other scripts;</span>
+        <span class="cm">// all other scripts blocked — even from allowlisted hosts</span>
+        <span class="str">`style-src 'self' 'nonce-${nonce}'`</span>,
+        <span class="str">`img-src 'self' https://cdn.example.com data:`</span>,
+        <span class="str">`font-src 'self'`</span>,
+        <span class="str">`connect-src 'self' https://api.example.com`</span>,
+        <span class="str">`frame-ancestors 'none'`</span>,
+        <span class="str">`form-action 'self'`</span>,
+        <span class="str">`base-uri 'self'`</span>,
+        <span class="str">`report-uri /api/csp-report`</span>,    <span class="cm">// collect violations</span>
+    ].join(<span class="str">';'</span>);
+
+    <span class="kw">const</span> response = NextResponse.next();
+    response.headers.set(<span class="str">'Content-Security-Policy'</span>, csp);
+    response.headers.set(<span class="str">'x-nonce'</span>, nonce); <span class="cm">// pass to _document for script tags</span>
+    <span class="kw">return</span> response;
+}</pre>
+        </div>
+        <div class="callout callout-info">
+          <span class="callout-label">Deploy in report-only first</span>
+          Use <code>Content-Security-Policy-Report-Only</code> header before enforcing. Collect violations for 1–2 weeks via <code>report-uri</code> to discover legitimate scripts that need nonces before flipping to enforcement mode.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPENDENCY & SUPPLY CHAIN -->
+  <section class="section" id="re-deps">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">05</span>
+      <h2 class="section-title">Dependency &amp; Supply Chain Security</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">5.1</span>
+        <span class="topic-title">NPM Supply Chain — Typosquatting, Lifecycle Scripts, and Lockfiles</span>
+        <div class="topic-tags"><span class="tag tag-supply">supply chain</span><span class="tag tag-owasp">OWASP A06</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          The NPM ecosystem has seen significant supply-chain attacks: <strong>typosquatting</strong> (malicious packages named similarly to popular ones), <strong>dependency confusion</strong> (publishing a private package name publicly at a higher version), and <strong>package takeover</strong> (maintainer account compromise).
+          <br><br>
+          Lifecycle scripts (<code>postinstall</code>, <code>preinstall</code>) run automatically on <code>npm install</code> — malicious packages use them to exfiltrate environment variables, tokens, and SSH keys at install time on developer machines and CI pipelines.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">supply-chain.sh</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm"># Commit lockfile — pin exact versions, verify on CI</span>
+git add package-lock.json   # or yarn.lock / pnpm-lock.yaml
+
+<span class="cm"># Disable lifecycle scripts on install (production/CI)</span>
+npm install --ignore-scripts
+
+<span class="cm"># Audit for known vulnerabilities</span>
+npm audit --audit-level=high
+npx audit-ci --high   # fails CI on high/critical
+
+<span class="cm"># Scan for malicious patterns in packages (Snyk / Socket.dev)</span>
+npx snyk test
+
+<span class="cm"># subresource integrity for CDN scripts in index.html</span>
+<span class="cm"># &lt;script src="https://cdn.../react.min.js"</span>
+<span class="cm">#         integrity="sha384-..."</span>
+<span class="cm">#         crossorigin="anonymous"&gt;&lt;/script&gt;</span></pre>
+        </div>
+        <div class="callout callout-warn">
+          <span class="callout-label">Dependency confusion</span>
+          If your org has private packages (e.g. scoped to <code>@mycompany/</code>), ensure your registry configuration cannot fall back to the public NPM registry for packages not found in your private registry. An attacker publishing a higher-versioned package with your internal name to the public registry can hijack installs.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH TOKEN HANDLING -->
+  <section class="section" id="re-auth">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">06</span>
+      <h2 class="section-title">Auth Token Handling in React</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">6.1</span>
+        <span class="topic-title">Silent Refresh and Token Leakage via postMessage</span>
+        <div class="topic-tags"><span class="tag tag-auth">auth</span><span class="tag tag-browser">browser</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          The silent refresh pattern (hidden iframe or popup window calling the auth server to get a new access token) carries a <code>postMessage</code> XSS risk if the message origin is not validated. A malicious script on any page listening to <code>window.message</code> events can receive the access token if the iframe's <code>postMessage</code> call targets <code>"*"</code> as the origin.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">silent-refresh.ts</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Sends token to any origin — any page listening can steal it</span>
+window.parent.postMessage({ token: accessToken }, <span class="str">'*'</span>);
+
+<span class="cm">// ✅ Always specify exact target origin</span>
+window.parent.postMessage(
+    { token: accessToken },
+    <span class="str">'https://app.example.com'</span>   <span class="cm">// ← exact origin</span>
+);
+
+<span class="cm">// ✅ Receiver always validates origin before using message data</span>
+window.addEventListener(<span class="str">'message'</span>, (event) => {
+    <span class="kw">if</span> (event.origin !== <span class="str">'https://auth.example.com'</span>) <span class="kw">return</span>; <span class="cm">// discard</span>
+    <span class="kw">const</span> { token } = event.data;
+    tokenStore.set(token);
+});</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">6.2</span>
+        <span class="topic-title">Leaking Tokens in URLs and Browser History</span>
+        <div class="topic-tags"><span class="tag tag-auth">auth</span><span class="tag tag-browser">browser</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          OAuth 2.0 implicit flow returned tokens in the URL fragment — those tokens are logged in browser history, server access logs for single-page navigations, and the <code>Referer</code> header on subsequent requests. <strong>Always use Authorization Code + PKCE</strong> for SPAs. The authorization code in the URL is short-lived and single-use; the actual tokens are exchanged server-side (or via the token endpoint) and never appear in the URL.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">pkce.ts</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// PKCE — code verifier generated in browser, code challenge sent to auth server</span>
+<span class="kw">async function</span> <span class="fn">generatePkce</span>() {
+    <span class="kw">const</span> verifier  = randomBase64Url(<span class="num">32</span>);
+    <span class="kw">const</span> digest    = <span class="kw">await</span> crypto.subtle.digest(
+        <span class="str">'SHA-256'</span>,
+        <span class="kw">new</span> TextEncoder().encode(verifier)
+    );
+    <span class="kw">const</span> challenge = base64UrlEncode(<span class="kw">new</span> Uint8Array(digest));
+    sessionStorage.setItem(<span class="str">'pkce_verifier'</span>, verifier); <span class="cm">// short-lived, session-only</span>
+    <span class="kw">return</span> { verifier, challenge };
+}
+
+<span class="cm">// Authorization URL — code_challenge replaces implicit token in fragment</span>
+<span class="kw">const</span> { challenge } = <span class="kw">await</span> generatePkce();
+<span class="kw">const</span> authUrl = <span class="str">`${AUTH_SERVER}/authorize?
+    response_type=code
+    &client_id=${CLIENT_ID}
+    &redirect_uri=${REDIRECT_URI}
+    &code_challenge=${challenge}
+    &code_challenge_method=S256
+    &scope=openid profile`</span>.replace(/\s/g, <span class="str">''</span>);</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURE RENDERING PATTERNS -->
+  <section class="section" id="re-rendering">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">07</span>
+      <h2 class="section-title">Secure Rendering Patterns</h2>
+    </div>
+
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">7.1</span>
+        <span class="topic-title">Prototype Pollution via JSON.parse and Object Spread</span>
+        <div class="topic-tags"><span class="tag tag-input">injection</span><span class="tag tag-browser">runtime</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Prototype pollution occurs when attacker-controlled JSON is merged into objects without sanitisation, allowing modification of <code>Object.prototype</code>. A payload like <code>{"__proto__": {"isAdmin": true}}</code> merged with <code>Object.assign({}, userInput)</code> sets <code>isAdmin</code> on every object in the process.
+          <br><br>
+          Libraries like <code>lodash.merge</code>, <code>deepmerge</code>, and custom recursive mergers are vulnerable. Use <code>JSON.parse</code> with a reviver to reject dangerous keys, or use libraries with explicit prototype pollution protection (<code>deepmerge</code> v4.3+ with <code>isMergeableObject</code>, or <code>structuredClone</code> for deep copies).
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">proto-pollution.ts</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Vulnerable to prototype pollution if input is attacker-controlled</span>
+<span class="kw">const</span> merged = _.merge({}, userSuppliedConfig);
+
+<span class="cm">// ✅ Reviver rejects __proto__, constructor, prototype keys</span>
+<span class="kw">const</span> safe = JSON.parse(untrustedJson, (key, value) => {
+    <span class="kw">if</span> ([<span class="str">'__proto__'</span>, <span class="str">'constructor'</span>, <span class="str">'prototype'</span>].includes(key)) {
+        <span class="kw">return</span> <span class="kw">undefined</span>; <span class="cm">// drop dangerous keys</span>
+    }
+    <span class="kw">return</span> value;
+});
+
+<span class="cm">// ✅ structuredClone — deep copy without prototype chain</span>
+<span class="kw">const</span> safeCopy = structuredClone(userInput);</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">7.2</span>
+        <span class="topic-title">Third-Party Scripts — Isolation and Integrity</span>
+        <div class="topic-tags"><span class="tag tag-supply">supply chain</span><span class="tag tag-browser">browser</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          Third-party scripts (analytics, chat widgets, A/B testing) run with full access to the page — they can read DOM content including form values, steal tokens from localStorage, and exfiltrate data to external servers. The 2019 British Airways breach (Magecart attack) was a compromised third-party script that exfiltrated payment card data from 500,000 customers.
+          <br><br>
+          Mitigations: (1) <strong>Subresource Integrity (SRI)</strong> — hash-pins CDN scripts, rejects tampered versions. (2) <strong>Sandboxed iframes</strong> — load third-party widgets in iframes with <code>sandbox</code> attribute, limiting their API access. (3) <strong>CSP <code>connect-src</code></strong> — blocks data exfiltration by restricting outbound HTTP origins. (4) Minimise the number of third-party scripts; audit each one.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">third-party.html</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">&lt;!-- SRI — browser rejects if CDN script is tampered --&gt;</span>
+&lt;script
+  src=<span class="str">"https://cdn.example.com/analytics.js"</span>
+  integrity=<span class="str">"sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"</span>
+  crossorigin=<span class="str">"anonymous"</span>
+  defer&gt;&lt;/script&gt;
+
+<span class="cm">&lt;!-- Sandboxed iframe for third-party widget --&gt;</span>
+&lt;iframe
+  src=<span class="str">"https://widget.vendor.com/chat"</span>
+  sandbox=<span class="str">"allow-scripts allow-same-origin allow-forms"</span>
+  <span class="cm">&lt;!-- allow-same-origin needed for localStorage; omit if not needed --&gt;</span>
+  allow=<span class="str">"camera 'none'; microphone 'none'"</span>&gt;
+&lt;/iframe&gt;</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">7.3</span>
+        <span class="topic-title">Sensitive Data in React State and DevTools Exposure</span>
+        <div class="topic-tags"><span class="tag tag-browser">runtime</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <div class="concept">
+          React DevTools (browser extension and bundled dev overlay) expose the full component tree and all state values to anyone with access to the browser — including malicious browser extensions. In development, this is acceptable. In production:
+          <br><br>
+          <strong>Never store sensitive values in React state</strong> (full card numbers, SSNs, decrypted secrets). Keep in-memory token store outside React's state graph (plain module variable, not <code>useState</code>/<code>useContext</code>). DevTools cannot inspect plain module-level variables.
+        </div>
+        <div class="code-wrap">
+          <div class="code-bar"><span class="code-filename">sensitive-state.ts</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+<pre><span class="cm">// ❌ Token in React state — visible in DevTools</span>
+<span class="kw">const</span> [accessToken, setAccessToken] = useState&lt;<span class="kw">string</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+<span class="cm">// ✅ Module-level variable — outside React's introspectable tree</span>
+<span class="kw">let</span> _accessToken: <span class="kw">string</span> | <span class="kw">null</span> = <span class="kw">null</span>;
+<span class="kw">export const</span> tokenStore = {
+    set: (t: <span class="kw">string</span>) => { _accessToken = t; },
+    get: ()           => _accessToken,
+    clear: ()         => { _accessToken = <span class="kw">null</span>; },
+};
+
+<span class="cm">// Disable React DevTools in production builds</span>
+<span class="kw">if</span> (process.env.NODE_ENV === <span class="str">'production'</span>) {
+    <span class="kw">const</span> noop = () => {};
+    (<span class="kw">window</span> <span class="kw">as any</span>).__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+        supportsFiber: <span class="kw">true</span>,
+        inject: noop, onCommitFiberRoot: noop, onCommitFiberUnmount: noop,
+    };
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REACT CHECKLIST -->
+  <section class="section" id="re-checklist">
+    <div class="section-header">
+      <span class="section-dot dot-react"></span>
+      <span class="section-label label-react">08</span>
+      <h2 class="section-title">React Security Checklist</h2>
+    </div>
+    <div class="topic open">
+      <div class="topic-header" onclick="toggle(this)">
+        <span class="topic-num">—</span>
+        <span class="topic-title">Application &amp; Architecture Level</span>
+        <div class="topic-tags"><span class="tag tag-critical">senior</span></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="topic-body">
+        <ul class="checklist">
+          <li class="critical">Audit every use of <code>dangerouslySetInnerHTML</code> — it must only receive output from a server-side sanitizer (DOMPurify with strict allowlist), never raw user input.</li>
+          <li class="critical">Validate URL schemes before rendering in <code>href</code>, <code>src</code>, or <code>action</code> — reject <code>javascript:</code>, <code>data:</code>, and <code>vbscript:</code> schemes.</li>
+          <li class="critical">In SSR, escape <code>&lt;/script&gt;</code> in JSON hydration payloads — use <code>serialize-javascript</code> or equivalent, never raw <code>JSON.stringify</code> inside <code>&lt;script&gt;</code> tags.</li>
+          <li class="critical">Store access tokens in memory (module variable), not <code>localStorage</code> or React state. Rehydrate via HttpOnly refresh token cookie on page load.</li>
+          <li class="critical">CSRF only applies to cookie-authenticated APIs. If using Bearer tokens in Authorization header, CSRF is not a concern — don't build CSRF infrastructure unnecessarily.</li>
+          <li>Use Authorization Code + PKCE for OAuth flows in SPAs — never implicit flow. The authorization code appears in the URL; tokens must not.</li>
+          <li>Always specify exact target origin in <code>postMessage</code> calls. Always validate <code>event.origin</code> before acting on received messages.</li>
+          <li>Implement a strict nonce-based CSP. Use <code>Content-Security-Policy-Report-Only</code> in staging before enforcing. Never use <code>unsafe-inline</code> as a permanent solution.</li>
+          <li>Commit and verify <code>package-lock.json</code>. Run <code>npm audit</code> in CI with <code>--audit-level=high</code>. Use <code>--ignore-scripts</code> in production installs.</li>
+          <li>Use Subresource Integrity (SRI) hashes for all CDN-loaded scripts and stylesheets.</li>
+          <li>Sandbox third-party widgets in iframes with the <code>sandbox</code> attribute. Restrict <code>connect-src</code> in CSP to block data exfiltration.</li>
+          <li>Sanitize JSON from untrusted sources with a reviver that rejects <code>__proto__</code>, <code>constructor</code>, and <code>prototype</code> keys before merging into objects.</li>
+          <li>Keep sensitive values out of React state and Context — they are visible in React DevTools and browser extension introspection.</li>
+          <li>Disable React DevTools in production builds by replacing the global hook with no-ops.</li>
+          <li class="warn">Audit <code>rel="noopener noreferrer"</code> on all external links with <code>target="_blank"</code> — without it, the opened page can reference the opener via <code>window.opener</code>.</li>
+          <li class="warn">Review environment variables prefixed with <code>REACT_APP_</code> / <code>NEXT_PUBLIC_</code> — they are bundled into the client and publicly visible. Never put secrets in public env vars.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggle(header) { header.closest('.topic').classList.toggle('open'); }
+
+  const sections = document.querySelectorAll('.section[id]');
+  const navItems = document.querySelectorAll('.nav-item[href]');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        const isDotnet = id.startsWith('dn-');
+        navItems.forEach(a => {
+          a.classList.remove('active-dotnet', 'active-react');
+          if (a.getAttribute('href') === '#' + id)
+            a.classList.add(isDotnet ? 'active-dotnet' : 'active-react');
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-60px 0px -55% 0px' });
+  sections.forEach(s => obs.observe(s));
+
+  function copyCode(btn) {
+    navigator.clipboard.writeText(btn.closest('.code-wrap').querySelector('pre').innerText)
+      .then(() => { btn.textContent = 'copied!'; setTimeout(() => btn.textContent = 'copy', 1500); });
+  }
+</script>
+</body>
+</html>

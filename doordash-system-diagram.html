@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoorDash System Design</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #f5f4f0;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  padding: 32px 24px 48px;
+}
+
+header {
+  max-width: 1300px;
+  margin: 0 auto 28px;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.4px;
+}
+header span {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #999;
+  letter-spacing: 0.08em;
+}
+
+.canvas-wrap {
+  max-width: 1300px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #e0ddd6;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  position: relative;
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Legend */
+.legend {
+  max-width: 1300px;
+  margin: 16px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 0 4px;
+}
+.leg {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #555;
+  font-family: 'DM Sans', sans-serif;
+}
+.leg-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.leg-line {
+  width: 24px; height: 2px;
+  flex-shrink: 0;
+}
+.leg-dash {
+  width: 24px; height: 2px;
+  background: repeating-linear-gradient(90deg,#aaa 0,#aaa 4px,transparent 4px,transparent 8px);
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>DoorDash — System Design</h1>
+  <span>ARCHITECTURE OVERVIEW</span>
+</header>
+
+<div class="canvas-wrap">
+<svg viewBox="0 0 1260 820" xmlns="http://www.w3.org/2000/svg" font-family="DM Sans, sans-serif">
+<defs>
+  <!-- Arrow markers -->
+  <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
+  </marker>
+  <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+  </marker>
+  <marker id="arr-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/>
+  </marker>
+  <marker id="arr-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#10b981"/>
+  </marker>
+  <marker id="arr-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#f59e0b"/>
+  </marker>
+  <marker id="arr-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#8b5cf6"/>
+  </marker>
+  <marker id="arr-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L8,3 z" fill="#999"/>
+  </marker>
+
+  <!-- Drop shadow filter -->
+  <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0001"/>
+  </filter>
+</defs>
+
+<!-- ═══════════════════════════ ZONE BACKGROUNDS ═══════════════════════════ -->
+
+<!-- Clients zone -->
+<rect x="18" y="16" width="188" height="790" rx="10" fill="#fdf8f0" stroke="#e8d9b8" stroke-width="1.5"/>
+<text x="112" y="36" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="#bfa96a" letter-spacing="0.12em">CLIENTS</text>
+
+<!-- Core Services zone -->
+<rect x="224" y="16" width="550" height="790" rx="10" fill="#f0f4ff" stroke="#c0ccee" stroke-width="1.5"/>
+<text x="499" y="36" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="#6a7abf" letter-spacing="0.12em">CORE SERVICES</text>
+
+<!-- Infra / async zone -->
+<rect x="792" y="16" width="220" height="790" rx="10" fill="#f0fff8" stroke="#b8e6d4" stroke-width="1.5"/>
+<text x="902" y="36" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="#3d9a72" letter-spacing="0.12em">MESSAGING / INFRA</text>
+
+<!-- External zone -->
+<rect x="1030" y="16" width="214" height="790" rx="10" fill="#fff5f5" stroke="#f0c0c0" stroke-width="1.5"/>
+<text x="1137" y="36" text-anchor="middle" font-size="10" font-family="DM Mono,monospace" fill="#c06060" letter-spacing="0.12em">EXTERNAL / DATA</text>
+
+
+<!-- ═══════════════════════════ NODE DEFINITIONS ═══════════════════════════ -->
+<!-- NODE TEMPLATE: rect + icon circle + label
+     Each node: (id, cx, cy, w=140, h=56) -->
+
+<!-- ── CLIENT NODES ── -->
+
+<!-- Customer App -->
+<g id="n-cust-app" filter="url(#shadow)">
+  <rect x="22" y="58" width="178" height="64" rx="8" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+  <circle cx="46" cy="90" r="14" fill="#fef3c7"/>
+  <text x="46" y="95" text-anchor="middle" font-size="16">📱</text>
+  <text x="112" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Customer App</text>
+  <text x="112" y="99" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Mobile / Web</text>
+</g>
+
+<!-- DoorDasher App -->
+<g id="n-dasher-app" filter="url(#shadow)">
+  <rect x="22" y="380" width="178" height="64" rx="8" fill="#fff" stroke="#10b981" stroke-width="2"/>
+  <circle cx="46" cy="412" r="14" fill="#d1fae5"/>
+  <text x="46" y="417" text-anchor="middle" font-size="16">🚗</text>
+  <text x="112" y="406" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Dasher App</text>
+  <text x="112" y="421" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Mobile / Web</text>
+</g>
+
+<!-- Restaurant Staff App -->
+<g id="n-rest-app" filter="url(#shadow)">
+  <rect x="22" y="620" width="178" height="64" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="2"/>
+  <circle cx="46" cy="652" r="14" fill="#dbeafe"/>
+  <text x="46" y="657" text-anchor="middle" font-size="16">🏪</text>
+  <text x="112" y="646" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Restaurant App</text>
+  <text x="112" y="661" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Staff Tablet / Web</text>
+</g>
+
+
+<!-- ── CORE SERVICE NODES ── -->
+
+<!-- Search Service -->
+<g id="n-search" filter="url(#shadow)">
+  <rect x="234" y="58" width="160" height="64" rx="8" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+  <circle cx="258" cy="90" r="14" fill="#fef3c7"/>
+  <text x="258" y="95" text-anchor="middle" font-size="16">🔍</text>
+  <text x="324" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Search Service</text>
+  <text x="324" y="99" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Elastic / Algolia</text>
+</g>
+
+<!-- Ordering Service -->
+<g id="n-order" filter="url(#shadow)">
+  <rect x="430" y="180" width="168" height="64" rx="8" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+  <circle cx="454" cy="212" r="14" fill="#fef3c7"/>
+  <text x="454" y="217" text-anchor="middle" font-size="16">🛒</text>
+  <text x="524" y="206" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Ordering Service</text>
+  <text x="524" y="221" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">REST API</text>
+</g>
+
+<!-- User Profile Service -->
+<g id="n-profile" filter="url(#shadow)">
+  <rect x="234" y="180" width="168" height="64" rx="8" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+  <circle cx="258" cy="212" r="14" fill="#ede9fe"/>
+  <text x="258" y="217" text-anchor="middle" font-size="16">👤</text>
+  <text x="328" y="206" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Profile Service</text>
+  <text x="328" y="221" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">User prefs / history</text>
+</g>
+
+<!-- Order Fulfilment Service -->
+<g id="n-fulfil" filter="url(#shadow)">
+  <rect x="430" y="380" width="168" height="64" rx="8" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+  <circle cx="454" cy="412" r="14" fill="#fef3c7"/>
+  <text x="454" y="417" text-anchor="middle" font-size="16">⚙️</text>
+  <text x="524" y="406" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Fulfilment Service</text>
+  <text x="524" y="421" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Coordinates order</text>
+</g>
+
+<!-- Dispatch Service -->
+<g id="n-dispatch" filter="url(#shadow)">
+  <rect x="430" y="540" width="168" height="64" rx="8" fill="#fff" stroke="#10b981" stroke-width="2"/>
+  <circle cx="454" cy="572" r="14" fill="#d1fae5"/>
+  <text x="454" y="577" text-anchor="middle" font-size="16">📡</text>
+  <text x="524" y="566" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Dispatch Service</text>
+  <text x="524" y="581" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Assigns driver</text>
+</g>
+
+<!-- Notification Service -->
+<g id="n-notif" filter="url(#shadow)">
+  <rect x="234" y="540" width="168" height="64" rx="8" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+  <circle cx="258" cy="572" r="14" fill="#ede9fe"/>
+  <text x="258" y="577" text-anchor="middle" font-size="16">🔔</text>
+  <text x="328" y="566" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Notification Service</text>
+  <text x="328" y="581" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Push / SMS / Email</text>
+</g>
+
+
+<!-- ── MESSAGING / INFRA ── -->
+
+<!-- Message Queue / Kafka -->
+<g id="n-queue" filter="url(#shadow)">
+  <rect x="802" y="295" width="196" height="64" rx="8" fill="#fff" stroke="#10b981" stroke-width="2" stroke-dasharray="6,3"/>
+  <circle cx="826" cy="327" r="14" fill="#d1fae5"/>
+  <text x="826" y="332" text-anchor="middle" font-size="16">⚡</text>
+  <text x="900" y="321" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Message Queue</text>
+  <text x="900" y="336" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Kafka / SQS / SNS</text>
+</g>
+
+
+<!-- ── EXTERNAL / DATA ── -->
+
+<!-- Payment Gateway -->
+<g id="n-payment" filter="url(#shadow)">
+  <rect x="1040" y="180" width="190" height="64" rx="8" fill="#fff" stroke="#ef4444" stroke-width="2"/>
+  <circle cx="1064" cy="212" r="14" fill="#fee2e2"/>
+  <text x="1064" y="217" text-anchor="middle" font-size="16">💳</text>
+  <text x="1140" y="206" text-anchor="middle" font-size="12" font-weight="700" fill="#111">Payment Gateway</text>
+  <text x="1140" y="221" text-anchor="middle" font-size="10" fill="#999" font-family="DM Mono,monospace">Stripe / Braintree</text>
+</g>
+
+<!-- DB: Orders -->
+<g id="db-orders">
+  <rect x="1040" y="290" width="190" height="52" rx="6" fill="#f8f8f8" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1060" y="318" font-size="14">🗄</text>
+  <text x="1082" y="312" font-size="11" font-weight="600" fill="#444">Orders DB</text>
+  <text x="1082" y="328" font-size="10" fill="#999" font-family="DM Mono,monospace">order records</text>
+</g>
+
+<!-- DB: User Profiles -->
+<g id="db-profile">
+  <rect x="1040" y="360" width="190" height="52" rx="6" fill="#f8f8f8" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1060" y="388" font-size="14">🗄</text>
+  <text x="1082" y="382" font-size="11" font-weight="600" fill="#444">Profile DB</text>
+  <text x="1082" y="398" font-size="10" fill="#999" font-family="DM Mono,monospace">user preferences</text>
+</g>
+
+<!-- DB: Dispatch -->
+<g id="db-dispatch">
+  <rect x="1040" y="430" width="190" height="52" rx="6" fill="#f8f8f8" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1060" y="458" font-size="14">🗄</text>
+  <text x="1082" y="452" font-size="11" font-weight="600" fill="#444">Dispatch DB</text>
+  <text x="1082" y="468" font-size="10" fill="#999" font-family="DM Mono,monospace">driver assignments</text>
+</g>
+
+<!-- DB: Notifications -->
+<g id="db-notif">
+  <rect x="1040" y="500" width="190" height="52" rx="6" fill="#f8f8f8" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1060" y="528" font-size="14">🗄</text>
+  <text x="1082" y="522" font-size="11" font-weight="600" fill="#444">Notifications DB</text>
+  <text x="1082" y="538" font-size="10" fill="#999" font-family="DM Mono,monospace">delivery logs</text>
+</g>
+
+<!-- DB: Search Index -->
+<g id="db-search">
+  <rect x="1040" y="58" width="190" height="52" rx="6" fill="#f8f8f8" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="1060" y="86" font-size="14">🗄</text>
+  <text x="1082" y="80" font-size="11" font-weight="600" fill="#444">Search Index</text>
+  <text x="1082" y="96" font-size="10" fill="#999" font-family="DM Mono,monospace">menus, restaurants</text>
+</g>
+
+
+<!-- ═══════════════════════════ CONNECTIONS ═══════════════════════════ -->
+<!-- All lines drawn AFTER nodes so they appear below -->
+
+<!-- 1. Customer App → Search Service (search query) -->
+<line x1="200" y1="82" x2="232" y2="82" stroke="#f59e0b" stroke-width="1.8" marker-end="url(#arr-orange)"/>
+<text x="216" y="76" text-anchor="middle" font-size="9" fill="#f59e0b" font-family="DM Mono,monospace">search</text>
+
+<!-- Search Service → Search Index DB -->
+<line x1="394" y1="82" x2="1038" y2="82" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-gray)"/>
+<text x="720" y="76" text-anchor="middle" font-size="9" fill="#aaa" font-family="DM Mono,monospace">read/write index</text>
+
+<!-- Search results back to customer app (slightly offset) -->
+<line x1="234" y1="98" x2="201" y2="98" stroke="#f59e0b" stroke-width="1.8" marker-end="url(#arr-orange)"/>
+<text x="216" y="112" text-anchor="middle" font-size="9" fill="#f59e0b" font-family="DM Mono,monospace">results</text>
+
+<!-- 2. Customer App → Ordering Service -->
+<path d="M111,122 Q111,165 430,212" stroke="#f59e0b" stroke-width="1.8" fill="none" marker-end="url(#arr-orange)"/>
+<text x="260" y="175" text-anchor="middle" font-size="9" fill="#f59e0b" font-family="DM Mono,monospace">place order</text>
+
+<!-- Customer App ↔ Profile Service -->
+<line x1="200" y1="200" x2="232" y2="206" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+<line x1="232" y1="218" x2="200" y2="224" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+<text x="216" y="196" text-anchor="middle" font-size="9" fill="#8b5cf6" font-family="DM Mono,monospace">profile</text>
+
+<!-- Profile Service → Profile DB -->
+<line x1="402" y1="206" x2="1038" y2="390" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-gray)"/>
+
+<!-- 3. Ordering Service → Payment Gateway -->
+<line x1="598" y1="204" x2="1038" y2="204" stroke="#ef4444" stroke-width="1.8" marker-end="url(#arr-red)"/>
+<text x="816" y="198" text-anchor="middle" font-size="9" fill="#ef4444" font-family="DM Mono,monospace">charge / confirm</text>
+
+<!-- Payment response back -->
+<line x1="1038" y1="220" x2="598" y2="220" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-red)"/>
+<text x="816" y="234" text-anchor="middle" font-size="9" fill="#ef4444" font-family="DM Mono,monospace">success / fail</text>
+
+<!-- 4. Ordering Service → Orders DB -->
+<path d="M598,216 Q810,256 1038,308" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arr-gray)"/>
+<text x="800" y="262" text-anchor="middle" font-size="9" fill="#aaa" font-family="DM Mono,monospace">save order</text>
+
+<!-- 5. Ordering Service → Message Queue (publish) -->
+<path d="M598,220 Q720,280 800,320" stroke="#10b981" stroke-width="1.8" fill="none" marker-end="url(#arr-green)"/>
+<text x="730" y="296" text-anchor="middle" font-size="9" fill="#10b981" font-family="DM Mono,monospace">publish event</text>
+
+<!-- Message Queue → Fulfilment Service (subscribe) -->
+<path d="M800,340 Q700,370 598,400" stroke="#10b981" stroke-width="1.8" fill="none" marker-end="url(#arr-green)"/>
+<text x="690" y="390" text-anchor="middle" font-size="9" fill="#10b981" font-family="DM Mono,monospace">subscribe</text>
+
+<!-- Message Queue → Notification Service (subscribe) -->
+<path d="M800,340 Q580,440 402,568" stroke="#8b5cf6" stroke-width="1.8" fill="none" marker-end="url(#arr-purple)"/>
+<text x="580" y="460" text-anchor="middle" font-size="9" fill="#8b5cf6" font-family="DM Mono,monospace">subscribe</text>
+
+<!-- 6. Fulfilment Service → Dispatch Service -->
+<line x1="514" y1="444" x2="514" y2="538" stroke="#10b981" stroke-width="1.8" marker-end="url(#arr-green)"/>
+<text x="536" y="496" font-size="9" fill="#10b981" font-family="DM Mono,monospace">trigger dispatch</text>
+
+<!-- 7. Fulfilment → Restaurant App -->
+<path d="M430,420 Q240,440 200,652" stroke="#3b82f6" stroke-width="1.8" fill="none" marker-end="url(#arr-blue)"/>
+<text x="195" y="545" text-anchor="end" font-size="9" fill="#3b82f6" font-family="DM Mono,monospace">notify: new order</text>
+
+<!-- Restaurant App → Fulfilment (accept order) -->
+<path d="M200,660 Q360,690 430,440" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arr-blue)"/>
+<text x="370" y="700" text-anchor="middle" font-size="9" fill="#3b82f6" font-family="DM Mono,monospace">accept order</text>
+
+<!-- 8. Dispatch Service → Dasher App -->
+<path d="M430,564 Q240,560 200,420" stroke="#10b981" stroke-width="1.8" fill="none" marker-end="url(#arr-green)"/>
+<text x="288" y="512" text-anchor="middle" font-size="9" fill="#10b981" font-family="DM Mono,monospace">assign job</text>
+
+<!-- 9. Dispatch → Dispatch DB -->
+<path d="M598,564 Q820,548 1038,454" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arr-gray)"/>
+
+<!-- 10. Notification Service → Notification DB -->
+<line x1="402" y1="566" x2="1038" y2="526" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-gray)"/>
+
+<!-- Order status back to Customer App -->
+<path d="M430,400 Q320,345 111,200" stroke="#555" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arr)"/>
+<text x="260" y="316" text-anchor="middle" font-size="9" fill="#888" font-family="DM Mono,monospace" transform="rotate(-32,260,316)">order status updates</text>
+
+<!-- Notification Service fans out -->
+<path d="M234,560 Q150,500 111,154" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-purple)"/>
+<path d="M234,572 Q90,572 90,444" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-purple)"/>
+<path d="M234,584 Q160,650 200,666" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" fill="none" marker-end="url(#arr-purple)"/>
+
+
+<!-- ═══════════════════════════ CALL-OUT LABELS (FLOATING) ═══════════════════════════ -->
+
+<!-- Numbered step badges -->
+<!-- Step 1 -->
+<circle cx="216" cy="60" r="9" fill="#f59e0b"/>
+<text x="216" y="64" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">1</text>
+
+<!-- Step 2 -->
+<circle cx="295" cy="153" r="9" fill="#f59e0b"/>
+<text x="295" y="157" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">2</text>
+
+<!-- Step 3 -->
+<circle cx="820" cy="188" r="9" fill="#ef4444"/>
+<text x="820" y="192" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">3</text>
+
+<!-- Step 4 -->
+<circle cx="706" cy="268" r="9" fill="#10b981"/>
+<text x="706" y="272" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">4</text>
+
+<!-- Step 5 -->
+<circle cx="514" cy="490" r="9" fill="#10b981"/>
+<text x="514" y="494" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">5</text>
+
+<!-- Step 6 -->
+<circle cx="216" cy="495" r="9" fill="#8b5cf6"/>
+<text x="216" y="499" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">6</text>
+
+
+<!-- ═══════════════════════════ BOTTOM STEP KEY ═══════════════════════════ -->
+<rect x="18" y="738" width="1224" height="64" rx="8" fill="#f9f9f9" stroke="#e5e7eb" stroke-width="1"/>
+<text x="36" y="756" font-size="10" font-family="DM Mono,monospace" fill="#999" letter-spacing="0.1em">FLOW</text>
+
+<circle cx="70" cy="773" r="8" fill="#f59e0b"/>
+<text x="70" y="777" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">1</text>
+<text x="84" y="778" font-size="11" fill="#333" font-family="DM Sans,sans-serif">Search restaurants</text>
+
+<circle cx="220" cy="773" r="8" fill="#f59e0b"/>
+<text x="220" y="777" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">2</text>
+<text x="234" y="778" font-size="11" fill="#333" font-family="DM Sans,sans-serif">Place order</text>
+
+<circle cx="350" cy="773" r="8" fill="#ef4444"/>
+<text x="350" y="777" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">3</text>
+<text x="364" y="778" font-size="11" fill="#333" font-family="DM Sans,sans-serif">Payment processed</text>
+
+<circle cx="520" cy="773" r="8" fill="#10b981"/>
+<text x="520" y="777" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">4</text>
+<text x="534" y="778" font-size="11" fill="#333" font-family="DM Sans,sans-serif">Queue → Fulfilment picks up order</text>
+
+<circle cx="750" cy="773" r="8" fill="#10b981"/>
+<text x="750" y="777" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">5</text>
+<text x="764" y="778" font-size="11" fill="#333" font-family="DM Sans,sans-serif">Dispatch assigns driver</text>
+
+<circle cx="920" cy="773" r="8" fill="#8b5cf6"/>
+<text x="920" y="777" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">6</text>
+<text x="934" y="778" font-size="11" fill="#333" font-family="DM Sans,sans-serif">Notifications fan out to all parties</text>
+
+</svg>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#f59e0b"></div> Ordering / Search flow</div>
+  <div class="leg"><div class="leg-dot" style="background:#ef4444"></div> Payment flow</div>
+  <div class="leg"><div class="leg-dot" style="background:#10b981"></div> Fulfilment &amp; dispatch</div>
+  <div class="leg"><div class="leg-dot" style="background:#8b5cf6"></div> Notifications &amp; profile</div>
+  <div class="leg"><div class="leg-dot" style="background:#3b82f6"></div> Restaurant staff</div>
+  <div class="leg">
+    <div class="leg-dash"></div> Database write / read
+  </div>
+  <div class="leg">
+    <svg width="24" height="12"><rect x="0" y="4" width="20" height="2" fill="#10b981" rx="1" stroke-dasharray="5,3"/><polygon points="20,1 24,5 20,9" fill="#10b981"/></svg>
+    Dashed border = message queue / async
+  </div>
+</div>
+
+</body>
+</html>
