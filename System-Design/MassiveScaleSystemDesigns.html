@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Massive Scale System Designs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0b0f;
+    --bg2: #111318;
+    --bg3: #1a1d26;
+    --border: #2a2d3a;
+    --accent1: #6c8eff;
+    --accent2: #ff6b6b;
+    --accent3: #4ade80;
+    --accent4: #fbbf24;
+    --accent5: #c084fc;
+    --accent6: #22d3ee;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg2);
+    z-index: 1;
+  }
+
+  .sidebar-header h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 4px;
+  }
+
+  .sidebar-header p {
+    font-size: 13px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .nav-group { padding: 12px 0; }
+
+  .nav-system {
+    padding: 8px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .nav-link {
+    display: block;
+    padding: 5px 20px 5px 36px;
+    font-size: 12px;
+    color: var(--text3);
+    text-decoration: none;
+    font-family: var(--mono);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .nav-link:hover { color: var(--text); background: var(--bg3); }
+  .nav-link.active { color: var(--text); border-left-color: var(--accent1); background: rgba(108,142,255,0.08); }
+
+  /* MAIN */
+  #main {
+    margin-left: 280px;
+    flex: 1;
+    padding: 0 48px 80px;
+    max-width: 1100px;
+  }
+
+  .page-header {
+    padding: 48px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    color: var(--text2);
+    font-size: 14px;
+    font-family: var(--mono);
+  }
+
+  /* SYSTEM SECTION */
+  .system {
+    border-bottom: 1px solid var(--border);
+    padding: 60px 0 40px;
+  }
+
+  .system-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .system-badge {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .system-title h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .system-title .subtitle {
+    font-size: 13px;
+    color: var(--text3);
+    font-family: var(--mono);
+    margin-top: 2px;
+  }
+
+  /* SUBSECTION */
+  .subsection {
+    margin-bottom: 36px;
+  }
+
+  .subsection-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .subsection-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    background: var(--bg3);
+    padding: 3px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .subsection h3 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* CARD */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .card h4 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+
+  .card ul { list-style: none; }
+  .card ul li {
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--text2);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+
+  .card ul li::before {
+    content: '▸';
+    color: var(--text3);
+    font-size: 10px;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ESTIMATION TABLE */
+  .est-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .est-table th {
+    background: var(--bg3);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .est-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .est-table tr:hover td { background: var(--bg3); }
+
+  .val {
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+
+  /* SCHEMA */
+  .schema-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  .schema-block .tname { color: var(--accent4); font-weight: 700; }
+  .schema-block .field { color: var(--text2); }
+  .schema-block .ftype { color: var(--accent5); }
+  .schema-block .fcomment { color: var(--text3); }
+  .schema-block .pk { color: var(--accent3); }
+  .schema-block .fk { color: var(--accent6); }
+
+  /* API */
+  .api-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+    overflow-x: auto;
+  }
+
+  .method { font-weight: 700; }
+  .method.get { color: var(--accent3); }
+  .method.post { color: var(--accent4); }
+  .method.put { color: var(--accent1); }
+  .method.delete { color: var(--accent2); }
+  .endpoint { color: var(--text); }
+  .api-desc { color: var(--text3); font-size: 11px; }
+
+  /* HLD DIAGRAM */
+  .hld-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .hld-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .hld-component {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-family: var(--mono);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hld-arrow {
+    color: var(--text3);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .hld-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+
+  .hld-label:first-child { margin-top: 0; }
+
+  /* TRADEOFF */
+  .tradeoff-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .tradeoff-card {
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .tradeoff-card.pro { border: 1px solid rgba(74, 222, 128, 0.3); }
+  .tradeoff-card.con { border: 1px solid rgba(255,107,107, 0.3); }
+  .tradeoff-card.neutral { border: 1px solid var(--border); }
+
+  .tradeoff-card h5 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .tradeoff-card.pro h5 { color: var(--accent3); }
+  .tradeoff-card.con h5 { color: var(--accent2); }
+  .tradeoff-card.neutral h5 { color: var(--text3); }
+
+  .tradeoff-card p { font-size: 12.5px; color: var(--text2); line-height: 1.6; }
+
+  /* DISTINCTIVE */
+  .distinctive-box {
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-top: 8px;
+  }
+
+  .distinctive-box h4 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .distinctive-box p, .distinctive-box li {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .distinctive-box ul { list-style: none; padding-left: 0; }
+  .distinctive-box ul li { padding: 3px 0; padding-left: 16px; position: relative; }
+  .distinctive-box ul li::before { content: '→'; position: absolute; left: 0; color: inherit; opacity: 0.7; }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: var(--mono);
+    font-weight: 600;
+    margin: 2px;
+  }
+
+  .tag-blue { background: rgba(108,142,255,0.15); color: var(--accent1); border: 1px solid rgba(108,142,255,0.3); }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--accent3); border: 1px solid rgba(74,222,128,0.3); }
+  .tag-red { background: rgba(255,107,107,0.15); color: var(--accent2); border: 1px solid rgba(255,107,107,0.3); }
+  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--accent4); border: 1px solid rgba(251,191,36,0.3); }
+  .tag-purple { background: rgba(192,132,252,0.15); color: var(--accent5); border: 1px solid rgba(192,132,252,0.3); }
+  .tag-cyan { background: rgba(34,211,238,0.15); color: var(--accent6); border: 1px solid rgba(34,211,238,0.3); }
+
+  /* INLINE CODE */
+  code {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent4);
+  }
+
+  /* INTERVIEW TRAPS */
+  .trap-box {
+    background: rgba(255,107,107,0.05);
+    border: 1px solid rgba(255,107,107,0.25);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-top: 8px;
+  }
+
+  .trap-box h4 {
+    color: var(--accent2);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .trap-box ul { list-style: none; }
+  .trap-box ul li {
+    font-size: 12.5px;
+    color: var(--text2);
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .trap-box ul li::before { content: '⚠'; position: absolute; left: 0; color: var(--accent2); font-size: 10px; top: 5px; }
+
+  /* TOC JUMP */
+  .toc-nav {
+    position: sticky;
+    top: 20px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .toc-nav a {
+    text-decoration: none;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .toc-nav a:hover { color: var(--text); border-color: var(--accent1); }
+
+  p.note {
+    font-size: 12.5px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  .mt8 { margin-top: 8px; }
+  .mt16 { margin-top: 16px; }
+  .mb8 { margin-bottom: 8px; }
+  .mb16 { margin-bottom: 16px; }
+
+  /* scrollbar */
+  #main::-webkit-scrollbar { width: 6px; }
+  #main::-webkit-scrollbar-track { background: transparent; }
+  #main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    #sidebar { transform: translateX(-100%); }
+    #main { margin-left: 0; padding: 16px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h2>System Design</h2>
+    <p>Massive Scale · 6 Systems</p>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-system"><span class="nav-dot" style="background:#6c8eff"></span> <span style="color:#6c8eff">Amazon E-Commerce</span></div>
+    <a class="nav-link" onclick="jump('amz-req')">01 Requirements</a>
+    <a class="nav-link" onclick="jump('amz-est')">02 Estimation</a>
+    <a class="nav-link" onclick="jump('amz-schema')">03 Schema</a>
+    <a class="nav-link" onclick="jump('amz-api')">04 API Design</a>
+    <a class="nav-link" onclick="jump('amz-hld')">05 High Level Design</a>
+    <a class="nav-link" onclick="jump('amz-detail')">06 Detailed Design</a>
+    <a class="nav-link" onclick="jump('amz-distinct')">07 Distinctive</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-system"><span class="nav-dot" style="background:#ff6b6b"></span> <span style="color:#ff6b6b">Online Auction</span></div>
+    <a class="nav-link" onclick="jump('auc-req')">01 Requirements</a>
+    <a class="nav-link" onclick="jump('auc-est')">02 Estimation</a>
+    <a class="nav-link" onclick="jump('auc-schema')">03 Schema</a>
+    <a class="nav-link" onclick="jump('auc-api')">04 API Design</a>
+    <a class="nav-link" onclick="jump('auc-hld')">05 High Level Design</a>
+    <a class="nav-link" onclick="jump('auc-detail')">06 Detailed Design</a>
+    <a class="nav-link" onclick="jump('auc-distinct')">07 Distinctive</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-system"><span class="nav-dot" style="background:#4ade80"></span> <span style="color:#4ade80">Distributed Calendar</span></div>
+    <a class="nav-link" onclick="jump('cal-req')">01 Requirements</a>
+    <a class="nav-link" onclick="jump('cal-est')">02 Estimation</a>
+    <a class="nav-link" onclick="jump('cal-schema')">03 Schema</a>
+    <a class="nav-link" onclick="jump('cal-api')">04 API Design</a>
+    <a class="nav-link" onclick="jump('cal-hld')">05 High Level Design</a>
+    <a class="nav-link" onclick="jump('cal-detail')">06 Detailed Design</a>
+    <a class="nav-link" onclick="jump('cal-distinct')">07 Distinctive</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-system"><span class="nav-dot" style="background:#22d3ee"></span> <span style="color:#22d3ee">Spotify</span></div>
+    <a class="nav-link" onclick="jump('spt-req')">01 Requirements</a>
+    <a class="nav-link" onclick="jump('spt-est')">02 Estimation</a>
+    <a class="nav-link" onclick="jump('spt-schema')">03 Schema</a>
+    <a class="nav-link" onclick="jump('spt-api')">04 API Design</a>
+    <a class="nav-link" onclick="jump('spt-hld')">05 High Level Design</a>
+    <a class="nav-link" onclick="jump('spt-detail')">06 Detailed Design</a>
+    <a class="nav-link" onclick="jump('spt-distinct')">07 Distinctive</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-system"><span class="nav-dot" style="background:#c084fc"></span> <span style="color:#c084fc">Telemedicine</span></div>
+    <a class="nav-link" onclick="jump('tel-req')">01 Requirements</a>
+    <a class="nav-link" onclick="jump('tel-est')">02 Estimation</a>
+    <a class="nav-link" onclick="jump('tel-schema')">03 Schema</a>
+    <a class="nav-link" onclick="jump('tel-api')">04 API Design</a>
+    <a class="nav-link" onclick="jump('tel-hld')">05 High Level Design</a>
+    <a class="nav-link" onclick="jump('tel-detail')">06 Detailed Design</a>
+    <a class="nav-link" onclick="jump('tel-distinct')">07 Distinctive</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-system"><span class="nav-dot" style="background:#fbbf24"></span> <span style="color:#fbbf24">Price Tracker</span></div>
+    <a class="nav-link" onclick="jump('pt-req')">01 Requirements</a>
+    <a class="nav-link" onclick="jump('pt-est')">02 Estimation</a>
+    <a class="nav-link" onclick="jump('pt-schema')">03 Schema</a>
+    <a class="nav-link" onclick="jump('pt-api')">04 API Design</a>
+    <a class="nav-link" onclick="jump('pt-hld')">05 High Level Design</a>
+    <a class="nav-link" onclick="jump('pt-detail')">06 Detailed Design</a>
+    <a class="nav-link" onclick="jump('pt-distinct')">07 Distinctive</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+  <div class="page-header">
+    <h1>Massive Scale System Designs</h1>
+    <p>6 Systems · Senior Architect Level · End-to-End</p>
+  </div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SYSTEM 1: AMAZON E-COMMERCE                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="system" id="system-amazon">
+  <div class="system-title">
+    <div class="system-badge" style="background:rgba(108,142,255,0.15); border:1px solid rgba(108,142,255,0.3)">🛍️</div>
+    <div>
+      <h2>Amazon E-Commerce</h2>
+      <div class="subtitle">Global marketplace · 300M+ customers · 12M+ sellers</div>
+    </div>
+  </div>
+
+  <!-- 01 REQUIREMENTS -->
+  <div class="subsection" id="amz-req">
+    <div class="subsection-header">
+      <span class="subsection-num">01</span>
+      <h3>Requirements</h3>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Functional</h4>
+        <ul>
+          <li>Product catalog browsing with full-text search and faceted filtering</li>
+          <li>User registration, authentication, profile management</li>
+          <li>Shopping cart (persistent across sessions), wishlist</li>
+          <li>Order placement, payment processing, order lifecycle management</li>
+          <li>Seller onboarding, inventory management, fulfillment</li>
+          <li>Product reviews & ratings</li>
+          <li>Recommendation engine (collaborative + content-based)</li>
+          <li>Flash sales, deals, coupons, promo codes</li>
+          <li>Real-time inventory deduction with oversell prevention</li>
+          <li>Returns, refunds, disputes</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Non-Functional</h4>
+        <ul>
+          <li><span class="val">Availability:</span> 99.99% (≤52 min downtime/year); AP system</li>
+          <li><span class="val">Latency:</span> Search p99 &lt; 200ms; checkout p99 &lt; 500ms</li>
+          <li><span class="val">Scale:</span> 1B+ page views/day; 10K orders/sec peak (Prime Day)</li>
+          <li><span class="val">Consistency:</span> Inventory: strong; catalog: eventual; cart: eventual</li>
+          <li><span class="val">Durability:</span> 11 nines for order/payment records</li>
+          <li><span class="val">Multi-region:</span> Active-active across 3+ AWS regions</li>
+          <li><span class="val">Security:</span> PCI-DSS L1, SOC2, GDPR</li>
+          <li><span class="val">CDN:</span> Static assets globally cached; &lt; 50ms TTFB</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 ESTIMATION -->
+  <div class="subsection" id="amz-est">
+    <div class="subsection-header">
+      <span class="subsection-num">02</span>
+      <h3>Estimation</h3>
+    </div>
+    <div class="card">
+      <table class="est-table">
+        <thead><tr><th>Metric</th><th>Assumption</th><th>Calculation</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>DAU</td><td>300M MAU, 50% DAU</td><td>300M × 0.5</td><td class="val" style="color:var(--accent1)">150M DAU</td></tr>
+          <tr><td>Page Views/day</td><td>150M users × 20 pages</td><td>150M × 20</td><td class="val" style="color:var(--accent1)">3B views/day</td></tr>
+          <tr><td>Read RPS</td><td>3B / 86400</td><td>—</td><td class="val" style="color:var(--accent1)">35K RPS avg; 350K peak</td></tr>
+          <tr><td>Orders/day</td><td>150M DAU × 0.5% conversion</td><td>750K orders/day</td><td class="val" style="color:var(--accent1)">~9 orders/sec avg; 10K peak</td></tr>
+          <tr><td>Product Catalog</td><td>350M SKUs, 2KB each</td><td>350M × 2KB</td><td class="val" style="color:var(--accent1)">700 GB (catalog)</td></tr>
+          <tr><td>Product Images</td><td>350M × 5 images × 500KB</td><td>—</td><td class="val" style="color:var(--accent1)">875 TB (S3/CDN)</td></tr>
+          <tr><td>Order DB storage</td><td>10 orders/user/yr × 1KB</td><td>300M × 10 × 1KB</td><td class="val" style="color:var(--accent1)">3 TB/year</td></tr>
+          <tr><td>Search index</td><td>350M docs × 5KB inverted index</td><td>—</td><td class="val" style="color:var(--accent1)">~1.75 TB (Elasticsearch)</td></tr>
+          <tr><td>Bandwidth (egress)</td><td>3B views × 200KB avg page</td><td>—</td><td class="val" style="color:var(--accent1)">~600 TB/day ≈ 56 Gbps</td></tr>
+          <tr><td>App Servers</td><td>350K RPS / 1K RPS per server</td><td>—</td><td class="val" style="color:var(--accent1)">350 servers (w/ LB)</td></tr>
+          <tr><td>Cache Hit</td><td>80% of reads served from Redis</td><td>—</td><td class="val" style="color:var(--accent1)">70K RPS to DB</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 03 SCHEMA -->
+  <div class="subsection" id="amz-schema">
+    <div class="subsection-header">
+      <span class="subsection-num">03</span>
+      <h3>Storage Schema</h3>
+    </div>
+    <div class="grid-2">
+      <div class="schema-block">
+<span class="tname">-- PostgreSQL (Orders, Users, Sellers)</span>
+
+<span class="tname">users</span> {
+  <span class="pk">user_id       UUID PK</span>
+  <span class="field">email         </span><span class="ftype">VARCHAR(255) UNIQUE</span>
+  <span class="field">phone_hash    </span><span class="ftype">VARCHAR(64)</span>
+  <span class="field">password_hash </span><span class="ftype">VARCHAR(255)</span>
+  <span class="field">created_at    </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">default_addr  </span><span class="fk">FK → addresses</span>
+}
+
+<span class="tname">orders</span> {
+  <span class="pk">order_id      UUID PK</span>
+  <span class="fk">user_id       FK → users</span>
+  <span class="field">status        </span><span class="ftype">ENUM(placed,paid,fulfilled,shipped,delivered,cancelled,returned)</span>
+  <span class="field">total_amount  </span><span class="ftype">DECIMAL(12,2)</span>
+  <span class="field">currency      </span><span class="ftype">CHAR(3)</span>
+  <span class="field">placed_at     </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">shipping_addr </span><span class="ftype">JSONB</span>
+}
+
+<span class="tname">order_items</span> {
+  <span class="pk">item_id       UUID PK</span>
+  <span class="fk">order_id      FK → orders</span>
+  <span class="fk">product_id    FK → products</span>
+  <span class="fk">seller_id     FK → sellers</span>
+  <span class="field">quantity      </span><span class="ftype">INT</span>
+  <span class="field">unit_price    </span><span class="ftype">DECIMAL(12,2)</span>
+  <span class="field">fulfillment   </span><span class="ftype">ENUM(amazon_fba,seller_ship)</span>
+}
+      </div>
+      <div>
+        <div class="schema-block" style="margin-bottom:12px">
+<span class="tname">-- DynamoDB (Cart - high-throughput KV)</span>
+<span class="tname">cart</span> {
+  <span class="pk">PK: user_id  SK: product_id</span>
+  <span class="field">quantity      </span><span class="ftype">Number</span>
+  <span class="field">price_snapshot</span><span class="ftype">Number</span>
+  <span class="field">added_at      </span><span class="ftype">String (ISO8601)</span>
+  <span class="field">TTL           </span><span class="ftype">Number</span>  <span class="fcomment">-- 90 day expiry</span>
+}
+        </div>
+        <div class="schema-block" style="margin-bottom:12px">
+<span class="tname">-- Elasticsearch (Product Catalog)</span>
+<span class="tname">products</span> {
+  <span class="field">product_id    </span><span class="ftype">keyword</span>
+  <span class="field">title         </span><span class="ftype">text (analyzed)</span>
+  <span class="field">description   </span><span class="ftype">text</span>
+  <span class="field">category_path </span><span class="ftype">keyword[]</span>
+  <span class="field">brand         </span><span class="ftype">keyword</span>
+  <span class="field">price         </span><span class="ftype">scaled_float</span>
+  <span class="field">avg_rating    </span><span class="ftype">half_float</span>
+  <span class="field">review_count  </span><span class="ftype">integer</span>
+  <span class="field">attributes    </span><span class="ftype">flattened</span>  <span class="fcomment">-- dynamic facets</span>
+  <span class="field">in_stock      </span><span class="ftype">boolean</span>
+  <span class="field">seller_ids    </span><span class="ftype">keyword[]</span>
+}
+        </div>
+        <div class="schema-block">
+<span class="tname">-- Redis (Inventory Counter)</span>
+<span class="tname">inventory:{product_id}</span>  <span class="ftype">String (DECR atomically)</span>
+<span class="tname">flash_sale:{sale_id}:qty</span> <span class="ftype">String (Lua script deduct)</span>
+<span class="tname">cart_lock:{user_id}</span>    <span class="ftype">String TTL=30s (checkout lock)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 API -->
+  <div class="subsection" id="amz-api">
+    <div class="subsection-header">
+      <span class="subsection-num">04</span>
+      <h3>API Design</h3>
+    </div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/search?q={query}&category={cat}&min_price={p}&sort={relevance|price|rating}&page={n}&limit={n}</span>
+<span class="api-desc">→ Returns paginated ranked product list; token-based pagination for deep pages</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/products/{productId}</span>
+<span class="api-desc">→ Full product detail, seller offers, stock status; 60s CDN cache</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/cart/items</span>  <span class="api-desc">body: {product_id, quantity, seller_id}</span>
+<span class="api-desc">→ Idempotent via user+product key; returns cart snapshot</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/orders</span>  <span class="api-desc">body: {cart_id, payment_token, shipping_address_id, promo_code}</span>
+<span class="api-desc">→ Initiates saga: inventory reserve → payment charge → order confirmed</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/orders/{orderId}/status</span>
+<span class="api-desc">→ Current status + timeline events; client polls or SSE subscription</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/products/{productId}/reviews</span>  <span class="api-desc">body: {rating, title, body, images[]}</span>
+<span class="api-desc">→ Verified purchase check; async moderation pipeline; idempotency-key header</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/recommendations?context={homepage|pdp|cart}&product_id={id}</span>
+<span class="api-desc">→ Returns 20 personalised items from ML model; soft real-time (5min staleness ok)</span></div>
+  </div>
+
+  <!-- 05 HLD -->
+  <div class="subsection" id="amz-hld">
+    <div class="subsection-header">
+      <span class="subsection-num">05</span>
+      <h3>High Level Design</h3>
+    </div>
+    <div class="hld-box">
+      <div class="hld-label">Client Layer</div>
+      <div class="hld-row">
+        <div class="hld-component">🌐 Browser / Mobile App</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent4)">☁️ CloudFront CDN</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent1)">🔀 AWS ALB</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent3)">🔑 API Gateway</div>
+      </div>
+
+      <div class="hld-label">Microservices Layer (ECS / EKS)</div>
+      <div class="hld-row">
+        <div class="hld-component">🔍 Search Service</div>
+        <div class="hld-component">📦 Product Service</div>
+        <div class="hld-component">🛒 Cart Service</div>
+        <div class="hld-component">📋 Order Service</div>
+        <div class="hld-component">💳 Payment Service</div>
+        <div class="hld-component">🏭 Inventory Service</div>
+        <div class="hld-component">🎯 Recommendation Service</div>
+        <div class="hld-component">📬 Notification Service</div>
+      </div>
+
+      <div class="hld-label">Data & Messaging Layer</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent3)">🐘 Aurora PG (Orders/Users)</div>
+        <div class="hld-component" style="border-color:var(--accent4)">⚡ DynamoDB (Cart)</div>
+        <div class="hld-component" style="border-color:var(--accent2)">🔴 Redis Cluster (Cache+Locks)</div>
+        <div class="hld-component" style="border-color:var(--accent6)">🔎 Elasticsearch (Catalog)</div>
+        <div class="hld-component" style="border-color:var(--accent5)">📡 Kafka (Events)</div>
+        <div class="hld-component" style="border-color:var(--accent1)">🗄️ S3 (Images/Assets)</div>
+      </div>
+
+      <div class="hld-label">Background Processing</div>
+      <div class="hld-row">
+        <div class="hld-component">📊 ML Pipeline (SageMaker)</div>
+        <div class="hld-component">📈 Analytics (Redshift)</div>
+        <div class="hld-component">🔄 Catalog Sync Worker</div>
+        <div class="hld-component">🔔 Review Moderation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 DETAILED DESIGN -->
+  <div class="subsection" id="amz-detail">
+    <div class="subsection-header">
+      <span class="subsection-num">06</span>
+      <h3>Detailed Design</h3>
+    </div>
+
+    <p class="note"><strong style="color:var(--text)">Order Checkout Saga:</strong> Saga orchestrator (Step Functions or custom) coordinates: (1) Lock cart via Redis SETNX, (2) Reserve inventory via Inventory Service (optimistic decrement with rollback), (3) Create payment intent via Stripe/internal PSP, (4) On payment success → publish OrderConfirmed to Kafka → emit to Fulfillment/Notification. On any failure → compensating transactions release inventory, void payment intent, unlock cart.</p>
+
+    <p class="note"><strong style="color:var(--text)">Inventory Management:</strong> Two-tier: Redis counter for hot-path real-time deductions (DECR atomic), Postgres as source of truth sync'd every 30s via background job. Flash sales use Lua scripts in Redis: DECR only if counter > 0 in a single atomic operation, preventing oversell even at 50K req/s.</p>
+
+    <p class="note"><strong style="color:var(--text)">Search Architecture:</strong> Elasticsearch with 5 shards/2 replicas per index. Query-time function scoring: relevance score × boost(rating) × boost(sales_rank) × seller_quality. Delta sync from Kafka events (product updated → re-index within 5s). "Suggest" index (smaller, prefix-optimized) for autocomplete via edge n-grams.</p>
+
+    <p class="note"><strong style="color:var(--text)">Caching Strategy:</strong> L1 = in-process LRU (Caffeine, 10K entries, 10s TTL); L2 = Redis cluster (product pages 5min TTL, category pages 1min, search results 30s). Cache invalidation via Kafka consumer on ProductUpdated events. Write-through for product data, write-behind for view counts.</p>
+
+    <div class="tradeoff-row">
+      <div class="tradeoff-card pro">
+        <h5>Strong Consistency: Inventory</h5>
+        <p>Redis DECR + Postgres 2PC for inventory prevents oversell; justified for revenue impact.</p>
+      </div>
+      <div class="tradeoff-card neutral">
+        <h5>Eventual Consistency: Catalog</h5>
+        <p>Price updates may be 5s stale in search; acceptable — checkout always re-validates live price.</p>
+      </div>
+      <div class="tradeoff-card pro">
+        <h5>CQRS for Orders</h5>
+        <p>Write model: normalized Postgres. Read model: DynamoDB + S3 projections for order history queries.</p>
+      </div>
+      <div class="tradeoff-card con">
+        <h5>Cart Consistency Trade-off</h5>
+        <p>DynamoDB eventual consistency means concurrent multi-device cart edits may conflict. Last-write-wins with client-merge UX.</p>
+      </div>
+    </div>
+
+    <div class="trap-box">
+      <h4>⚠ Interviewer Traps</h4>
+      <ul>
+        <li>Don't say "just use a DB transaction for checkout" — at 10K TPS, distributed saga is mandatory; explain compensating transactions explicitly</li>
+        <li>Oversell prevention: naive SELECT FOR UPDATE won't scale; Redis DECR or optimistic locking with version field is the answer</li>
+        <li>Search: don't use DB LIKE queries; Elasticsearch with inverted index, scoring functions, and delta sync is expected</li>
+        <li>Cart: DynamoDB not a relational join; denormalize and store price snapshots at add-time, re-validate at checkout</li>
+        <li>Reviews: async pipeline required — sync write then async ML moderation/aggregation</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 07 DISTINCTIVE -->
+  <div class="subsection" id="amz-distinct">
+    <div class="subsection-header">
+      <span class="subsection-num">07</span>
+      <h3>Distinctive Component: Flash Sale Engine</h3>
+    </div>
+    <div class="distinctive-box" style="background:rgba(108,142,255,0.07); border:1px solid rgba(108,142,255,0.25)">
+      <h4 style="color:var(--accent1)">⚡ Sub-10ms Inventory Deduction at 100K TPS</h4>
+      <p>Amazon's "Lightning Deal" problem: 1M users simultaneously hit "Buy Now" for 500 units. Solution architecture:</p>
+      <ul style="margin-top:8px">
+        <li><strong>Pre-warm:</strong> 5 min before sale, load inventory count into Redis as a counter per SKU</li>
+        <li><strong>Lua Script (atomic):</strong> <code>if redis.call('GET',key) &gt; 0 then DECR; return 1 else return 0 end</code> — single round trip, no race condition</li>
+        <li><strong>Queue overflow:</strong> Excess requestors enter a virtual waiting room (SSE-based), shown position in queue</li>
+        <li><strong>Async Postgres sync:</strong> Every 10s, Redis counter reconciled with Postgres inventory truth via background job with idempotent upsert</li>
+        <li><strong>Rollback on payment failure:</strong> If Stripe declines, INCR the Redis counter and publish InventoryReleased event</li>
+        <li><strong>Anti-bot:</strong> CAPTCHA + rate-limit per user_id (Redis sliding window 60s/10 attempts) at API Gateway</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SYSTEM 2: ONLINE AUCTION                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="system" id="system-auction">
+  <div class="system-title">
+    <div class="system-badge" style="background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3)">🔨</div>
+    <div>
+      <h2>Online Auction System</h2>
+      <div class="subtitle">eBay-scale · 190M+ buyers · 1.5B+ listings · Real-time bidding</div>
+    </div>
+  </div>
+
+  <div class="subsection" id="auc-req">
+    <div class="subsection-header"><span class="subsection-num">01</span><h3>Requirements</h3></div>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Functional</h4>
+        <ul>
+          <li>Sellers create listings with start price, reserve price, end time, category, images</li>
+          <li>Buyers place bids; auto-bidding (proxy bid) up to max amount</li>
+          <li>Real-time current price updates to all watchers</li>
+          <li>Bid validation: must exceed current highest bid + minimum increment</li>
+          <li>Auction closes at deadline; winner notification + payment flow</li>
+          <li>"Buy It Now" option with immediate purchase</li>
+          <li>Auction extension (if bid placed in last 2 min, extend by 2 min — anti-sniping)</li>
+          <li>Watch list, bid history, seller reputation</li>
+          <li>Fraud detection: shill bidding, account takeover detection</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Non-Functional</h4>
+        <ul>
+          <li><span class="val">Availability:</span> 99.99%; auction close must be reliable</li>
+          <li><span class="val">Bid Consistency:</span> Exactly-one winning bid; no dual winners</li>
+          <li><span class="val">Latency:</span> Bid acceptance &lt; 100ms; price broadcast &lt; 500ms</li>
+          <li><span class="val">Scale:</span> 250K concurrent auctions; 50K bids/sec peak</li>
+          <li><span class="val">Time accuracy:</span> Auction end time ±1 second across nodes</li>
+          <li><span class="val">Bid ordering:</span> Total ordering within same auction required</li>
+          <li><span class="val">Data retention:</span> Bid history immutable 7 years (dispute resolution)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="auc-est">
+    <div class="subsection-header"><span class="subsection-num">02</span><h3>Estimation</h3></div>
+    <div class="card">
+      <table class="est-table">
+        <thead><tr><th>Metric</th><th>Assumption</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Active auctions</td><td>1.5B listings, 25% active at once</td><td class="val" style="color:var(--accent2)">250K concurrent auctions</td></tr>
+          <tr><td>Bids per second (avg)</td><td>500M bids/day</td><td class="val" style="color:var(--accent2)">~5,800 bids/sec avg; 50K peak</td></tr>
+          <tr><td>Price watchers</td><td>250K auctions × 200 watchers avg</td><td class="val" style="color:var(--accent2)">50M WebSocket connections</td></tr>
+          <tr><td>Bid record size</td><td>200 bytes/bid × 500M/day</td><td class="val" style="color:var(--accent2)">100 GB write/day</td></tr>
+          <tr><td>Listing storage</td><td>1.5B × 5KB avg</td><td class="val" style="color:var(--accent2)">7.5 TB (catalog DB)</td></tr>
+          <tr><td>Image storage</td><td>1.5B × 3 images × 300KB</td><td class="val" style="color:var(--accent2)">~1.35 PB (S3)</td></tr>
+          <tr><td>WebSocket servers</td><td>50M conns / 50K per server</td><td class="val" style="color:var(--accent2)">1,000 WS servers</td></tr>
+          <tr><td>Bid service servers</td><td>50K TPS / 2K per server</td><td class="val" style="color:var(--accent2)">25 bid servers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection" id="auc-schema">
+    <div class="subsection-header"><span class="subsection-num">03</span><h3>Storage Schema</h3></div>
+    <div class="grid-2">
+      <div class="schema-block">
+<span class="tname">-- PostgreSQL (Auctions, authoritative bids)</span>
+
+<span class="tname">auctions</span> {
+  <span class="pk">auction_id     UUID PK</span>
+  <span class="fk">seller_id      FK → users</span>
+  <span class="field">title          </span><span class="ftype">VARCHAR(200)</span>
+  <span class="field">start_price    </span><span class="ftype">DECIMAL(12,2)</span>
+  <span class="field">reserve_price  </span><span class="ftype">DECIMAL(12,2)</span>  <span class="fcomment">-- hidden</span>
+  <span class="field">current_price  </span><span class="ftype">DECIMAL(12,2)</span>
+  <span class="field">bid_count      </span><span class="ftype">INT DEFAULT 0</span>
+  <span class="fk">current_winner </span><span class="ftype">FK → users (nullable)</span>
+  <span class="field">ends_at        </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">status         </span><span class="ftype">ENUM(scheduled,active,extended,closed,cancelled)</span>
+  <span class="field">version        </span><span class="ftype">BIGINT</span>  <span class="fcomment">-- optimistic lock</span>
+  <span class="field">buy_it_now     </span><span class="ftype">DECIMAL(12,2) nullable</span>
+}
+
+<span class="tname">bids</span> {
+  <span class="pk">bid_id         UUID PK</span>
+  <span class="fk">auction_id     FK → auctions</span>
+  <span class="fk">bidder_id      FK → users</span>
+  <span class="field">amount         </span><span class="ftype">DECIMAL(12,2)</span>
+  <span class="field">proxy_max      </span><span class="ftype">DECIMAL(12,2)</span>  <span class="fcomment">-- auto-bid ceiling (encrypted)</span>
+  <span class="field">placed_at      </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">status         </span><span class="ftype">ENUM(winning,outbid,won,invalid)</span>
+  <span class="field">ip_hash        </span><span class="ftype">VARCHAR(64)</span>
+}
+      </div>
+      <div>
+        <div class="schema-block" style="margin-bottom:12px">
+<span class="tname">-- Redis (Hot auction state)</span>
+<span class="tname">auction:{auction_id}:price</span>     <span class="ftype">String (current price)</span>
+<span class="tname">auction:{auction_id}:winner</span>    <span class="ftype">String (user_id)</span>
+<span class="tname">auction:{auction_id}:ends_at</span>   <span class="ftype">String (epoch ms)</span>
+<span class="tname">auction:{auction_id}:lock</span>      <span class="ftype">String TTL=100ms (bid lock)</span>
+<span class="tname">user:{user_id}:proxy:{auc_id}</span>  <span class="ftype">String (encrypted max bid)</span>
+<span class="tname">watcher:{auction_id}</span>           <span class="ftype">Set (subscriber connection IDs)</span>
+        </div>
+        <div class="schema-block">
+<span class="tname">-- Cassandra (Bid history time-series)</span>
+<span class="tname">bid_history</span> {
+  <span class="pk">auction_id  UUID  PARTITION KEY</span>
+  <span class="pk">placed_at   TIMEUUID  CLUSTERING DESC</span>
+  <span class="field">bidder_id   UUID</span>
+  <span class="field">amount      DECIMAL</span>
+  <span class="field">is_proxy    BOOLEAN</span>
+} <span class="fcomment">-- Optimized for "show all bids for auction" query</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="auc-api">
+    <div class="subsection-header"><span class="subsection-num">04</span><h3>API Design</h3></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/auctions</span>  <span class="api-desc">body: {title, description, images[], start_price, reserve_price, ends_at, category}</span>
+<span class="api-desc">→ Creates listing; schedules AuctionOpen event in scheduler service</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/auctions/{auctionId}/bids</span>  <span class="api-desc">body: {amount, proxy_max?}  Header: Idempotency-Key</span>
+<span class="api-desc">→ Returns {bid_id, status: winning|outbid, current_price}; 100ms SLA</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/auctions/{auctionId}/bids?page_token={t}&limit={n}</span>
+<span class="api-desc">→ Paginated bid history; reads from Cassandra replica</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">ws://auction-ws.example.com/v1/auctions/{auctionId}/stream</span>
+<span class="api-desc">→ WebSocket; server pushes {type: price_update|auction_extended|auction_closed, data}</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/auctions/{auctionId}/watchlist</span>
+<span class="api-desc">→ Add to user's watchlist; triggers notification preferences</span></div>
+  </div>
+
+  <div class="subsection" id="auc-hld">
+    <div class="subsection-header"><span class="subsection-num">05</span><h3>High Level Design</h3></div>
+    <div class="hld-box">
+      <div class="hld-label">Bidding Hot Path</div>
+      <div class="hld-row">
+        <div class="hld-component">📱 Client</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent1)">🔀 API Gateway + Auth</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent2)">⚡ Bid Service</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent2)">🔴 Redis (Lua lock + CAS)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent4)">🐘 Postgres (durable write)</div>
+      </div>
+      <div class="hld-label">Price Broadcast Path</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent2)">⚡ Bid Service</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">📡 Kafka (BidPlaced events)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent6)">📡 WS Fanout Service</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component">👥 50M WebSocket Clients</div>
+      </div>
+      <div class="hld-label">Auction Lifecycle</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent3)">⏰ Scheduler Service (sorted sets in Redis)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">📡 Kafka (AuctionClose event)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component">💳 Payment Service</div>
+        <div class="hld-component">🔔 Notification Service</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="auc-detail">
+    <div class="subsection-header"><span class="subsection-num">06</span><h3>Detailed Design</h3></div>
+    <p class="note"><strong style="color:var(--text)">Bid Acceptance — Lua Script in Redis:</strong> The entire bid validation is a single Lua script: read current_price, check bid > current_price + increment, check auction not expired, check bidder not current winner, THEN atomically set new price and winner. Returns 0/1. This makes bid acceptance lock-free at the Redis level. Postgres write happens async (best-effort durable log) via Kafka consumer — if it fails, retry with idempotency.</p>
+    <p class="note"><strong style="color:var(--text)">Proxy Bidding:</strong> When bid service processes a new bid, it checks all existing proxy bids for this auction (stored encrypted in Redis sorted set by proxy_max). If current bid triggers a proxy, automatically generate counter-bids up to proxy_max. This happens inside the same Lua transaction to maintain atomicity.</p>
+    <p class="note"><strong style="color:var(--text)">Anti-Sniping — Auction Extension:</strong> Scheduler uses Redis sorted set with auction_id scored by end_time. A background poller (every 100ms) checks for auctions ending within 2 min. When a bid arrives in the last 2 min, Auction Service does: ZADD auctions_schedule {new_endtime} {auction_id} atomically with bid commit. Broadcast extension event to all watchers.</p>
+    <p class="note"><strong style="color:var(--text)">WebSocket Scalability:</strong> 1,000 WS servers, each holding 50K connections. When Kafka consumer (fanout service) receives BidPlaced event, it looks up Redis Set <code>watcher:{auction_id}</code> → gets list of WS server IDs → uses Redis Pub/Sub to push to those specific servers → servers push to individual connections. Consistent hashing maps auctions to WS server partitions.</p>
+    <div class="trap-box">
+      <h4>⚠ Interviewer Traps</h4>
+      <ul>
+        <li>Don't accept bids with just a DB transaction — Postgres row lock at 50K TPS will deadlock; Redis Lua is the answer</li>
+        <li>Auction end time: don't rely on application server clocks — use Redis TTL or NTP-synced scheduler with at-least-once semantics + idempotent close handler</li>
+        <li>Proxy bid: must be server-side and encrypted at rest — never expose proxy max to other bidders or it's fraud enablement</li>
+        <li>WebSocket at scale: can't broadcast to 50M connections from one service — partition by auction, use Redis Pub/Sub for server-to-server coordination</li>
+        <li>Winning bid confirmation: "winning" status in Redis is provisional; only Postgres write + payment success = final win</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection" id="auc-distinct">
+    <div class="subsection-header"><span class="subsection-num">07</span><h3>Distinctive Component: Real-Time Bid Consistency</h3></div>
+    <div class="distinctive-box" style="background:rgba(255,107,107,0.07); border:1px solid rgba(255,107,107,0.25)">
+      <h4 style="color:var(--accent2)">🔒 Exactly-Once Winning Bid Guarantee</h4>
+      <p>The hardest problem: two bidders simultaneously place the exact same bid amount. Solution uses a 3-phase commit with Redis as coordinator:</p>
+      <ul style="margin-top:8px">
+        <li><strong>Phase 1 — Redis CAS:</strong> Lua script does GETSET + version check atomically. Only one thread wins</li>
+        <li><strong>Phase 2 — Async Postgres:</strong> Winner publishes BidAccepted with bid_id to Kafka. Consumer writes to Postgres with ON CONFLICT DO NOTHING on (auction_id, placed_at, amount)</li>
+        <li><strong>Phase 3 — Reconciliation:</strong> Every 60s, a reconciler compares Redis state to Postgres and flags discrepancies for manual review (SLA breach alerting)</li>
+        <li><strong>Shill bidding detection:</strong> Graph analysis of bidder–seller relationships; bidders who only ever bid on the same seller's auctions, bid amounts always just above previous, device fingerprint clustering → auto-flag + human review queue</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SYSTEM 3: DISTRIBUTED CALENDAR                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="system" id="system-calendar">
+  <div class="system-title">
+    <div class="system-badge" style="background:rgba(74,222,128,0.15); border:1px solid rgba(74,222,128,0.3)">📅</div>
+    <div>
+      <h2>Distributed Calendar Service</h2>
+      <div class="subtitle">Google Calendar-scale · 1B+ users · Shared calendars · Scheduling intelligence</div>
+    </div>
+  </div>
+
+  <div class="subsection" id="cal-req">
+    <div class="subsection-header"><span class="subsection-num">01</span><h3>Requirements</h3></div>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Functional</h4>
+        <ul>
+          <li>Create/update/delete events with recurrence rules (RRULE: daily, weekly, monthly, custom)</li>
+          <li>Multi-calendar per user (personal, work, holidays), share calendars with granular permissions</li>
+          <li>Invite attendees; attendees accept/decline/tentative</li>
+          <li>Meeting scheduling: find-a-time (free/busy overlay across attendees)</li>
+          <li>Push notifications: email, mobile push, in-app reminders</li>
+          <li>Event search (full text)</li>
+          <li>Time zone handling for all events and recurrences</li>
+          <li>Video conferencing integration (Meet/Zoom link generation)</li>
+          <li>Working hours and out-of-office blocks</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Non-Functional</h4>
+        <ul>
+          <li><span class="val">Availability:</span> 99.9% (personal data; tolerate brief unavailability)</li>
+          <li><span class="val">Latency:</span> Calendar view load &lt; 300ms; event create &lt; 200ms</li>
+          <li><span class="val">Scale:</span> 1B users; 50M events created/day; 500M view loads/day</li>
+          <li><span class="val">Consistency:</span> Eventual; concurrent edits use last-write-wins + conflict notification</li>
+          <li><span class="val">Recurrence:</span> Expand lazily (don't materialize all occurrences)</li>
+          <li><span class="val">Sync:</span> CalDAV compatible; mobile offline support with delta sync</li>
+          <li><span class="val">Data size:</span> 1KB average per event; 500 events/user/year</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="cal-est">
+    <div class="subsection-header"><span class="subsection-num">02</span><h3>Estimation</h3></div>
+    <div class="card">
+      <table class="est-table">
+        <thead><tr><th>Metric</th><th>Assumption</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Events/day created</td><td>1B users × 0.05 events/day</td><td class="val" style="color:var(--accent3)">50M events/day = 578 writes/sec</td></tr>
+          <tr><td>Calendar view RPS</td><td>500M/day = 5,800/sec avg; 50K peak</td><td class="val" style="color:var(--accent3)">50K RPS reads</td></tr>
+          <tr><td>Event storage</td><td>1B users × 500 events × 1KB</td><td class="val" style="color:var(--accent3)">500 TB total events</td></tr>
+          <tr><td>Free/busy queries</td><td>10M meeting schedules/day × 10 attendees</td><td class="val" style="color:var(--accent3)">100M free/busy lookups/day</td></tr>
+          <tr><td>Reminder jobs</td><td>50M events × avg 2 reminders</td><td class="val" style="color:var(--accent3)">100M notifications/day = 1,157/sec</td></tr>
+          <tr><td>Event DB sharding</td><td>500TB / 2TB per shard</td><td class="val" style="color:var(--accent3)">250 shards (shard by user_id)</td></tr>
+          <tr><td>App servers</td><td>50K RPS / 2K per server</td><td class="val" style="color:var(--accent3)">25 servers (+auto-scale)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection" id="cal-schema">
+    <div class="subsection-header"><span class="subsection-num">03</span><h3>Storage Schema</h3></div>
+    <div class="grid-2">
+      <div class="schema-block">
+<span class="tname">-- PostgreSQL sharded by user_id</span>
+
+<span class="tname">calendars</span> {
+  <span class="pk">calendar_id   UUID PK</span>
+  <span class="fk">owner_id      FK → users</span>
+  <span class="field">name          </span><span class="ftype">VARCHAR(255)</span>
+  <span class="field">color         </span><span class="ftype">VARCHAR(7)</span>
+  <span class="field">timezone      </span><span class="ftype">VARCHAR(64)</span>
+  <span class="field">is_primary    </span><span class="ftype">BOOLEAN</span>
+  <span class="field">access_role   </span><span class="ftype">ENUM(owner,reader,writer,freeBusyReader)</span>
+}
+
+<span class="tname">events</span> {
+  <span class="pk">event_id      UUID PK</span>
+  <span class="fk">calendar_id   FK → calendars</span>
+  <span class="field">title         </span><span class="ftype">VARCHAR(1024)</span>
+  <span class="field">description   </span><span class="ftype">TEXT</span>
+  <span class="field">start_time    </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">end_time      </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">timezone      </span><span class="ftype">VARCHAR(64)</span>
+  <span class="field">recurrence    </span><span class="ftype">TEXT</span>  <span class="fcomment">-- RRULE string</span>
+  <span class="field">original_id   </span><span class="ftype">UUID nullable</span>  <span class="fcomment">-- for exception instances</span>
+  <span class="field">status        </span><span class="ftype">ENUM(confirmed,tentative,cancelled)</span>
+  <span class="field">visibility    </span><span class="ftype">ENUM(public,private,default)</span>
+  <span class="field">updated_at    </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">etag          </span><span class="ftype">VARCHAR(64)</span>  <span class="fcomment">-- for sync/caching</span>
+}
+
+<span class="tname">attendees</span> {
+  <span class="pk">id            UUID PK</span>
+  <span class="fk">event_id      FK → events</span>
+  <span class="field">email         </span><span class="ftype">VARCHAR(255)</span>
+  <span class="field">rsvp          </span><span class="ftype">ENUM(accepted,declined,tentative,needsAction)</span>
+  <span class="field">is_organizer  </span><span class="ftype">BOOLEAN</span>
+}
+      </div>
+      <div>
+        <div class="schema-block" style="margin-bottom:12px">
+<span class="tname">-- Redis (Free/Busy bitmap per user per day)</span>
+<span class="tname">freebusy:{user_id}:{date_yyyymmdd}</span>
+  <span class="ftype">BITFIELD 96 bits</span>  <span class="fcomment">-- 24hr × 4 (15min slots)</span>
+  <span class="fcomment">-- 1=busy, 0=free; set atomically on event create</span>
+  <span class="fcomment">-- TTL = 7 days (only cache near-term)</span>
+
+<span class="tname">cal_sync:{user_id}:token</span>   <span class="ftype">String</span>  <span class="fcomment">-- delta sync token</span>
+        </div>
+        <div class="schema-block">
+<span class="tname">-- Elasticsearch (Event search)</span>
+<span class="tname">events_search</span> {
+  <span class="field">event_id      </span><span class="ftype">keyword</span>
+  <span class="field">user_id       </span><span class="ftype">keyword</span>
+  <span class="field">title         </span><span class="ftype">text (analyzed)</span>
+  <span class="field">description   </span><span class="ftype">text</span>
+  <span class="field">start_time    </span><span class="ftype">date</span>
+  <span class="field">attendee_emails</span><span class="ftype">keyword[]</span>
+}
+
+<span class="tname">-- DynamoDB (Reminder jobs)</span>
+<span class="tname">reminders</span> {
+  <span class="pk">PK: fire_minute  SK: event_id+user_id</span>
+  <span class="field">channel       </span><span class="ftype">ENUM(email,push,popup)</span>
+  <span class="field">message       </span><span class="ftype">String</span>
+  <span class="field">sent          </span><span class="ftype">Boolean</span>
+}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="cal-api">
+    <div class="subsection-header"><span class="subsection-num">04</span><h3>API Design</h3></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/calendars/{calendarId}/events?timeMin={iso}&timeMax={iso}&timeZone={tz}&singleEvents=true</span>
+<span class="api-desc">→ Returns expanded recurrences in range; singleEvents=true expands RRULE; etag for caching</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/calendars/{calendarId}/events</span>  <span class="api-desc">body: {title, start, end, recurrence, attendees[], reminders[]}</span>
+<span class="api-desc">→ Creates event; publishes EventCreated; schedules reminders; invites attendees asynchronously</span></div>
+    <div class="api-block"><span class="method put">PUT</span>  <span class="endpoint">/v1/calendars/{calendarId}/events/{eventId}?updateMode={this|thisAndFollowing|all}</span>
+<span class="api-desc">→ Recurring event edit modes: single instance, following instances, or all; handles exception records</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/freeBusy</span>  <span class="api-desc">body: {timeMin, timeMax, items: [{id: email}]}</span>
+<span class="api-desc">→ Returns busy intervals per user; reads Redis BITFIELD first, falls back to DB; used by find-a-time</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/calendars/{calendarId}/events?syncToken={token}</span>
+<span class="api-desc">→ Delta sync; returns only changed events since token; issues new sync token; 410 GONE = full sync required</span></div>
+  </div>
+
+  <div class="subsection" id="cal-hld">
+    <div class="subsection-header"><span class="subsection-num">05</span><h3>High Level Design</h3></div>
+    <div class="hld-box">
+      <div class="hld-label">Core Services</div>
+      <div class="hld-row">
+        <div class="hld-component">📱 Client (Web/iOS/Android)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent3)">🔑 API Gateway + Auth</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent3)">📅 Calendar Service</div>
+        <div class="hld-component" style="border-color:var(--accent3)">⏱️ FreeBusy Service</div>
+        <div class="hld-component" style="border-color:var(--accent3)">🔔 Reminder Service</div>
+        <div class="hld-component" style="border-color:var(--accent3)">🔍 Search Service</div>
+      </div>
+      <div class="hld-label">Data Layer</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent4)">🐘 Postgres (sharded by user)</div>
+        <div class="hld-component" style="border-color:var(--accent2)">🔴 Redis (free/busy bitmaps)</div>
+        <div class="hld-component" style="border-color:var(--accent1)">⚡ DynamoDB (reminders)</div>
+        <div class="hld-component" style="border-color:var(--accent6)">🔎 Elasticsearch</div>
+      </div>
+      <div class="hld-label">Async Processing</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent5)">📡 Kafka (EventCreated, RSVPUpdated)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component">📧 Invite Mailer</div>
+        <div class="hld-component">📲 Push Notifier</div>
+        <div class="hld-component">🔄 FreeBusy Updater</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="cal-detail">
+    <div class="subsection-header"><span class="subsection-num">06</span><h3>Detailed Design</h3></div>
+    <p class="note"><strong style="color:var(--text)">Recurring Event Expansion:</strong> Never store all occurrences — store RRULE string. At query time, Calendar Service uses iCal4j (Java) or python-recurring-ical-events library to expand RRULE in the requested [timeMin, timeMax] window. Exception instances (edited single occurrences) stored as separate event rows with <code>original_id</code> FK pointing to the master; merged during expansion. Deletion of single instance = cancelled exception record.</p>
+    <p class="note"><strong style="color:var(--text)">Free/Busy with Redis BITFIELD:</strong> 24 hours × 4 slots/hour = 96 bits per user per day. On event create, Calendar Service atomically sets the relevant bits. FreeBusy Service reads Redis BITFIELDs for all requested users and ORs them together — sub-millisecond for 20 attendees. Near-term 7 days in Redis; historical falls back to DB aggregation query.</p>
+    <p class="note"><strong style="color:var(--text)">Delta Sync Token:</strong> Sync token = opaque encoding of (user_id, last_sync_timestamp). On each sync request, query <code>WHERE updated_at > last_sync_time AND calendar_id IN (user_calendars)</code>. Return changed/deleted events + new token. Token expired (>30 days) → 410 GONE → client does full sync. Mobile clients batch sync every 15 min; push channels trigger immediate sync on change.</p>
+    <p class="note"><strong style="color:var(--text)">Reminder Delivery — DynamoDB as a job store:</strong> Partition key = <code>fire_minute</code> (epoch minute). A fleet of reminder workers query DynamoDB for the current minute's bucket every 60s, send notifications (FCM for Android, APNS for iOS, SES for email), mark sent=true. Idempotent by reminder_id — at-least-once delivery with dedup.</p>
+    <div class="trap-box">
+      <h4>⚠ Interviewer Traps</h4>
+      <ul>
+        <li>Never materialize all recurrence instances — "weekly for 3 years" = 156 rows is manageable, but "daily for 5 years" = 1825 rows × 1B users breaks storage; always expand lazily at query time</li>
+        <li>Timezone correctness: store all times as UTC; convert to user's timezone only at read time; DST transitions must re-evaluate recurrence on every query</li>
+        <li>Editing recurring events: "this only", "this and following", and "all" are three distinct write patterns; "this and following" splits the series into two master records</li>
+        <li>Free/busy privacy: when user sets visibility=private, return BUSY intervals but not event details to non-owners</li>
+        <li>Sharding: shard by user_id not calendar_id — calendar queries always join to a single user's data</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection" id="cal-distinct">
+    <div class="subsection-header"><span class="subsection-num">07</span><h3>Distinctive Component: Smart Scheduling + Find-A-Time</h3></div>
+    <div class="distinctive-box" style="background:rgba(74,222,128,0.07); border:1px solid rgba(74,222,128,0.25)">
+      <h4 style="color:var(--accent3)">🧠 Sub-100ms Meeting Slot Finder for 50 Attendees</h4>
+      <ul>
+        <li><strong>Input:</strong> 50 attendee emails, desired duration 60 min, within next 7 days, 9am–6pm</li>
+        <li><strong>Step 1:</strong> Batch Redis BITFIELD reads for all 50 users × 7 days = 350 BITFIELD GETs (pipelined, ~2ms)</li>
+        <li><strong>Step 2:</strong> Bitwise OR all 350 bitmaps (96-bit bitwise union) → find zero-runs ≥ 4 consecutive slots (60 min)</li>
+        <li><strong>Step 3:</strong> Rank candidates by: fewest conflicts, business hours weight, attendee timezone spread, preferred meeting times from ML model</li>
+        <li><strong>Step 4:</strong> For users missing from Redis cache, async DB fallback; return partial results with confidence score</li>
+        <li><strong>Working hours:</strong> Stored per user as a weekly RRULE in Redis; applied as mask before slot search</li>
+        <li><strong>Total latency:</strong> ~20ms Redis + 5ms compute + 10ms cache miss fallback = well under 100ms</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SYSTEM 4: SPOTIFY                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="system" id="system-spotify">
+  <div class="system-title">
+    <div class="system-badge" style="background:rgba(34,211,238,0.15); border:1px solid rgba(34,211,238,0.3)">🎵</div>
+    <div>
+      <h2>Spotify</h2>
+      <div class="subtitle">600M users · 100M songs · Streaming + Playlists + Discover Weekly</div>
+    </div>
+  </div>
+
+  <div class="subsection" id="spt-req">
+    <div class="subsection-header"><span class="subsection-num">01</span><h3>Requirements</h3></div>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Functional</h4>
+        <ul>
+          <li>Audio streaming with adaptive bitrate (96/160/320 kbps, lossless)</li>
+          <li>Create/edit/share playlists; collaborative playlists</li>
+          <li>Search: tracks, artists, albums, podcasts, playlists</li>
+          <li>Follow artists, friends; social listening activity feed</li>
+          <li>Top K songs globally, per country, per genre (leaderboard)</li>
+          <li>Discover Weekly: personalized 30-song playlist generated weekly</li>
+          <li>Radio / autoplay based on seed track/artist</li>
+          <li>Offline mode (download tracks for Premium)</li>
+          <li>Cross-device handoff (seamless device switch mid-track)</li>
+          <li>Podcasts: streaming + chapters + show notes</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Non-Functional</h4>
+        <ul>
+          <li><span class="val">Availability:</span> 99.99%; streaming must not drop</li>
+          <li><span class="val">Stream latency:</span> Track starts within 200ms of play button press</li>
+          <li><span class="val">Scale:</span> 600M users; 10M concurrent streams; 4B plays/day</li>
+          <li><span class="val">Bandwidth:</span> 160kbps × 10M streams = 1.6 Tbps audio egress</li>
+          <li><span class="val">Discover Weekly:</span> Generated for 600M users every Monday; 12h window</li>
+          <li><span class="val">Top K:</span> Real-time global top 50; updated every 30s</li>
+          <li><span class="val">CDN:</span> Audio segments served from edge; hit rate > 95%</li>
+          <li><span class="val">Copyright:</span> DRM, play count reporting to rights holders</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="spt-est">
+    <div class="subsection-header"><span class="subsection-num">02</span><h3>Estimation</h3></div>
+    <div class="card">
+      <table class="est-table">
+        <thead><tr><th>Metric</th><th>Assumption</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Concurrent streams</td><td>600M × 40% DAU × 4% streaming at once</td><td class="val" style="color:var(--accent6)">~10M concurrent</td></tr>
+          <tr><td>Audio bandwidth</td><td>10M × 160kbps avg</td><td class="val" style="color:var(--accent6)">1.6 Tbps egress</td></tr>
+          <tr><td>Audio storage</td><td>100M songs × 5MB (160kbps) × 3 bitrates</td><td class="val" style="color:var(--accent6)">1.5 PB audio files (S3)</td></tr>
+          <tr><td>Play events/day</td><td>4B plays/day</td><td class="val" style="color:var(--accent6)">46K events/sec write</td></tr>
+          <tr><td>Play event storage</td><td>4B × 100 bytes</td><td class="val" style="color:var(--accent6)">400 GB/day (Kafka → data lake)</td></tr>
+          <tr><td>User listen history</td><td>600M × 2000 songs/year × 50 bytes</td><td class="val" style="color:var(--accent6)">60 TB/year</td></tr>
+          <tr><td>CDN edge nodes</td><td>1.6 Tbps / 10 Gbps per PoP</td><td class="val" style="color:var(--accent6)">160+ PoPs globally</td></tr>
+          <tr><td>Top K computation</td><td>4B plays / 86400s × 30s window</td><td class="val" style="color:var(--accent6)">Flink stream processing, ~1.4M events per 30s window</td></tr>
+          <tr><td>Discover Weekly ML</td><td>600M users, generate in 12h = 13.9M/hr</td><td class="val" style="color:var(--accent6)">~4K playlists/sec generation throughput</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection" id="spt-schema">
+    <div class="subsection-header"><span class="subsection-num">03</span><h3>Storage Schema</h3></div>
+    <div class="grid-2">
+      <div class="schema-block">
+<span class="tname">-- PostgreSQL (Tracks, Albums, Artists)</span>
+
+<span class="tname">tracks</span> {
+  <span class="pk">track_id        UUID PK</span>
+  <span class="fk">album_id        FK → albums</span>
+  <span class="field">title           </span><span class="ftype">VARCHAR(512)</span>
+  <span class="field">duration_ms     </span><span class="ftype">INT</span>
+  <span class="field">audio_key       </span><span class="ftype">VARCHAR(512)</span>  <span class="fcomment">-- S3 path (DRM encrypted)</span>
+  <span class="field">preview_key     </span><span class="ftype">VARCHAR(512)</span>  <span class="fcomment">-- 30s free preview</span>
+  <span class="field">isrc            </span><span class="ftype">CHAR(12) UNIQUE</span>  <span class="fcomment">-- rights identifier</span>
+  <span class="field">available_markets</span><span class="ftype">VARCHAR[] </span>  <span class="fcomment">-- geo availability</span>
+  <span class="field">play_count      </span><span class="ftype">BIGINT</span>  <span class="fcomment">-- denormalized, updated async</span>
+  <span class="field">audio_features  </span><span class="ftype">JSONB</span>  <span class="fcomment">-- tempo, key, energy, valence, danceability</span>
+}
+
+<span class="tname">playlists</span> {
+  <span class="pk">playlist_id     UUID PK</span>
+  <span class="fk">owner_id        FK → users</span>
+  <span class="field">name            </span><span class="ftype">VARCHAR(255)</span>
+  <span class="field">is_collaborative</span><span class="ftype">BOOLEAN</span>
+  <span class="field">is_public       </span><span class="ftype">BOOLEAN</span>
+  <span class="field">snapshot_id     </span><span class="ftype">VARCHAR(64)</span>  <span class="fcomment">-- version for sync</span>
+  <span class="field">follower_count  </span><span class="ftype">INT</span>
+}
+
+<span class="tname">playlist_tracks</span> {
+  <span class="pk">id              UUID PK</span>
+  <span class="fk">playlist_id     FK → playlists</span>
+  <span class="fk">track_id        FK → tracks</span>
+  <span class="field">position        </span><span class="ftype">FLOAT</span>  <span class="fcomment">-- fractional for O(1) reorder</span>
+  <span class="field">added_by        </span><span class="fk">FK → users</span>
+  <span class="field">added_at        </span><span class="ftype">TIMESTAMPTZ</span>
+}
+      </div>
+      <div>
+        <div class="schema-block" style="margin-bottom:12px">
+<span class="tname">-- Cassandra (Listen history, play events)</span>
+<span class="tname">listen_history</span> {
+  <span class="pk">user_id   UUID  PARTITION KEY</span>
+  <span class="pk">played_at TIMEUUID  CLUSTERING DESC</span>
+  <span class="field">track_id  UUID</span>
+  <span class="field">ms_played INT</span>
+  <span class="field">context   VARCHAR</span>  <span class="fcomment">-- playlist_id or radio or search</span>
+}  <span class="fcomment">-- Optimized for "user's recent plays" query</span>
+
+<span class="tname">-- Kafka Topics (streams)</span>
+<span class="tname">play-events</span>          <span class="fcomment">-- partitioned by user_id (600 partitions)</span>
+<span class="tname">play-events-by-track</span> <span class="fcomment">-- partitioned by track_id (for Top K)</span>
+        </div>
+        <div class="schema-block">
+<span class="tname">-- Redis (Top K leaderboard)</span>
+<span class="tname">topk:global</span>          <span class="ftype">ZSET (score=play_count)</span>
+<span class="tname">topk:country:{cc}</span>    <span class="ftype">ZSET</span>
+<span class="tname">topk:genre:{genre_id}</span><span class="ftype">ZSET</span>
+<span class="fcomment">-- Updated by Flink → Redis ZINCRBY every 30s</span>
+
+<span class="tname">-- DynamoDB (Discover Weekly output)</span>
+<span class="tname">discover_weekly</span> {
+  <span class="pk">PK: user_id  SK: week_id (YYYY-WW)</span>
+  <span class="field">track_ids   </span><span class="ftype">List(30 UUIDs)</span>
+  <span class="field">generated_at</span><span class="ftype">String</span>
+}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="spt-api">
+    <div class="subsection-header"><span class="subsection-num">04</span><h3>API Design</h3></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/tracks/{trackId}/stream?quality={96|160|320|lossless}&device_id={id}</span>
+<span class="api-desc">→ Returns signed CDN URL (5min expiry) for audio segment; logs play event to Kafka; DRM token included</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/me/player/play</span>  <span class="api-desc">body: {context_uri, offset, position_ms, device_id}</span>
+<span class="api-desc">→ Initiates playback on given device; publishes to player state service; triggers cross-device sync</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/charts/top?type={global|country|genre}&country={cc}&genre={id}&limit={n}</span>
+<span class="api-desc">→ Returns real-time leaderboard from Redis ZREVRANGE; TTL 30s; served from cache tier</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/me/discover-weekly</span>
+<span class="api-desc">→ Returns this week's 30 tracks from DynamoDB; falls back to collaborative filter if not generated yet</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/playlists/{playlistId}/tracks</span>  <span class="api-desc">body: {uris: [track_uri], position?}</span>
+<span class="api-desc">→ Appends/inserts tracks; updates snapshot_id; broadcasts to collaborative editors via WebSocket</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/me/player/seek?position_ms={ms}</span>
+<span class="api-desc">→ Stateless; client re-requests CDN URL with byte-range offset; updates player state in Redis</span></div>
+  </div>
+
+  <div class="subsection" id="spt-hld">
+    <div class="subsection-header"><span class="subsection-num">05</span><h3>High Level Design</h3></div>
+    <div class="hld-box">
+      <div class="hld-label">Audio Delivery Path</div>
+      <div class="hld-row">
+        <div class="hld-component">📱 Spotify Client</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent6)">🌐 Stream Service (signed URL)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent4)">☁️ CloudFront CDN (edge audio cache)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent3)">🗄️ S3 (audio segments, DRM)</div>
+      </div>
+      <div class="hld-label">Play Event Pipeline (Real-time)</div>
+      <div class="hld-row">
+        <div class="hld-component">📊 Play Events</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">📡 Kafka</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent2)">⚡ Apache Flink (streaming)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent2)">🔴 Redis ZSETs (Top K)</div>
+      </div>
+      <div class="hld-label">Discover Weekly Pipeline (Batch, weekly)</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent3)">🗄️ Cassandra (listen history)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">🔥 Spark (collaborative filter ALS)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent1)">⚡ DynamoDB (playlists output)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component">📲 Push to 600M users</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="spt-detail">
+    <div class="subsection-header"><span class="subsection-num">06</span><h3>Detailed Design</h3></div>
+    <p class="note"><strong style="color:var(--text)">Audio Streaming:</strong> Tracks pre-encoded at 3 bitrates + lossless. Each track split into 10-second segments (HLS/DASH). Stream Service generates pre-signed S3/CDN URLs valid 5 min. Client prefetches next 3 segments ahead. CDN edge caches top 5% of tracks (Pareto — covers 85%+ of streams). Long-tail tracks fetched from S3 origin. Adaptive bitrate: client switches quality based on measured bandwidth.</p>
+    <p class="note"><strong style="color:var(--text)">Top K — Real-time Leaderboard:</strong> Kafka topic partitioned by track_id. Apache Flink job: 30-second tumbling window, counts plays per track per country. ZINCRBY to Redis ZSETs. For global top 50: ZREVRANGE O(K log N). Approximate Top-K using Count-Min Sketch in Flink for memory efficiency (actual ranking confirmed against exact counters every 5 min). Track of leaderboard changes pushed via SSE to subscribed web clients.</p>
+    <p class="note"><strong style="color:var(--text)">Discover Weekly — ML Pipeline:</strong> Input: 600M users × listen history (last 6 months). Spark ALS collaborative filtering: user-song interaction matrix factorized into 200-dim latent vectors. For each user: find K nearest neighbor users (cosine sim in vector space) → take their most-played songs you haven't heard → filter by audio feature compatibility (same energy/tempo range as your top songs) → rank by predicted play probability → select top 30. Generated in 4-6 hours on Monday morning on a cluster of 500 Spark executors. Output written to DynamoDB partitioned by user_id.</p>
+    <p class="note"><strong style="color:var(--text)">Cross-device handoff:</strong> Player state (current track, position_ms, is_playing, device_id, queue) stored in Redis keyed by user_id with 1s TTL refresh. When user switches device, new device polls player state and resumes from stored position_ms. WebSocket connection per user for real-time device list and state sync.</p>
+    <div class="trap-box">
+      <h4>⚠ Interviewer Traps</h4>
+      <ul>
+        <li>Top K: naive approach = increment a counter per song per request at 46K writes/sec. Answer: Count-Min Sketch in Flink for approximate counting, windowed aggregation, Redis ZSET for retrieval</li>
+        <li>Discover Weekly: don't say "collaborative filtering on every request" — it's batch-computed weekly; storing results in DynamoDB is the key insight</li>
+        <li>Audio streaming: don't stream from your app servers — signed CDN URLs. The app server only handles auth + metadata, audio bytes flow CDN → client</li>
+        <li>Play counting for royalties: needs exactly-once semantics eventually. Kafka + idempotent Cassandra writes + batch reconciliation to rights management system</li>
+        <li>Offline mode: encrypted segments stored on device, DRM key validated against server on reconnect, key revoked if subscription lapses</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection" id="spt-distinct">
+    <div class="subsection-header"><span class="subsection-num">07</span><h3>Distinctive Component: Discover Weekly at 600M Scale</h3></div>
+    <div class="distinctive-box" style="background:rgba(34,211,238,0.07); border:1px solid rgba(34,211,238,0.25)">
+      <h4 style="color:var(--accent6)">🧠 ALS Collaborative Filtering + Audio Feature Fusion</h4>
+      <ul>
+        <li><strong>Two-tower model:</strong> User tower (listen history embeddings) + Track tower (audio feature embeddings); inner product = predicted score</li>
+        <li><strong>Cold start for new users:</strong> Seed with genre preferences from onboarding quiz → map to cluster of similar existing users → borrow their top tracks</li>
+        <li><strong>Audio feature matching:</strong> Even if CF finds a song you'd love, if it's death metal and you listen to lo-fi beats, filter it. Energy, tempo, valence, danceability stored per track from audio analysis; apply soft filter (±20% of user's median features)</li>
+        <li><strong>Diversity injection:</strong> After ranking, MMR (Maximal Marginal Relevance) re-ranking to avoid 30 identical-sounding tracks; interleave familiar artists with new discoveries at 60/40 ratio</li>
+        <li><strong>Distributed generation:</strong> 600M users split into 6000 Spark partitions; each partition processes 100K users; total 4-6hr wall clock time; Monday 3am UTC generation start to be ready for 9am wakeup in all time zones</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SYSTEM 5: TELEMEDICINE                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="system" id="system-telemedicine">
+  <div class="system-title">
+    <div class="system-badge" style="background:rgba(192,132,252,0.15); border:1px solid rgba(192,132,252,0.3)">🏥</div>
+    <div>
+      <h2>Online Telemedicine + Pharmacy</h2>
+      <div class="subtitle">Telehealth platform · Video consults · EHR · e-Prescription · Pharmacy fulfillment</div>
+    </div>
+  </div>
+
+  <div class="subsection" id="tel-req">
+    <div class="subsection-header"><span class="subsection-num">01</span><h3>Requirements</h3></div>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Functional</h4>
+        <ul>
+          <li>Patient registration, health profile (PMHx, allergies, medications)</li>
+          <li>Doctor search by specialty, language, availability</li>
+          <li>Appointment booking (scheduled + on-demand "see a doctor now")</li>
+          <li>HD video consultation (WebRTC) with screen share</li>
+          <li>Electronic health record (EHR): notes, diagnosis, care plan</li>
+          <li>e-Prescription: doctor issues Rx → sent to pharmacy electronically</li>
+          <li>Pharmacy: inventory, fulfillment, delivery tracking</li>
+          <li>Drug interaction checking before Rx issuance</li>
+          <li>Lab order integration; result retrieval</li>
+          <li>Insurance verification + billing / co-pay</li>
+          <li>Follow-up messaging between patient and doctor</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Non-Functional</h4>
+        <ul>
+          <li><span class="val">Availability:</span> 99.99%; video calls must not drop mid-consult</li>
+          <li><span class="val">Compliance:</span> HIPAA (US), GDPR (EU), HL7 FHIR R4 standard</li>
+          <li><span class="val">Video latency:</span> &lt; 150ms round-trip for real-time feel</li>
+          <li><span class="val">Data sensitivity:</span> PHI encrypted at rest (AES-256) and in transit (TLS 1.3)</li>
+          <li><span class="val">Audit:</span> Every PHI access logged immutably with user, timestamp, reason</span></li>
+          <li><span class="val">Scale:</span> 10M patients; 200K doctors; 500K consults/day</li>
+          <li><span class="val">Prescription safety:</span> Drug interactions checked against FDA DB before issuance</li>
+          <li><span class="val">EHR storage:</span> Records retained 10 years minimum; tamper-evident</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="tel-est">
+    <div class="subsection-header"><span class="subsection-num">02</span><h3>Estimation</h3></div>
+    <div class="card">
+      <table class="est-table">
+        <thead><tr><th>Metric</th><th>Assumption</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Consults/day</td><td>500K consults, avg 15 min</td><td class="val" style="color:var(--accent5)">~1,250 Mbps video bandwidth (HD 2Mbps × concurrent)</td></tr>
+          <tr><td>Concurrent video calls</td><td>500K / 86400 × 900s avg</td><td class="val" style="color:var(--accent5)">~5,200 concurrent calls</td></tr>
+          <tr><td>EHR records</td><td>10M patients × 100 visits/lifetime × 10KB</td><td class="val" style="color:var(--accent5)">10 TB EHR storage</td></tr>
+          <tr><td>Video recordings (optional)</td><td>500K × 15 min × 300MB/hr</td><td class="val" style="color:var(--accent5)">37.5 TB/day (if recorded; hot=30d, warm=1yr)</td></tr>
+          <tr><td>Prescriptions/day</td><td>500K consults × 60% issue Rx</td><td class="val" style="color:var(--accent5)">300K Rx/day = 3.5/sec</td></tr>
+          <tr><td>Pharmacy orders/day</td><td>300K Rx × 80% routed to platform pharmacy</td><td class="val" style="color:var(--accent5)">240K orders/day</td></tr>
+          <tr><td>TURN servers</td><td>5,200 calls × 2Mbps / 10 Gbps per server</td><td class="val" style="color:var(--accent5)">~2 TURN servers (low; most calls peer-to-peer)</td></tr>
+          <tr><td>Audit log writes</td><td>Every PHI access; 1M access/day × 200 bytes</td><td class="val" style="color:var(--accent5)">200 MB/day audit log (append-only)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection" id="tel-schema">
+    <div class="subsection-header"><span class="subsection-num">03</span><h3>Storage Schema</h3></div>
+    <div class="grid-2">
+      <div class="schema-block">
+<span class="tname">-- PostgreSQL (patients, doctors, appointments)</span>
+
+<span class="tname">patients</span> {
+  <span class="pk">patient_id      UUID PK</span>
+  <span class="field">name_encrypted  </span><span class="ftype">BYTEA</span>  <span class="fcomment">-- AES-256 at app layer</span>
+  <span class="field">dob_encrypted   </span><span class="ftype">BYTEA</span>
+  <span class="field">gender          </span><span class="ftype">VARCHAR(20)</span>
+  <span class="field">blood_type      </span><span class="ftype">VARCHAR(5)</span>
+  <span class="field">allergies       </span><span class="ftype">JSONB</span>  <span class="fcomment">-- [{substance, severity, reaction}]</span>
+  <span class="field">current_meds    </span><span class="ftype">JSONB</span>
+  <span class="field">insurance_ref   </span><span class="ftype">VARCHAR(255)</span>
+}
+
+<span class="tname">appointments</span> {
+  <span class="pk">appt_id         UUID PK</span>
+  <span class="fk">patient_id      FK → patients</span>
+  <span class="fk">doctor_id       FK → doctors</span>
+  <span class="field">scheduled_at    </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">duration_min    </span><span class="ftype">INT DEFAULT 15</span>
+  <span class="field">status          </span><span class="ftype">ENUM(booked,in_progress,completed,cancelled,no_show)</span>
+  <span class="field">call_room_id    </span><span class="ftype">VARCHAR(255)</span>  <span class="fcomment">-- WebRTC room identifier</span>
+  <span class="field">type            </span><span class="ftype">ENUM(scheduled,on_demand)</span>
+}
+
+<span class="tname">ehr_notes</span> {
+  <span class="pk">note_id         UUID PK</span>
+  <span class="fk">appt_id         FK → appointments</span>
+  <span class="fk">doctor_id       FK → doctors</span>
+  <span class="field">soap_note       </span><span class="ftype">JSONB encrypted</span>  <span class="fcomment">-- S=subjective,O=objective,A=assessment,P=plan</span>
+  <span class="field">diagnosis_codes </span><span class="ftype">VARCHAR[]</span>  <span class="fcomment">-- ICD-10 codes</span>
+  <span class="field">created_at      </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">signed_at       </span><span class="ftype">TIMESTAMPTZ</span>  <span class="fcomment">-- digital signature timestamp</span>
+  <span class="field">signature_hash  </span><span class="ftype">VARCHAR(512)</span>
+}
+      </div>
+      <div>
+        <div class="schema-block" style="margin-bottom:12px">
+<span class="tname">prescriptions</span> {
+  <span class="pk">rx_id           UUID PK</span>
+  <span class="fk">appt_id         FK → appointments</span>
+  <span class="fk">doctor_id       FK → doctors</span>
+  <span class="fk">patient_id      FK → patients</span>
+  <span class="field">medication_code </span><span class="ftype">VARCHAR(20)</span>  <span class="fcomment">-- NDC code</span>
+  <span class="field">medication_name </span><span class="ftype">VARCHAR(255)</span>
+  <span class="field">dosage          </span><span class="ftype">VARCHAR(100)</span>
+  <span class="field">instructions    </span><span class="ftype">TEXT encrypted</span>
+  <span class="field">refills         </span><span class="ftype">INT</span>
+  <span class="field">issued_at       </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">expires_at      </span><span class="ftype">TIMESTAMPTZ</span>
+  <span class="field">status          </span><span class="ftype">ENUM(issued,sent,filled,cancelled)</span>
+  <span class="field">dea_number      </span><span class="ftype">VARCHAR(20)</span>  <span class="fcomment">-- for controlled substances</span>
+}
+        </div>
+        <div class="schema-block">
+<span class="tname">-- Append-only audit log (Cassandra or WORM S3)</span>
+<span class="tname">phi_access_log</span> {
+  <span class="pk">log_id          TIMEUUID PK</span>
+  <span class="field">accessor_id     UUID</span>  <span class="fcomment">-- doctor, patient, admin</span>
+  <span class="field">accessor_role   VARCHAR</span>
+  <span class="field">patient_id      UUID</span>
+  <span class="field">resource_type   VARCHAR</span>  <span class="fcomment">-- ehr_note, prescription, etc</span>
+  <span class="field">resource_id     UUID</span>
+  <span class="field">action          ENUM(read,write,delete)</span>
+  <span class="field">accessed_at     TIMESTAMPTZ</span>
+  <span class="field">reason          VARCHAR</span>
+  <span class="field">ip_address      VARCHAR</span>
+}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="tel-api">
+    <div class="subsection-header"><span class="subsection-num">04</span><h3>API Design</h3></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/appointments</span>  <span class="api-desc">body: {doctor_id, scheduled_at, complaint, type: scheduled|on_demand}</span>
+<span class="api-desc">→ Reserves slot; creates WebRTC room; sends confirmation + calendar invite; returns {appt_id, call_room_id}</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/appointments/{apptId}/join</span>
+<span class="api-desc">→ Returns {webrtc_config: {ice_servers, room_token}}; validates caller is patient or assigned doctor</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/appointments/{apptId}/ehr-note</span>  <span class="api-desc">body: {soap_note, diagnosis_codes[]}</span>
+<span class="api-desc">→ Doctor only; creates note, triggers PHI audit log; e-signs with doctor's certificate</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/prescriptions</span>  <span class="api-desc">body: {appt_id, medication_code, dosage, refills, instructions}</span>
+<span class="api-desc">→ Checks drug interactions before accepting; issues Rx; electronically routes to pharmacy; PDMP check for controlled substances</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/doctors/available?specialty={s}&language={lang}&after={iso}&duration={min}</span>
+<span class="api-desc">→ Returns available doctors with next 3 slots; reads from doctor availability calendar service</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/patients/{patientId}/ehr?types=notes,prescriptions,labs</span>
+<span class="api-desc">→ FHIR R4 Bundle response; every read creates phi_access_log entry; role-based field filtering</span></div>
+  </div>
+
+  <div class="subsection" id="tel-hld">
+    <div class="subsection-header"><span class="subsection-num">05</span><h3>High Level Design</h3></div>
+    <div class="hld-box">
+      <div class="hld-label">Video Consultation Path</div>
+      <div class="hld-row">
+        <div class="hld-component">📱 Patient App</div>
+        <div class="hld-component">🩺 Doctor App</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">📞 Signaling Service (WebSocket)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">🌐 STUN/TURN Servers (WebRTC)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component">🔗 P2P Video</div>
+      </div>
+      <div class="hld-label">Clinical Data Path</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent5)">🏥 EHR Service</div>
+        <div class="hld-component" style="border-color:var(--accent5)">💊 Prescription Service</div>
+        <div class="hld-component" style="border-color:var(--accent5)">🔬 Lab Integration Service</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent4)">🐘 Postgres (PHI, encrypted)</div>
+        <div class="hld-component" style="border-color:var(--accent3)">📋 WORM Audit Log</div>
+      </div>
+      <div class="hld-label">Pharmacy Fulfillment</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent5)">💊 Prescription Service</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">📡 Kafka</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">🏪 Pharmacy Service (inventory)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component">📦 Fulfillment + Delivery</div>
+        <div class="hld-component">🔔 Patient Notified</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="tel-detail">
+    <div class="subsection-header"><span class="subsection-num">06</span><h3>Detailed Design</h3></div>
+    <p class="note"><strong style="color:var(--text)">Video via WebRTC:</strong> Signaling service brokers ICE candidate exchange (SDP offer/answer) over WebSocket. For peer-to-peer calls, most go direct (85%+). TURN relay only for symmetric NAT scenarios (~15%). Media encrypted via DTLS-SRTP (WebRTC standard). Recording: if enabled, media passes through a Selective Forwarding Unit (SFU) like mediasoup; recorded server-side to S3 with KMS encryption. Room token JWT signed by signaling service, expires with appointment.</p>
+    <p class="note"><strong style="color:var(--text)">Drug Interaction Checking:</strong> On Rx issuance, Prescription Service calls Drug Interaction Service (internal) which checks: new drug vs patient's current_meds (from health profile) + all active Rx from Prescriptions table. Drug interaction DB: FDA NDF-RT + Drugs@FDA + clinical rules engine. Response in &lt;100ms (in-memory lookup). Contraindicated interaction = hard block. Moderate interaction = warning + doctor override with reason.</p>
+    <p class="note"><strong style="color:var(--text)">PHI Encryption Architecture:</strong> Envelope encryption: each patient has a unique Data Encryption Key (DEK) stored in AWS KMS. Sensitive fields encrypted at the application layer before DB write using the DEK. KMS key rotation yearly. All traffic over TLS 1.3. Encryption at rest via AWS RDS encryption. Application-level encryption adds protection even against DBA-level DB access.</p>
+    <p class="note"><strong style="color:var(--text)">On-Demand Doctor Matching:</strong> Patient requests "see a doctor now" → OnDemand Queue Service. Available doctors maintain WebSocket heartbeat (status=available). Patient arrives in queue → assigned to first available doctor of requested specialty in same timezone/language match. Redis sorted set: doctors by available_since score → ZPOPMIN assigns next doctor. Average wait &lt; 5 min guaranteed by dynamic surge pricing for doctor incentive.</p>
+    <div class="trap-box">
+      <h4>⚠ Interviewer Traps</h4>
+      <ul>
+        <li>HIPAA: every PHI access must be logged. Don't just say "we have a DB" — immutable audit log (WORM S3 or Cassandra with no deletes) with accessor, reason, and timestamp is required</li>
+        <li>Video: don't route all video through your servers — WebRTC P2P for most calls, TURN only as fallback. Running all video through servers at scale is prohibitively expensive</li>
+        <li>Prescription safety: drug interaction check must be synchronous and block issuance. Not a nice-to-have — it's a safety-critical requirement</li>
+        <li>EHR notes: must be digitally signed by the doctor at time of creation (non-repudiation), not just saved. Modification after signing = audit event</li>
+        <li>Controlled substance Rx: PDMP (Prescription Drug Monitoring Program) check required in most US states — external API call before issuance</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection" id="tel-distinct">
+    <div class="subsection-header"><span class="subsection-num">07</span><h3>Distinctive Component: HIPAA-Compliant PHI Access Control</h3></div>
+    <div class="distinctive-box" style="background:rgba(192,132,252,0.07); border:1px solid rgba(192,132,252,0.25)">
+      <h4 style="color:var(--accent5)">🔒 Zero-Trust PHI Access with Break-Glass Protocol</h4>
+      <ul>
+        <li><strong>Normal access:</strong> Doctor can only access PHI for patients with active/recent appointment (within 90 days). Enforced at API Gateway via policy engine (OPA — Open Policy Agent); not just application-layer check</li>
+        <li><strong>Break-glass:</strong> Emergency scenario — doctor can access any patient PHI but must provide reason code (emergency, patient-request, court-order). Triggers high-priority audit alert to compliance team + automatic HIPAA incident creation</li>
+        <li><strong>Minimum necessary standard:</strong> Role-based field filtering. Billing team sees insurance fields. Pharmacist sees only medication-relevant fields. No one sees the full record by default</li>
+        <li><strong>Patient consent ledger:</strong> Immutable record of what data was shared, with whom, when, with revocation support (GDPR right to erasure = soft delete + audit of deletion)</li>
+        <li><strong>Audit completeness guarantee:</strong> PHI access middleware intercepts ALL PHI-touching service calls and writes to audit log before the actual response is returned — synchronous write to Cassandra (replication_factor=3); if audit write fails, deny the request. Audit log never loses an entry.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SYSTEM 6: DISTRIBUTED PRICE TRACKER                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="system" id="system-pricetracker">
+  <div class="system-title">
+    <div class="system-badge" style="background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3)">📉</div>
+    <div>
+      <h2>Distributed Price Tracker</h2>
+      <div class="subtitle">CamelCamelCamel-scale · 500M products tracked · Cross-retailer · Price history + Alerts</div>
+    </div>
+  </div>
+
+  <div class="subsection" id="pt-req">
+    <div class="subsection-header"><span class="subsection-num">01</span><h3>Requirements</h3></div>
+    <div class="grid-2">
+      <div class="card">
+        <h4>Functional</h4>
+        <ul>
+          <li>Track prices for 500M+ products across Amazon, Walmart, Best Buy, Target, etc.</li>
+          <li>Price history charts (30d, 90d, 1yr, all-time) per product per retailer</li>
+          <li>User sets price alerts: "notify me when product drops below $X"</li>
+          <li>Price drop notifications: email, push, SMS</li>
+          <li>Search: find product + compare prices across retailers</li>
+          <li>Price trend analysis: is this at an all-time low? Best price this year?</li>
+          <li>Coupon/deal detection: browser extension integration</li>
+          <li>API for third-party developers</li>
+          <li>Crawl politeness: respect robots.txt, rate limits</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>Non-Functional</h4>
+        <ul>
+          <li><span class="val">Scale:</span> 500M products × 5 retailers = 2.5B product-retailer combos to track</li>
+          <li><span class="val">Crawl frequency:</span> Popular products every 15 min; tail products every 24h</li>
+          <li><span class="val">Alert latency:</span> Price drop detected → notification &lt; 5 min</li>
+          <li><span class="val">History reads:</span> 50M chart loads/day; charts cached aggressively</li>
+          <li><span class="val">Storage:</span> Time-series optimized; 3 price points/day × 500M products × 365 days = massive</li>
+          <li><span class="val">Availability:</span> 99.9%; brief history gaps tolerable</li>
+          <li><span class="val">Legality:</span> Scraping ToS compliance; IP rotation; rate limiting</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="pt-est">
+    <div class="subsection-header"><span class="subsection-num">02</span><h3>Estimation</h3></div>
+    <div class="card">
+      <table class="est-table">
+        <thead><tr><th>Metric</th><th>Assumption</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Products tracked</td><td>500M products × 5 retailers</td><td class="val" style="color:var(--accent4)">2.5B product-retailer pairs</td></tr>
+          <tr><td>Crawls/day</td><td>Hot 50M × 96/day + Warm 200M × 4/day + Cold 250M × 1/day</td><td class="val" style="color:var(--accent4)">~6.6B crawl jobs/day = 76K/sec</td></tr>
+          <tr><td>Price records/day</td><td>2.5B pairs × 2 checks/day avg (only store on change)</td><td class="val" style="color:var(--accent4)">~500M price writes/day (20% change rate)</td></tr>
+          <tr><td>Price history storage</td><td>500M writes/day × 20 bytes × 3 years</td><td class="val" style="color:var(--accent4)">~10 TB/year → 30 TB total (Cassandra, compressed)</td></tr>
+          <tr><td>Alert checks/day</td><td>100M alerts, each checked per crawl</td><td class="val" style="color:var(--accent4)">Bloom filter in Redis; match rate ~0.1% = 100K notifications/day</td></tr>
+          <tr><td>Crawler infrastructure</td><td>76K crawls/sec, 500ms avg crawl</td><td class="val" style="color:var(--accent4)">38,000 concurrent crawlers needed; 380 servers at 100 conns each</td></tr>
+          <tr><td>Chart reads</td><td>50M/day; 80% cache hit</td><td class="val" style="color:var(--accent4)">10M Cassandra reads/day from cache misses</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection" id="pt-schema">
+    <div class="subsection-header"><span class="subsection-num">03</span><h3>Storage Schema</h3></div>
+    <div class="grid-2">
+      <div class="schema-block">
+<span class="tname">-- Cassandra (Time-series price history)</span>
+<span class="tname">-- PRIMARY: "show me this product's price history"</span>
+
+<span class="tname">price_history</span> {
+  <span class="pk">product_id  UUID   PARTITION KEY</span>
+  <span class="pk">retailer_id VARCHAR PARTITION KEY  </span><span class="fcomment">-- composite</span>
+  <span class="pk">recorded_at TIMESTAMP CLUSTERING DESC</span>
+  <span class="field">price       DECIMAL(12,4)</span>
+  <span class="field">currency    CHAR(3)</span>
+  <span class="field">in_stock    BOOLEAN</span>
+  <span class="field">url         VARCHAR</span>
+  <span class="field">crawl_id    UUID</span>
+}
+<span class="fcomment">-- One row per price change event; deduplicated on ingest</span>
+<span class="fcomment">-- Compaction: TWCS (TimeWindowCompactionStrategy)</span>
+<span class="fcomment">-- TTL: 5 years for raw data</span>
+
+<span class="tname">product_current_price</span> {
+  <span class="pk">product_id  UUID   PARTITION KEY</span>
+  <span class="pk">retailer_id VARCHAR PARTITION KEY</span>
+  <span class="field">price       DECIMAL(12,4)</span>
+  <span class="field">updated_at  TIMESTAMP</span>
+  <span class="field">all_time_low DECIMAL</span>
+  <span class="field">all_time_high DECIMAL</span>
+  <span class="field">year_low    DECIMAL</span>
+  <span class="field">year_high   DECIMAL</span>
+}  <span class="fcomment">-- Maintained by price ingestion worker</span>
+      </div>
+      <div>
+        <div class="schema-block" style="margin-bottom:12px">
+<span class="tname">-- PostgreSQL (Products, alerts, users)</span>
+
+<span class="tname">products</span> {
+  <span class="pk">product_id   UUID PK</span>
+  <span class="field">asin         </span><span class="ftype">VARCHAR(20)</span>  <span class="fcomment">-- Amazon identifier</span>
+  <span class="field">upc          </span><span class="ftype">VARCHAR(20)</span>
+  <span class="field">title        </span><span class="ftype">VARCHAR(512)</span>
+  <span class="field">brand        </span><span class="ftype">VARCHAR(255)</span>
+  <span class="field">category     </span><span class="ftype">VARCHAR(100)</span>
+  <span class="field">image_url    </span><span class="ftype">VARCHAR(512)</span>
+  <span class="field">crawl_tier   </span><span class="ftype">ENUM(hot,warm,cold)</span>  <span class="fcomment">-- crawl frequency</span>
+  <span class="field">popularity   </span><span class="ftype">INT</span>  <span class="fcomment">-- watcher count</span>
+}
+
+<span class="tname">price_alerts</span> {
+  <span class="pk">alert_id     UUID PK</span>
+  <span class="fk">user_id      FK → users</span>
+  <span class="fk">product_id   FK → products</span>
+  <span class="field">retailer_id  </span><span class="ftype">VARCHAR(50) nullable</span>  <span class="fcomment">-- null=any</span>
+  <span class="field">target_price </span><span class="ftype">DECIMAL(12,4)</span>
+  <span class="field">channels     </span><span class="ftype">VARCHAR[]</span>  <span class="fcomment">-- email, push, sms</span>
+  <span class="field">is_active    </span><span class="ftype">BOOLEAN</span>
+  <span class="field">triggered_at </span><span class="ftype">TIMESTAMPTZ nullable</span>
+}
+        </div>
+        <div class="schema-block">
+<span class="tname">-- Redis (Crawl scheduling + alert matching)</span>
+<span class="tname">crawl:hot</span>    <span class="ftype">ZSET (score=next_crawl_at epoch)</span>
+<span class="tname">crawl:warm</span>   <span class="ftype">ZSET</span>
+<span class="tname">crawl:cold</span>   <span class="ftype">ZSET</span>
+<span class="fcomment">-- Scheduler ZPOPMINs ready jobs every second</span>
+
+<span class="tname">alert_bloom:{product_id}</span>  <span class="ftype">BITFIELD</span>
+<span class="fcomment">-- Bloom filter: "are there any alerts for this product?"</span>
+<span class="fcomment">-- False positive rate 1%; only check DB if bloom hits</span>
+
+<span class="tname">price_cache:{product_id}:{retailer}</span> <span class="ftype">String JSON TTL=5min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="pt-api">
+    <div class="subsection-header"><span class="subsection-num">04</span><h3>API Design</h3></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/products/{productId}/price-history?retailer={id}&range={30d|90d|1y|all}&resolution={daily|hourly}</span>
+<span class="api-desc">→ Returns time-series from Cassandra; 30d cached in Redis as pre-aggregated JSON array; chart-ready format</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/products/{productId}/prices</span>
+<span class="api-desc">→ Current price across all tracked retailers; from product_current_price table; 5min Redis cache</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/alerts</span>  <span class="api-desc">body: {product_id, retailer_id?, target_price, channels[]}</span>
+<span class="api-desc">→ Creates alert; updates Bloom filter for product; returns {alert_id}</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/search?q={query}&category={cat}&retailer={id}&max_price={n}</span>
+<span class="api-desc">→ Elasticsearch query; returns products with current price per retailer; highlights deals (vs 90d avg)</span></div>
+    <div class="api-block"><span class="method get">GET</span>  <span class="endpoint">/v1/products/{productId}/analysis</span>
+<span class="api-desc">→ Is this the all-time low? vs 30d avg? Price trend direction? Statistical analysis from pre-computed stats</span></div>
+    <div class="api-block"><span class="method post">POST</span> <span class="endpoint">/v1/products/track</span>  <span class="api-desc">body: {url}</span>
+<span class="api-desc">→ User submits any product URL; URL parser identifies retailer + product ID; adds to crawl queue; returns product_id</span></div>
+  </div>
+
+  <div class="subsection" id="pt-hld">
+    <div class="subsection-header"><span class="subsection-num">05</span><h3>High Level Design</h3></div>
+    <div class="hld-box">
+      <div class="hld-label">Crawling Infrastructure</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent4)">⏰ Crawl Scheduler (Redis ZSETs)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent4)">📡 Kafka (crawl-jobs topic)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent4)">🕷️ Crawler Pool (380 servers, rotating IPs)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent4)">📦 Raw HTML → Parser Service</div>
+      </div>
+      <div class="hld-label">Price Ingestion + Alert Pipeline</div>
+      <div class="hld-row">
+        <div class="hld-component" style="border-color:var(--accent4)">🔍 Parser → Extracted Price</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent5)">📡 Kafka (price-changes)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent3)">💾 Cassandra Writer</div>
+        <div class="hld-component" style="border-color:var(--accent2)">🚨 Alert Matcher</div>
+        <div class="hld-component" style="border-color:var(--accent4)">📊 Stats Updater</div>
+      </div>
+      <div class="hld-label">Read Path</div>
+      <div class="hld-row">
+        <div class="hld-component">📱 Client</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent1)">🔑 API Gateway</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent2)">🔴 Redis (price cache + chart cache)</div>
+        <div class="hld-arrow">→</div>
+        <div class="hld-component" style="border-color:var(--accent3)">🗄️ Cassandra (history) / Postgres (meta)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="pt-detail">
+    <div class="subsection-header"><span class="subsection-num">06</span><h3>Detailed Design</h3></div>
+    <p class="note"><strong style="color:var(--text)">Tiered Crawl Scheduling:</strong> Products classified into Hot (popularity > 1000 watchers → every 15min), Warm (10-1000 watchers → every 6hr), Cold (&lt;10 watchers → once/day). Redis ZSET scored by next_crawl_at (Unix timestamp). Scheduler runs every second: ZPOPMIN N up to batch_size → push to Kafka → after crawl completes, re-schedule: ZADD {next_crawl_time} {product_id}. Tier re-classification runs nightly based on watcher count changes.</p>
+    <p class="note"><strong style="color:var(--text)">Deduplication on Ingest:</strong> Parser extracts price. Before writing to Cassandra, compare to Redis cached current price. If price unchanged → skip write (saves ~80% of Cassandra writes). If changed → write to Cassandra + update Redis cache + publish to price-changes Kafka topic. price_changes topic triggers alert matcher and stats updater.</p>
+    <p class="note"><strong style="color:var(--text)">Alert Matching with Bloom Filter:</strong> Product-level Bloom filter in Redis answers "does any alert exist for this product?" in O(1). False positive rate ~1% (check DB unnecessarily 1% of time). True negative = zero DB reads. On Bloom hit: query Postgres for active alerts WHERE product_id=? AND target_price >= new_price → for each match, enqueue notification job to SQS. Alert deduplication: alert triggers once, then becomes inactive (or re-arms after price rises above target + hysteresis band).</p>
+    <p class="note"><strong style="color:var(--text)">Distributed Crawling at Scale:</strong> 380 crawler servers, each running 100 async Playwright/Puppeteer or httpx workers. IP rotation: residential proxy pool (rotating every 10 requests per domain). Per-domain rate limiting: Redis sliding window counter per domain per IP. Crawl failure → exponential backoff, re-enqueue to Kafka with retry count. Anti-bot detection: randomize user-agent, request timing, viewport; headless browser for JS-heavy pages. robots.txt fetched and cached per domain, respected.</p>
+    <div class="tradeoff-row">
+      <div class="tradeoff-card pro">
+        <h5>Cassandra for Time-Series</h5>
+        <p>TWCS compaction perfectly aligns with append-only price history. Wide partition (product+retailer) → one disk seek for full history.</p>
+      </div>
+      <div class="tradeoff-card neutral">
+        <h5>Dedup at Ingest vs Storage</h5>
+        <p>Only storing price-change events (not every crawl) reduces Cassandra writes by 80% but means chart queries must know the "last known price" at any point-in-time.</p>
+      </div>
+      <div class="tradeoff-card con">
+        <h5>Crawl Legality Trade-off</h5>
+        <p>Scraping violates many retailers' ToS. Production systems use official APIs where available (Amazon PA API), scraping only where no API exists. Anti-bot measures escalate: CAPTCHAs may require human solving or ML.</p>
+      </div>
+      <div class="tradeoff-card pro">
+        <h5>Pre-aggregated Stats</h5>
+        <p>All-time low, year low, 30d avg pre-computed by Stats Updater on each price change → O(1) reads vs expensive time-series queries.</p>
+      </div>
+    </div>
+    <div class="trap-box">
+      <h4>⚠ Interviewer Traps</h4>
+      <ul>
+        <li>Don't put price history in PostgreSQL with a B-tree index — at 30 TB and 500M writes/day, Cassandra's time-series model (TWCS, wide partitions) is the right answer</li>
+        <li>Naive alert matching = SELECT * FROM alerts WHERE target_price >= new_price for every crawled product at 76K/sec = DB meltdown. Bloom filter is the key optimization</li>
+        <li>Crawling 2.5B product-URLs: can't re-crawl everything equally. Tiered scheduling by popularity is how you stay within rate limits while giving good coverage</li>
+        <li>Price deduplication: if price didn't change, don't write. At 76K crawls/sec, blindly writing all would be 2.5B writes/day vs 500M with dedup</li>
+        <li>Chart performance: don't query raw time-series for 1yr charts — pre-aggregate to daily/weekly points. Cassandra stores raw; background job downsamples for chart tiers</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection" id="pt-distinct">
+    <div class="subsection-header"><span class="subsection-num">07</span><h3>Distinctive Component: Distributed Crawl Orchestration + Deduplication</h3></div>
+    <div class="distinctive-box" style="background:rgba(251,191,36,0.07); border:1px solid rgba(251,191,36,0.3)">
+      <h4 style="color:var(--accent4)">🕷️ 76K Crawls/sec with Intelligent Scheduling + Change Detection</h4>
+      <ul>
+        <li><strong>Crawl quota management:</strong> Per-domain rate limiter using Redis sliding window (token bucket: Amazon gets 1 crawl/IP/10sec). Domain coordinator assigns crawls to IP+server pairs to maximize throughput without triggering blocks</li>
+        <li><strong>Smart retry:</strong> HTTP 429 / 503 → exponential backoff (30s, 2min, 10min, 1hr). After 3 failures → downgrade to cold tier. After 7 days of failure → alert operator, flag product as "tracking paused"</li>
+        <li><strong>Change detection before storage:</strong> Crawler fetches, Parser extracts price → compare to Redis current price hash. Hash = MD5(price, in_stock, currency). Hash match = no event. Hash miss = new Kafka event. This single optimization reduces Cassandra write load from 6.6B to ~500M/day</li>
+        <li><strong>Parser resilience:</strong> Retailer HTML structure changes break parsers. Each retailer has versioned parser (CSS selector rules stored in config DB). When parse failure rate spikes (>5% on a domain) → alert engineering + fallback to known-good parser version. Parsers A/B tested on 1% of crawls before promotion</li>
+        <li><strong>Cross-retailer product matching:</strong> UPC/EAN barcode matching for identical products across retailers. ML model (BERT embeddings on title+brand+category) for non-barcode matching. Confidence score threshold; low confidence → manual review queue. Result: "compare this product on 5 retailers" feature</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+  function jump(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Update active nav
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  }
+
+  // Highlight nav on scroll
+  const sections = document.querySelectorAll('[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          const target = link.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+          if (target === entry.target.id) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

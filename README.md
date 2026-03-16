@@ -41,6 +41,11 @@ Modern web development and performance.
 *   **Web Performance Fundamentals**: Optimizing frontend applications.
 *   **React Cheatsheet**: Quick reference for hooks and components.
 
+### 🤝 [Behavioral](./Behavioral/)
+The "soft skills" and stories that win interviews.
+*   **STAR Method Template**: A structured guide for your interview stories.
+*   **Common Questions**: Practice questions for conflict, leadership, and failure.
+
 ### 👔 [Career & General](./Career-and-General/)
 General engineering wisdom and interview playbooks.
 *   **Software Engineer's Guidebook (Gergely Orosz)**: Career navigation from Senior to Staff level.

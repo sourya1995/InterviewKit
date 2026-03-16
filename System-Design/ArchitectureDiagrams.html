@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Diagrams</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13151c;
+    --bg3: #1c1f2a;
+    --border: #2a2d3a;
+    --text: #e2e8f0;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --font: 'JetBrains Mono', 'Fira Code', monospace;
+    --sans: system-ui, sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; }
+
+  .header { padding:28px 32px 0; border-bottom:1px solid var(--border); }
+  .header h1 { font-size:20px; font-weight:700; letter-spacing:-0.01em; margin-bottom:16px; }
+
+  .tabs { display:flex; gap:2px; overflow-x:auto; padding-bottom:0; }
+  .tab {
+    padding:10px 18px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+    transition:all 0.15s;
+    color:var(--text2);
+  }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:#fff; border-bottom-color:#6c8eff; }
+
+  .diagram-area { padding:24px 32px 40px; overflow-x:auto; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  svg { display:block; max-width:100%; }
+
+  /* Lightweight legend */
+  .legend {
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:16px;
+    padding:10px 14px;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:8px;
+  }
+  .legend-item {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:var(--text2);
+  }
+  .legend-dot {
+    width:10px; height:10px; border-radius:2px; flex-shrink:0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Architecture Diagrams — Massive Scale Systems</h1>
+  <div class="tabs">
+    <button class="tab active" onclick="show(0)">🛍️ Amazon E-Commerce</button>
+    <button class="tab" onclick="show(1)">🔨 Online Auction</button>
+    <button class="tab" onclick="show(2)">📅 Distributed Calendar</button>
+    <button class="tab" onclick="show(3)">🎵 Spotify</button>
+    <button class="tab" onclick="show(4)">🏥 Telemedicine</button>
+    <button class="tab" onclick="show(5)">📉 Price Tracker</button>
+  </div>
+</div>
+
+<div class="diagram-area">
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PANEL 0: AMAZON E-COMMERCE                    -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="panel active" id="p0">
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Client / Edge</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5ba55e"></div> Core Services</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4844a"></div> Data Stores</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9b6ec8"></div> Async / Events</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c85e5e"></div> Critical Path</div>
+</div>
+<svg width="100%" viewBox="0 0 880 760">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- LAYER LABELS -->
+<text x="16" y="58" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,58)">CLIENT</text>
+<text x="16" y="178" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,178)">EDGE</text>
+<text x="16" y="348" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,348)">SERVICES</text>
+<text x="16" y="558" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,558)">DATA</text>
+<text x="16" y="700" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,700)">ASYNC</text>
+
+<!-- LAYER BANDS -->
+<rect x="36" y="20" width="830" height="70" rx="6" fill="#4a90d9" fill-opacity="0.06" stroke="#4a90d9" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="100" width="830" height="80" rx="6" fill="#4a90d9" fill-opacity="0.04" stroke="#4a90d9" stroke-opacity="0.1" stroke-width="0.5"/>
+<rect x="36" y="194" width="830" height="220" rx="6" fill="#5ba55e" fill-opacity="0.05" stroke="#5ba55e" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="428" width="830" height="180" rx="6" fill="#d4844a" fill-opacity="0.06" stroke="#d4844a" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="622" width="830" height="110" rx="6" fill="#9b6ec8" fill-opacity="0.06" stroke="#9b6ec8" stroke-opacity="0.15" stroke-width="0.5"/>
+
+<!-- CLIENT ROW -->
+<!-- Browser -->
+<rect x="60" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="120" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Browser</text>
+<text x="120" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Web / SPA</text>
+
+<!-- Mobile -->
+<rect x="210" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="270" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Mobile App</text>
+<text x="270" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">iOS / Android</text>
+
+<!-- Seller Dashboard -->
+<rect x="360" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="425" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Seller Portal</text>
+<text x="425" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Inventory / Listings</text>
+
+<!-- EDGE ROW -->
+<!-- CloudFront -->
+<rect x="60" y="112" width="120" height="56" rx="6" fill="#4a90d9" fill-opacity="0.12" stroke="#4a90d9" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="120" y="133" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">CloudFront</text>
+<text x="120" y="148" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">CDN / static</text>
+<text x="120" y="161" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">&lt; 50ms TTFB</text>
+
+<!-- ALB -->
+<rect x="240" y="112" width="120" height="56" rx="6" fill="#4a90d9" fill-opacity="0.12" stroke="#4a90d9" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="300" y="133" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">AWS ALB</text>
+<text x="300" y="148" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Load Balancer</text>
+<text x="300" y="161" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">350K RPS peak</text>
+
+<!-- API Gateway + Auth -->
+<rect x="420" y="112" width="140" height="56" rx="6" fill="#c85e5e" fill-opacity="0.18" stroke="#c85e5e" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="490" y="133" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">API Gateway</text>
+<text x="490" y="148" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Auth · Rate limit</text>
+<text x="490" y="161" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">JWT validation</text>
+
+<!-- SERVICES ROW -->
+<!-- Search Service -->
+<rect x="50" y="210" width="110" height="56" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="105" y="233" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Search Svc</text>
+<text x="105" y="250" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Elasticsearch</text>
+<text x="105" y="264" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">350M SKUs</text>
+
+<!-- Product Service -->
+<rect x="175" y="210" width="110" height="56" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="230" y="233" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Product Svc</text>
+<text x="230" y="250" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Catalog · Images</text>
+<text x="230" y="264" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">L1+L2 cache</text>
+
+<!-- Cart Service -->
+<rect x="300" y="210" width="110" height="56" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="355" y="233" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Cart Svc</text>
+<text x="355" y="250" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">DynamoDB KV</text>
+<text x="355" y="264" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">persistent</text>
+
+<!-- Order Service (highlighted - critical path) -->
+<rect x="425" y="204" width="120" height="68" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="485" y="226" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Order Svc</text>
+<text x="485" y="242" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Saga orchestrator</text>
+<text x="485" y="257" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Step Functions</text>
+<text x="485" y="271" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">compensating tx</text>
+
+<!-- Inventory Service (highlighted) -->
+<rect x="560" y="204" width="120" height="68" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="620" y="226" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Inventory Svc</text>
+<text x="620" y="242" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Redis Lua deduct</text>
+<text x="620" y="257" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">flash sale engine</text>
+<text x="620" y="271" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">oversell protect</text>
+
+<!-- Payment Service -->
+<rect x="695" y="210" width="120" height="56" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="755" y="233" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Payment Svc</text>
+<text x="755" y="250" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Stripe / PSP</text>
+<text x="755" y="264" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">PCI-DSS L1</text>
+
+<!-- SECOND SERVICES ROW -->
+<!-- Recommendation -->
+<rect x="50" y="300" width="120" height="44" rx="6" fill="#5ba55e" fill-opacity="0.12" stroke="#5ba55e" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="110" y="319" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Reco Svc</text>
+<text x="110" y="334" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">SageMaker ML</text>
+
+<!-- Review Service -->
+<rect x="190" y="300" width="110" height="44" rx="6" fill="#5ba55e" fill-opacity="0.12" stroke="#5ba55e" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="245" y="319" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Review Svc</text>
+<text x="245" y="334" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">async moderation</text>
+
+<!-- Notification Service -->
+<rect x="315" y="300" width="120" height="44" rx="6" fill="#5ba55e" fill-opacity="0.12" stroke="#5ba55e" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="375" y="319" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Notif Svc</text>
+<text x="375" y="334" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">SES / SNS / FCM</text>
+
+<!-- Fulfillment Service -->
+<rect x="450" y="300" width="120" height="44" rx="6" fill="#5ba55e" fill-opacity="0.12" stroke="#5ba55e" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="510" y="319" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Fulfillment Svc</text>
+<text x="510" y="334" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">FBA / 3PL</text>
+
+<!-- Seller Service -->
+<rect x="590" y="300" width="110" height="44" rx="6" fill="#5ba55e" fill-opacity="0.12" stroke="#5ba55e" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="645" y="319" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Seller Svc</text>
+<text x="645" y="334" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">inventory mgmt</text>
+
+<!-- DATA ROW -->
+<!-- Aurora PG -->
+<rect x="50" y="444" width="130" height="56" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="115" y="465" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Aurora PG</text>
+<text x="115" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Orders · Users</text>
+<text x="115" y="494" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Multi-AZ HA</text>
+
+<!-- DynamoDB -->
+<rect x="200" y="444" width="130" height="56" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="265" y="465" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">DynamoDB</text>
+<text x="265" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Cart · Sessions</text>
+<text x="265" y="494" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">10ms p99 reads</text>
+
+<!-- Redis Cluster -->
+<rect x="350" y="444" width="130" height="56" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.6" stroke-width="1"/>
+<text x="415" y="465" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Redis Cluster</text>
+<text x="415" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Cache · Inventory</text>
+<text x="415" y="494" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Lua scripts · Locks</text>
+
+<!-- Elasticsearch -->
+<rect x="500" y="444" width="130" height="56" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="565" y="465" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Elasticsearch</text>
+<text x="565" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Product catalog</text>
+<text x="565" y="494" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">350K RPS reads</text>
+
+<!-- S3 -->
+<rect x="650" y="444" width="110" height="56" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="705" y="465" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">S3</text>
+<text x="705" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Product images</text>
+<text x="705" y="494" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">875 TB</text>
+
+<!-- ASYNC ROW -->
+<!-- Kafka -->
+<rect x="80" y="638" width="160" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="160" y="659" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Apache Kafka</text>
+<text x="160" y="675" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">OrderPlaced · InventoryUpdated</text>
+<text x="160" y="689" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">ProductUpdated events</text>
+
+<!-- Redshift -->
+<rect x="280" y="638" width="130" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="345" y="659" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Redshift</text>
+<text x="345" y="675" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Analytics · OLAP</text>
+<text x="345" y="689" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Sales reports</text>
+
+<!-- SageMaker -->
+<rect x="440" y="638" width="140" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="510" y="659" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">SageMaker</text>
+<text x="510" y="675" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">ML training pipeline</text>
+<text x="510" y="689" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Recommendations</text>
+
+<!-- Step Functions -->
+<rect x="610" y="638" width="140" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="680" y="659" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Step Functions</text>
+<text x="680" y="675" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Checkout saga</text>
+<text x="680" y="689" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">compensating tx</text>
+
+<!-- ARROWS: Client → Edge -->
+<line x1="120" y1="76" x2="120" y2="110" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="270" y1="76" x2="300" y2="110" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="425" y1="76" x2="490" y2="110" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+
+<!-- Edge internal -->
+<line x1="180" y1="140" x2="238" y2="140" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="360" y1="140" x2="418" y2="140" stroke="#c85e5e" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+
+<!-- API Gateway → Services -->
+<line x1="490" y1="168" x2="105" y2="208" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="490" y1="168" x2="230" y2="208" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="490" y1="168" x2="355" y2="208" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="490" y1="168" x2="485" y2="202" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="490" y1="168" x2="755" y2="208" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+
+<!-- Order saga (critical) -->
+<line x1="545" y1="238" x2="558" y2="238" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.8" marker-end="url(#arr)"/>
+<line x1="620" y1="238" x2="693" y2="238" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.8" marker-end="url(#arr)"/>
+
+<!-- Services → Data -->
+<line x1="105" y1="266" x2="115" y2="442" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="355" y1="266" x2="265" y2="442" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="485" y1="272" x2="415" y2="442" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="105" y1="266" x2="565" y2="442" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.3" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="755" y1="266" x2="705" y2="442" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+
+<!-- Services → Kafka -->
+<line x1="485" y1="344" x2="290" y2="636" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="645" y1="344" x2="200" y2="636" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+
+<!-- Kafka → Notif/Fulfillment -->
+<line x1="160" y1="638" x2="375" y2="346" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="160" y1="638" x2="510" y2="346" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+</svg>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PANEL 1: ONLINE AUCTION                       -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="panel" id="p1">
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Client / Edge</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c85e5e"></div> Bid Hot Path (critical)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5ba55e"></div> Supporting Services</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4844a"></div> Data Stores</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9b6ec8"></div> Broadcast / Async</div>
+</div>
+<svg width="100%" viewBox="0 0 880 720">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- LAYER BANDS -->
+<rect x="36" y="20" width="830" height="70" rx="6" fill="#4a90d9" fill-opacity="0.06" stroke="#4a90d9" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="104" width="830" height="80" rx="6" fill="#4a90d9" fill-opacity="0.04" stroke="#4a90d9" stroke-opacity="0.1" stroke-width="0.5"/>
+<rect x="36" y="198" width="830" height="180" rx="6" fill="#5ba55e" fill-opacity="0.04" stroke="#5ba55e" stroke-opacity="0.12" stroke-width="0.5"/>
+<rect x="36" y="392" width="830" height="170" rx="6" fill="#d4844a" fill-opacity="0.06" stroke="#d4844a" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="576" width="830" height="110" rx="6" fill="#9b6ec8" fill-opacity="0.06" stroke="#9b6ec8" stroke-opacity="0.15" stroke-width="0.5"/>
+
+<!-- LAYER LABELS -->
+<text x="16" y="60" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,60)">CLIENT</text>
+<text x="16" y="165" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,165)">EDGE</text>
+<text x="16" y="310" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,310)">SERVICES</text>
+<text x="16" y="490" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,490)">DATA</text>
+<text x="16" y="642" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,642)">ASYNC</text>
+
+<!-- CLIENT ROW -->
+<rect x="60" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="120" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Buyer Client</text>
+<text x="120" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Web / Mobile</text>
+
+<rect x="210" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="270" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">WS Client</text>
+<text x="270" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Live price feed</text>
+
+<rect x="360" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="420" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Seller Client</text>
+<text x="420" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Listing mgmt</text>
+
+<!-- EDGE ROW -->
+<rect x="60" y="116" width="130" height="56" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="125" y="136" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">API Gateway</text>
+<text x="125" y="151" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Auth · Rate limit</text>
+<text x="125" y="165" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Idempotency keys</text>
+
+<rect x="220" y="116" width="150" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="295" y="136" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">WS Gateway</text>
+<text x="295" y="151" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">1,000 WS servers</text>
+<text x="295" y="165" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">50M connections</text>
+
+<!-- SERVICES ROW (1) -->
+<!-- Bid Service - CRITICAL -->
+<rect x="50" y="210" width="140" height="76" rx="6" fill="#c85e5e" fill-opacity="0.2" stroke="#c85e5e" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="120" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Bid Service</text>
+<text x="120" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Lua CAS in Redis</text>
+<text x="120" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">50K bids/sec</text>
+<text x="120" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">proxy bidding</text>
+
+<!-- Auction Lifecycle -->
+<rect x="210" y="210" width="130" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="275" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Auction Svc</text>
+<text x="275" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Lifecycle mgmt</text>
+<text x="275" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">anti-sniping ext</text>
+<text x="275" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">scheduler</text>
+
+<!-- WS Fanout -->
+<rect x="360" y="210" width="140" height="76" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="430" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">WS Fanout</text>
+<text x="430" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Kafka consumer</text>
+<text x="430" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Redis Pub/Sub</text>
+<text x="430" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">partition by auction</text>
+
+<!-- Listing Service -->
+<rect x="520" y="210" width="120" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="580" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Listing Svc</text>
+<text x="580" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Search index</text>
+<text x="580" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Category browse</text>
+<text x="580" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">image upload S3</text>
+
+<!-- Payment Service -->
+<rect x="660" y="210" width="120" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="720" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Payment Svc</text>
+<text x="720" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Winner billing</text>
+<text x="720" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Stripe hold</text>
+<text x="720" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">capture on close</text>
+
+<!-- SERVICES ROW 2 -->
+<rect x="210" y="304" width="130" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="275" y="322" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Notif Svc</text>
+<text x="275" y="337" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Outbid / won alerts</text>
+
+<rect x="360" y="304" width="130" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="425" y="322" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Fraud Svc</text>
+<text x="425" y="337" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Shill bid detection</text>
+
+<!-- DATA ROW -->
+<!-- Redis hot state -->
+<rect x="50" y="408" width="150" height="68" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="125" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Redis</text>
+<text x="125" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Hot auction state</text>
+<text x="125" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">current price/winner</text>
+<text x="125" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">bid locks (100ms TTL)</text>
+
+<!-- Postgres -->
+<rect x="220" y="408" width="140" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="290" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Postgres</text>
+<text x="290" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Auctions · Users</text>
+<text x="290" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Authoritative bids</text>
+<text x="290" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Optimistic locking</text>
+
+<!-- Cassandra -->
+<rect x="380" y="408" width="150" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="455" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Cassandra</text>
+<text x="455" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Bid history</text>
+<text x="455" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">time-series append</text>
+<text x="455" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">7yr retention</text>
+
+<!-- Elasticsearch (listings) -->
+<rect x="550" y="408" width="140" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="620" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Elasticsearch</text>
+<text x="620" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Listing search</text>
+<text x="620" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">1.5B docs</text>
+<text x="620" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">faceted filters</text>
+
+<!-- ASYNC ROW -->
+<!-- Kafka -->
+<rect x="80" y="592" width="200" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="180" y="613" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Apache Kafka</text>
+<text x="180" y="629" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">BidPlaced · AuctionClosed</text>
+<text x="180" y="643" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">partitioned by auction_id</text>
+
+<!-- Scheduler -->
+<rect x="320" y="592" width="180" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="410" y="613" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Scheduler</text>
+<text x="410" y="629" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Redis ZSET sorted by end_time</text>
+<text x="410" y="643" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">100ms poll, auto-extend</text>
+
+<!-- Reconciler -->
+<rect x="530" y="592" width="160" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="610" y="613" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Reconciler</text>
+<text x="610" y="629" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Redis ↔ Postgres</text>
+<text x="610" y="643" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">60s consistency check</text>
+
+<!-- ARROWS -->
+<line x1="120" y1="76" x2="125" y2="114" stroke="#c85e5e" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+<line x1="270" y1="76" x2="295" y2="114" stroke="#9b6ec8" stroke-width="1" stroke-opacity="0.6" marker-end="url(#arr)"/>
+<line x1="125" y1="172" x2="120" y2="208" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="120" y1="286" x2="125" y2="406" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="120" y1="286" x2="290" y2="406" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="120" y1="286" x2="455" y2="406" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="430" y1="286" x2="180" y2="590" stroke="#9b6ec8" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="180" y1="590" x2="430" y2="350" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="295" y1="286" x2="410" y2="590" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="295" y1="172" x2="430" y2="208" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+</svg>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PANEL 2: DISTRIBUTED CALENDAR                 -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="panel" id="p2">
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Client / Sync</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5ba55e"></div> Core Services</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4844a"></div> Data Stores</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9b6ec8"></div> Async / Reminders</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c85e5e"></div> Free/Busy (critical)</div>
+</div>
+<svg width="100%" viewBox="0 0 880 700">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- LAYER BANDS -->
+<rect x="36" y="20" width="830" height="70" rx="6" fill="#4a90d9" fill-opacity="0.06" stroke="#4a90d9" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="104" width="830" height="70" rx="6" fill="#4a90d9" fill-opacity="0.04" stroke="#4a90d9" stroke-opacity="0.1" stroke-width="0.5"/>
+<rect x="36" y="188" width="830" height="190" rx="6" fill="#5ba55e" fill-opacity="0.04" stroke="#5ba55e" stroke-opacity="0.12" stroke-width="0.5"/>
+<rect x="36" y="392" width="830" height="160" rx="6" fill="#d4844a" fill-opacity="0.06" stroke="#d4844a" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="566" width="830" height="106" rx="6" fill="#9b6ec8" fill-opacity="0.06" stroke="#9b6ec8" stroke-opacity="0.15" stroke-width="0.5"/>
+
+<!-- LAYER LABELS -->
+<text x="16" y="58" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,58)">CLIENT</text>
+<text x="16" y="148" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,148)">EDGE</text>
+<text x="16" y="295" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,295)">SERVICES</text>
+<text x="16" y="488" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,488)">DATA</text>
+<text x="16" y="630" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,630)">ASYNC</text>
+
+<!-- CLIENT ROW -->
+<rect x="60" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="120" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Web App</text>
+<text x="120" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Browser</text>
+
+<rect x="210" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="270" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">iOS / Android</text>
+<text x="270" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Offline + sync</text>
+
+<rect x="360" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="425" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">CalDAV Client</text>
+<text x="425" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Apple Cal / Outlook</text>
+
+<rect x="520" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="585" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">3rd Party API</text>
+<text x="585" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Meet / Zoom embed</text>
+
+<!-- EDGE ROW -->
+<rect x="60" y="116" width="150" height="44" rx="6" fill="#4a90d9" fill-opacity="0.12" stroke="#4a90d9" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="135" y="135" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">API Gateway</text>
+<text x="135" y="150" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Auth · OAuth2</text>
+
+<rect x="240" y="116" width="160" height="44" rx="6" fill="#4a90d9" fill-opacity="0.12" stroke="#4a90d9" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="320" y="135" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">CalDAV Gateway</text>
+<text x="320" y="150" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">RFC 4791 protocol</text>
+
+<!-- SERVICES ROW -->
+<!-- Calendar Service -->
+<rect x="50" y="200" width="140" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="120" y="222" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Calendar Svc</text>
+<text x="120" y="238" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">CRUD events</text>
+<text x="120" y="253" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">RRULE expansion</text>
+<text x="120" y="268" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Delta sync tokens</text>
+
+<!-- FreeBusy Service - CRITICAL -->
+<rect x="210" y="200" width="150" height="68" rx="6" fill="#c85e5e" fill-opacity="0.18" stroke="#c85e5e" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="285" y="222" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">FreeBusy Svc</text>
+<text x="285" y="238" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Redis BITFIELD</text>
+<text x="285" y="253" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">96 bits/user/day</text>
+<text x="285" y="268" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">50 attendees &lt;20ms</text>
+
+<!-- Reminder Service -->
+<rect x="380" y="200" width="140" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="450" y="222" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Reminder Svc</text>
+<text x="450" y="238" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">DynamoDB jobs</text>
+<text x="450" y="253" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">fire_minute PK</text>
+<text x="450" y="268" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">100M notifs/day</text>
+
+<!-- Search Service -->
+<rect x="540" y="200" width="130" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="605" y="222" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Search Svc</text>
+<text x="605" y="238" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Elasticsearch</text>
+<text x="605" y="253" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">full-text events</text>
+<text x="605" y="268" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">attendee filter</text>
+
+<!-- Sharing Service -->
+<rect x="690" y="200" width="120" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="750" y="222" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Sharing Svc</text>
+<text x="750" y="238" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">ACL permissions</text>
+<text x="750" y="253" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">owner/reader</text>
+<text x="750" y="268" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">writer/freeBusy</text>
+
+<!-- Row 2 services -->
+<rect x="120" y="292" width="160" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="200" y="311" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Invite Svc</text>
+<text x="200" y="326" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">RSVP · attendee mgmt</text>
+
+<rect x="310" y="292" width="160" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="390" y="311" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Conferencing Svc</text>
+<text x="390" y="326" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Meet / Zoom link gen</text>
+
+<!-- DATA ROW -->
+<!-- Postgres sharded -->
+<rect x="50" y="408" width="180" height="68" rx="6" fill="#d4844a" fill-opacity="0.18" stroke="#d4844a" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="140" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Postgres (sharded)</text>
+<text x="140" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">events · attendees</text>
+<text x="140" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">sharded by user_id</text>
+<text x="140" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">250 shards · 500TB</text>
+
+<!-- Redis freebusy -->
+<rect x="250" y="408" width="180" height="68" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="340" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Redis Cluster</text>
+<text x="340" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">FreeBusy BITFIELDs</text>
+<text x="340" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">7-day sliding cache</text>
+<text x="340" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">sync tokens</text>
+
+<!-- DynamoDB reminders -->
+<rect x="450" y="408" width="170" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="535" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">DynamoDB</text>
+<text x="535" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Reminder jobs</text>
+<text x="535" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">PK=fire_minute</text>
+<text x="535" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">idempotent delivery</text>
+
+<!-- Elasticsearch -->
+<rect x="640" y="408" width="150" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="715" y="430" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Elasticsearch</text>
+<text x="715" y="446" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Event search index</text>
+<text x="715" y="461" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">per-user sharding</text>
+<text x="715" y="475" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">title · description</text>
+
+<!-- ASYNC ROW -->
+<rect x="80" y="582" width="220" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="190" y="603" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Kafka</text>
+<text x="190" y="619" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">EventCreated · RSVPUpdated</text>
+<text x="190" y="633" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">FreeBusyUpdated events</text>
+
+<rect x="330" y="582" width="180" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="420" y="603" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Email / Push</text>
+<text x="420" y="619" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">SES · FCM · APNS</text>
+<text x="420" y="633" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">invite + reminder delivery</text>
+
+<rect x="540" y="582" width="180" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="630" y="603" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">FreeBusy Updater</text>
+<text x="630" y="619" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Kafka consumer</text>
+<text x="630" y="633" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">set BITFIELD on event create</text>
+
+<!-- ARROWS -->
+<line x1="120" y1="76" x2="135" y2="114" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="270" y1="76" x2="320" y2="114" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="135" y1="160" x2="120" y2="198" stroke="#5ba55e" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="135" y1="160" x2="285" y2="198" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="135" y1="160" x2="450" y2="198" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="120" y1="268" x2="140" y2="406" stroke="#d4844a" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="285" y1="268" x2="340" y2="406" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="450" y1="268" x2="535" y2="406" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="605" y1="268" x2="715" y2="406" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="120" y1="268" x2="190" y2="580" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="190" y1="580" x2="630" y2="580" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="190" y1="638" x2="420" y2="580" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+</svg>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PANEL 3: SPOTIFY                              -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="panel" id="p3">
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Client / Delivery</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c85e5e"></div> Streaming Hot Path</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5ba55e"></div> Supporting Services</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4844a"></div> Data Stores</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9b6ec8"></div> ML / Batch Pipelines</div>
+</div>
+<svg width="100%" viewBox="0 0 880 760">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- LAYER BANDS -->
+<rect x="36" y="20" width="830" height="70" rx="6" fill="#4a90d9" fill-opacity="0.06" stroke="#4a90d9" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="104" width="830" height="80" rx="6" fill="#c85e5e" fill-opacity="0.05" stroke="#c85e5e" stroke-opacity="0.2" stroke-width="0.5"/>
+<rect x="36" y="198" width="830" height="200" rx="6" fill="#5ba55e" fill-opacity="0.04" stroke="#5ba55e" stroke-opacity="0.12" stroke-width="0.5"/>
+<rect x="36" y="412" width="830" height="160" rx="6" fill="#d4844a" fill-opacity="0.06" stroke="#d4844a" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="586" width="830" height="140" rx="6" fill="#9b6ec8" fill-opacity="0.06" stroke="#9b6ec8" stroke-opacity="0.15" stroke-width="0.5"/>
+
+<!-- LAYER LABELS -->
+<text x="16" y="58" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,58)">CLIENT</text>
+<text x="16" y="165" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,165)">STREAMING</text>
+<text x="16" y="320" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,320)">SERVICES</text>
+<text x="16" y="505" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,505)">DATA</text>
+<text x="16" y="672" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,672)">ML PIPELINE</text>
+
+<!-- CLIENT ROW -->
+<rect x="60" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="120" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Desktop App</text>
+<text x="120" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Win / Mac / Linux</text>
+
+<rect x="210" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="270" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Mobile App</text>
+<text x="270" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">iOS / Android</text>
+
+<rect x="360" y="32" width="120" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="420" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Web Player</text>
+<text x="420" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Browser HLS</text>
+
+<rect x="510" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="575" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Smart Speaker</text>
+<text x="575" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Connect protocol</text>
+
+<!-- STREAMING ROW (Critical) -->
+<!-- CDN -->
+<rect x="50" y="116" width="180" height="56" rx="6" fill="#c85e5e" fill-opacity="0.2" stroke="#c85e5e" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="140" y="137" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">CloudFront CDN</text>
+<text x="140" y="153" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">160+ edge PoPs</text>
+<text x="140" y="168" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">top 5% tracks cached</text>
+
+<!-- Stream Service -->
+<rect x="250" y="116" width="180" height="56" rx="6" fill="#c85e5e" fill-opacity="0.2" stroke="#c85e5e" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="340" y="137" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Stream Service</text>
+<text x="340" y="153" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Signed CDN URLs</text>
+<text x="340" y="168" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">DRM tokens · 5min TTL</text>
+
+<!-- S3 Audio -->
+<rect x="450" y="116" width="180" height="56" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="540" y="137" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">S3 Audio Store</text>
+<text x="540" y="153" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">1.5 PB · 3 bitrates</text>
+<text x="540" y="168" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">10s HLS segments DRM</text>
+
+<!-- Play Event Logger -->
+<rect x="650" y="116" width="160" height="56" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="730" y="137" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Play Logger</text>
+<text x="730" y="153" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">46K events/sec</text>
+<text x="730" y="168" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">royalty tracking</text>
+
+<!-- SERVICES ROW -->
+<rect x="50" y="210" width="130" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="115" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Catalog Svc</text>
+<text x="115" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Tracks · Albums</text>
+<text x="115" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Artists · Postgres</text>
+<text x="115" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Redis cache</text>
+
+<rect x="200" y="210" width="130" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="265" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Playlist Svc</text>
+<text x="265" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">CRUD playlists</text>
+<text x="265" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">collaborative edit</text>
+<text x="265" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">fractional position</text>
+
+<rect x="350" y="210" width="140" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="420" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Search Svc</text>
+<text x="420" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Elasticsearch</text>
+<text x="420" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">tracks · playlists</text>
+<text x="420" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">artists · podcasts</text>
+
+<!-- Top K Service - highlighted -->
+<rect x="508" y="204" width="150" height="80" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="583" y="228" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Top K Svc</text>
+<text x="583" y="244" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Flink streaming</text>
+<text x="583" y="259" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Count-Min Sketch</text>
+<text x="583" y="274" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Redis ZSET 30s</text>
+<text x="583" y="284" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">global/country/genre</text>
+
+<rect x="680" y="210" width="140" height="68" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="750" y="232" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Player State</text>
+<text x="750" y="248" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Redis per user</text>
+<text x="750" y="263" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">cross-device sync</text>
+<text x="750" y="278" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">WS handoff</text>
+
+<!-- Row 2 services -->
+<rect x="200" y="302" width="130" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="265" y="320" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Radio / Autoplay</text>
+<text x="265" y="335" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">seed-based reco</text>
+
+<rect x="350" y="302" width="140" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="420" y="320" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Social Feed</text>
+<text x="420" y="335" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">friend activity</text>
+
+<!-- DATA ROW -->
+<rect x="50" y="428" width="140" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="120" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Postgres</text>
+<text x="120" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Tracks · Albums</text>
+<text x="120" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Artists · Playlists</text>
+<text x="120" y="495" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">audio_features JSONB</text>
+
+<rect x="210" y="428" width="150" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="285" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Cassandra</text>
+<text x="285" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Listen history</text>
+<text x="285" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">user_id + TIMEUUID</text>
+<text x="285" y="495" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">4B events/day</text>
+
+<rect x="380" y="428" width="150" height="68" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="455" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Redis Cluster</text>
+<text x="455" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Top K ZSETs</text>
+<text x="455" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Player state</text>
+<text x="455" y="495" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Catalog cache</text>
+
+<rect x="550" y="428" width="140" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="620" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">DynamoDB</text>
+<text x="620" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Discover Weekly</text>
+<text x="620" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">600M × 30 tracks</text>
+<text x="620" y="495" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">user_id + week_id</text>
+
+<rect x="710" y="428" width="130" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="775" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Elasticsearch</text>
+<text x="775" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Catalog search</text>
+<text x="775" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">100M tracks/podcasts</text>
+<text x="775" y="495" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">fuzzy match</text>
+
+<!-- ML / ASYNC ROW -->
+<rect x="50" y="602" width="170" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="135" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Kafka</text>
+<text x="135" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">play-events (by user_id)</text>
+<text x="135" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">play-events (by track_id)</text>
+
+<rect x="240" y="602" width="180" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.15" stroke="#9b6ec8" stroke-opacity="0.5" stroke-width="0.8"/>
+<text x="330" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Apache Flink</text>
+<text x="330" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">30s tumbling window</text>
+<text x="330" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Count-Min Sketch Top K</text>
+
+<rect x="440" y="602" width="200" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="540" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Spark (Discover Weekly)</text>
+<text x="540" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">ALS collaborative filter</text>
+<text x="540" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">600M users · Monday 3am</text>
+
+<rect x="660" y="602" width="170" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="745" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Audio Encoder</text>
+<text x="745" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">3 bitrates + lossless</text>
+<text x="745" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">audio features extraction</text>
+
+<!-- ARROWS -->
+<line x1="270" y1="76" x2="340" y2="114" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="140" y1="172" x2="540" y2="114" stroke="#c85e5e" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="340" y1="172" x2="265" y2="208" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="730" y1="172" x2="135" y2="600" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="135" y1="600" x2="330" y2="600" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="330" y1="658" x2="455" y2="494" stroke="#c85e5e" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+<line x1="285" y1="496" x2="540" y2="600" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="540" y1="658" x2="620" y2="494" stroke="#9b6ec8" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="583" y1="284" x2="455" y2="426" stroke="#c85e5e" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+</svg>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PANEL 4: TELEMEDICINE                         -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="panel" id="p4">
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Clients</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c85e5e"></div> Video / Signaling (critical)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5ba55e"></div> Clinical Services</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9b6ec8"></div> PHI / HIPAA Layer</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4844a"></div> Data Stores</div>
+</div>
+<svg width="100%" viewBox="0 0 880 760">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- LAYER BANDS -->
+<rect x="36" y="20" width="830" height="70" rx="6" fill="#4a90d9" fill-opacity="0.06" stroke="#4a90d9" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="104" width="830" height="90" rx="6" fill="#c85e5e" fill-opacity="0.06" stroke="#c85e5e" stroke-opacity="0.2" stroke-width="0.5"/>
+<rect x="36" y="208" width="830" height="200" rx="6" fill="#5ba55e" fill-opacity="0.04" stroke="#5ba55e" stroke-opacity="0.12" stroke-width="0.5"/>
+<rect x="36" y="422" width="830" height="160" rx="6" fill="#9b6ec8" fill-opacity="0.06" stroke="#9b6ec8" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="596" width="830" height="140" rx="6" fill="#d4844a" fill-opacity="0.06" stroke="#d4844a" stroke-opacity="0.15" stroke-width="0.5"/>
+
+<!-- LAYER LABELS -->
+<text x="16" y="58" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,58)">CLIENT</text>
+<text x="16" y="165" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,165)">VIDEO</text>
+<text x="16" y="325" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,325)">CLINICAL</text>
+<text x="16" y="515" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,515)">PHI / AUDIT</text>
+<text x="16" y="675" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,675)">DATA</text>
+
+<!-- CLIENT ROW -->
+<rect x="60" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="125" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Patient App</text>
+<text x="125" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">iOS / Android / Web</text>
+
+<rect x="220" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="285" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Doctor App</text>
+<text x="285" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Web EMR + Mobile</text>
+
+<rect x="380" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="445" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Pharmacy Portal</text>
+<text x="445" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Rx fulfillment</text>
+
+<rect x="540" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="605" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Admin Portal</text>
+<text x="605" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Ops + compliance</text>
+
+<!-- VIDEO ROW -->
+<!-- Signaling Service -->
+<rect x="50" y="116" width="170" height="68" rx="6" fill="#c85e5e" fill-opacity="0.2" stroke="#c85e5e" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="135" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Signaling Svc</text>
+<text x="135" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">WebSocket (WS)</text>
+<text x="135" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">SDP offer/answer</text>
+<text x="135" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">JWT room token</text>
+
+<!-- STUN/TURN -->
+<rect x="240" y="116" width="160" height="68" rx="6" fill="#c85e5e" fill-opacity="0.18" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="320" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">STUN / TURN</text>
+<text x="320" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">ICE candidates</text>
+<text x="320" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">P2P 85% of calls</text>
+<text x="320" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">DTLS-SRTP encrypted</text>
+
+<!-- SFU (Recording) -->
+<rect x="420" y="116" width="160" height="68" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="500" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">SFU (mediasoup)</text>
+<text x="500" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Optional recording</text>
+<text x="500" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">→ S3 KMS encrypted</text>
+<text x="500" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">37.5 TB/day if enabled</text>
+
+<!-- API Gateway -->
+<rect x="600" y="116" width="170" height="68" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="685" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">API Gateway</text>
+<text x="685" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">OPA policy engine</text>
+<text x="685" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Role-based field filter</text>
+<text x="685" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">TLS 1.3 · HTTPS only</text>
+
+<!-- CLINICAL SERVICES ROW -->
+<rect x="50" y="220" width="130" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="115" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Appt Svc</text>
+<text x="115" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Booking · queue</text>
+<text x="115" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">on-demand match</text>
+<text x="115" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Redis ZPOPMIN</text>
+
+<rect x="200" y="220" width="130" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="265" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">EHR Svc</text>
+<text x="265" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">SOAP notes</text>
+<text x="265" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">FHIR R4 bundle</text>
+<text x="265" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">digital signature</text>
+
+<!-- Prescription Service - highlighted -->
+<rect x="350" y="214" width="150" height="88" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="425" y="236" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Prescription Svc</text>
+<text x="425" y="252" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">e-Rx issuance</text>
+<text x="425" y="267" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Drug interaction chk</text>
+<text x="425" y="282" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">PDMP check</text>
+<text x="425" y="297" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">FDA NDF-RT rules</text>
+
+<rect x="520" y="220" width="130" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="585" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Pharmacy Svc</text>
+<text x="585" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Inventory mgmt</text>
+<text x="585" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">fulfillment</text>
+<text x="585" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">delivery tracking</text>
+
+<rect x="670" y="220" width="130" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="735" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Billing Svc</text>
+<text x="735" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Insurance verify</text>
+<text x="735" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">co-pay collection</text>
+<text x="735" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Stripe · claims</text>
+
+<!-- Row 2 clinical -->
+<rect x="120" y="318" width="160" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="200" y="337" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Lab Integration</text>
+<text x="200" y="352" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">HL7 FHIR results</text>
+
+<rect x="310" y="318" width="160" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="390" y="337" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Messaging Svc</text>
+<text x="390" y="352" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Patient-doctor async</text>
+
+<!-- PHI / HIPAA ROW -->
+<rect x="50" y="438" width="200" height="68" rx="6" fill="#9b6ec8" fill-opacity="0.2" stroke="#9b6ec8" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="150" y="460" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">PHI Audit Middleware</text>
+<text x="150" y="476" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Every PHI access logged</text>
+<text x="150" y="491" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">sync write before response</text>
+<text x="150" y="506" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">break-glass protocol</text>
+
+<rect x="270" y="438" width="180" height="68" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.7" stroke-width="0.8"/>
+<text x="360" y="460" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Envelope Encryption</text>
+<text x="360" y="476" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">AWS KMS DEKs per patient</text>
+<text x="360" y="491" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">AES-256 app-layer</text>
+<text x="360" y="506" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">yearly key rotation</text>
+
+<rect x="470" y="438" width="170" height="68" rx="6" fill="#9b6ec8" fill-opacity="0.15" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="555" y="460" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Consent Ledger</text>
+<text x="555" y="476" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Data sharing log</text>
+<text x="555" y="491" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">GDPR revocation</text>
+<text x="555" y="506" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">immutable append</text>
+
+<rect x="660" y="438" width="160" height="68" rx="6" fill="#9b6ec8" fill-opacity="0.15" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="740" y="460" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Kafka Events</text>
+<text x="740" y="476" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">RxIssued → Pharmacy</text>
+<text x="740" y="491" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">ApptCompleted events</text>
+<text x="740" y="506" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">LabOrderCreated</text>
+
+<!-- DATA ROW -->
+<rect x="50" y="612" width="180" height="68" rx="6" fill="#d4844a" fill-opacity="0.18" stroke="#d4844a" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="140" y="634" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Postgres (PHI)</text>
+<text x="140" y="650" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">patients · appts</text>
+<text x="140" y="665" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">EHR notes (encrypted)</text>
+<text x="140" y="680" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">prescriptions</text>
+
+<rect x="250" y="612" width="180" height="68" rx="6" fill="#9b6ec8" fill-opacity="0.15" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="340" y="634" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">WORM Audit Log</text>
+<text x="340" y="650" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Cassandra append-only</text>
+<text x="340" y="665" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">S3 WORM bucket</text>
+<text x="340" y="680" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">10-year HIPAA retention</text>
+
+<rect x="450" y="612" width="160" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="530" y="634" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Redis</text>
+<text x="530" y="650" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Doctor availability</text>
+<text x="530" y="665" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">on-demand queue</text>
+<text x="530" y="680" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">drug interaction cache</text>
+
+<rect x="630" y="612" width="160" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="710" y="634" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">S3 + KMS</text>
+<text x="710" y="650" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Video recordings</text>
+<text x="710" y="665" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">HIPAA-compliant</text>
+<text x="710" y="680" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">encrypted at rest</text>
+
+<!-- ARROWS -->
+<line x1="125" y1="76" x2="135" y2="114" stroke="#c85e5e" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+<line x1="285" y1="76" x2="320" y2="114" stroke="#c85e5e" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+<line x1="285" y1="76" x2="685" y2="114" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="685" y1="184" x2="265" y2="218" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="685" y1="184" x2="425" y2="212" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="265" y1="296" x2="150" y2="436" stroke="#9b6ec8" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="425" y1="302" x2="360" y2="436" stroke="#9b6ec8" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="425" y1="302" x2="740" y2="436" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="150" y1="506" x2="140" y2="610" stroke="#d4844a" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="150" y1="506" x2="340" y2="610" stroke="#9b6ec8" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+</svg>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PANEL 5: PRICE TRACKER                        -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="panel" id="p5">
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Client / API</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c85e5e"></div> Crawler Hot Path</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5ba55e"></div> Ingestion / Alerts</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d4844a"></div> Data Stores</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9b6ec8"></div> Scheduling / Analytics</div>
+</div>
+<svg width="100%" viewBox="0 0 880 760">
+<defs>
+  <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- LAYER BANDS -->
+<rect x="36" y="20" width="830" height="70" rx="6" fill="#4a90d9" fill-opacity="0.06" stroke="#4a90d9" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="104" width="830" height="90" rx="6" fill="#c85e5e" fill-opacity="0.06" stroke="#c85e5e" stroke-opacity="0.2" stroke-width="0.5"/>
+<rect x="36" y="208" width="830" height="190" rx="6" fill="#5ba55e" fill-opacity="0.04" stroke="#5ba55e" stroke-opacity="0.12" stroke-width="0.5"/>
+<rect x="36" y="412" width="830" height="160" rx="6" fill="#d4844a" fill-opacity="0.06" stroke="#d4844a" stroke-opacity="0.15" stroke-width="0.5"/>
+<rect x="36" y="586" width="830" height="140" rx="6" fill="#9b6ec8" fill-opacity="0.06" stroke="#9b6ec8" stroke-opacity="0.15" stroke-width="0.5"/>
+
+<!-- LAYER LABELS -->
+<text x="16" y="58" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,58)">CLIENT</text>
+<text x="16" y="165" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,165)">CRAWLERS</text>
+<text x="16" y="325" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,325)">INGESTION</text>
+<text x="16" y="505" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,505)">DATA</text>
+<text x="16" y="672" font-family="system-ui,sans-serif" font-size="10" font-weight="600" fill="#4a5568" text-anchor="start" transform="rotate(-90,16,672)">SCHEDULING</text>
+
+<!-- CLIENT ROW -->
+<rect x="60" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="125" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Web App</text>
+<text x="125" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Price charts · alerts</text>
+
+<rect x="220" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="285" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Browser Ext</text>
+<text x="285" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Auto price overlay</text>
+
+<rect x="380" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="445" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Mobile App</text>
+<text x="445" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Alert push notifs</text>
+
+<rect x="540" y="32" width="130" height="44" rx="6" fill="#4a90d9" fill-opacity="0.18" stroke="#4a90d9" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="605" y="51" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">3rd Party API</text>
+<text x="605" y="66" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Developer access</text>
+
+<!-- CRAWLER ROW -->
+<!-- Crawl Scheduler -->
+<rect x="50" y="116" width="170" height="68" rx="6" fill="#c85e5e" fill-opacity="0.2" stroke="#c85e5e" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="135" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Crawl Scheduler</text>
+<text x="135" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Redis ZSET 3 tiers</text>
+<text x="135" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Hot/Warm/Cold</text>
+<text x="135" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">ZPOPMIN 1s polling</text>
+
+<!-- Crawler Pool -->
+<rect x="240" y="116" width="190" height="68" rx="6" fill="#c85e5e" fill-opacity="0.2" stroke="#c85e5e" stroke-opacity="0.8" stroke-width="1.2"/>
+<text x="335" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Crawler Pool</text>
+<text x="335" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">380 servers · 100 conns each</text>
+<text x="335" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">rotating IPs · Playwright</text>
+<text x="335" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">robots.txt compliance</text>
+
+<!-- Retailers -->
+<rect x="450" y="116" width="160" height="68" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="530" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">Retailers</text>
+<text x="530" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Amazon · Walmart</text>
+<text x="530" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Best Buy · Target</text>
+<text x="530" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">5 retailers · 2.5B pairs</text>
+
+<!-- API Gateway (read path) -->
+<rect x="630" y="116" width="170" height="68" rx="6" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="715" y="138" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7bb8f0" text-anchor="middle">API Gateway</text>
+<text x="715" y="154" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Rate limit · Auth</text>
+<text x="715" y="169" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">Read path entry</text>
+<text x="715" y="182" font-family="system-ui,sans-serif" font-size="10" fill="#4a90d9" text-anchor="middle">CDN for charts</text>
+
+<!-- INGESTION / ALERT ROW -->
+<!-- Parser Service -->
+<rect x="50" y="220" width="150" height="76" rx="6" fill="#5ba55e" fill-opacity="0.18" stroke="#5ba55e" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="125" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Parser Svc</text>
+<text x="125" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Versioned CSS selectors</text>
+<text x="125" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Extract price/stock</text>
+<text x="125" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Failure rate monitor</text>
+
+<!-- Dedup & Ingest -->
+<rect x="220" y="220" width="160" height="76" rx="6" fill="#5ba55e" fill-opacity="0.18" stroke="#5ba55e" stroke-opacity="0.6" stroke-width="0.8"/>
+<text x="300" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Dedup + Ingest</text>
+<text x="300" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">MD5 hash compare</text>
+<text x="300" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">80% write savings</text>
+<text x="300" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">write if changed only</text>
+
+<!-- Alert Matcher - highlighted -->
+<rect x="398" y="214" width="160" height="88" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="478" y="236" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Alert Matcher</text>
+<text x="478" y="252" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Bloom filter check</text>
+<text x="478" y="267" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">1% FP rate</text>
+<text x="478" y="282" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">DB lookup on hit</text>
+<text x="478" y="297" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">100K notifs/day</text>
+
+<!-- Stats Updater -->
+<rect x="578" y="220" width="150" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="653" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Stats Updater</text>
+<text x="653" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">all-time low/high</text>
+<text x="653" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">year low/high</text>
+<text x="653" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">30d avg pre-compute</text>
+
+<!-- Search + Chart Services -->
+<rect x="748" y="220" width="110" height="76" rx="6" fill="#5ba55e" fill-opacity="0.15" stroke="#5ba55e" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="803" y="242" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Search Svc</text>
+<text x="803" y="258" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Elasticsearch</text>
+<text x="803" y="273" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">product search</text>
+<text x="803" y="288" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">deal highlight</text>
+
+<!-- Row 2 ingestion -->
+<rect x="220" y="316" width="160" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="300" y="334" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Notif Svc</text>
+<text x="300" y="349" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Email · Push · SMS</text>
+
+<rect x="410" y="316" width="160" height="44" rx="6" fill="#5ba55e" fill-opacity="0.1" stroke="#5ba55e" stroke-opacity="0.3" stroke-width="0.5"/>
+<text x="490" y="334" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#7ec880" text-anchor="middle">Product Matcher</text>
+<text x="490" y="349" font-family="system-ui,sans-serif" font-size="10" fill="#5ba55e" text-anchor="middle">Cross-retailer UPC/ML</text>
+
+<!-- DATA ROW -->
+<!-- Cassandra -->
+<rect x="50" y="428" width="190" height="68" rx="6" fill="#d4844a" fill-opacity="0.2" stroke="#d4844a" stroke-opacity="0.7" stroke-width="1"/>
+<text x="145" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Cassandra</text>
+<text x="145" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Price history time-series</text>
+<text x="145" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">TWCS · 30 TB · 5yr TTL</text>
+<text x="145" y="496" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">partition: product+retailer</text>
+
+<!-- Redis -->
+<rect x="260" y="428" width="180" height="68" rx="6" fill="#c85e5e" fill-opacity="0.15" stroke="#c85e5e" stroke-opacity="0.7" stroke-width="1"/>
+<text x="350" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e88" text-anchor="middle">Redis Cluster</text>
+<text x="350" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Bloom filters (alerts)</text>
+<text x="350" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Crawl ZSETs (3 tiers)</text>
+<text x="350" y="496" font-family="system-ui,sans-serif" font-size="10" fill="#c85e5e" text-anchor="middle">Price cache 5min TTL</text>
+
+<!-- Postgres -->
+<rect x="460" y="428" width="160" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="540" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Postgres</text>
+<text x="540" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Products · Users</text>
+<text x="540" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">price_alerts · tiers</text>
+<text x="540" y="496" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">500M products</text>
+
+<!-- Elasticsearch -->
+<rect x="640" y="428" width="160" height="68" rx="6" fill="#d4844a" fill-opacity="0.15" stroke="#d4844a" stroke-opacity="0.5" stroke-width="0.5"/>
+<text x="720" y="450" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e8a870" text-anchor="middle">Elasticsearch</text>
+<text x="720" y="466" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">Product search idx</text>
+<text x="720" y="481" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">current price facets</text>
+<text x="720" y="496" font-family="system-ui,sans-serif" font-size="10" fill="#d4844a" text-anchor="middle">delta sync from Kafka</text>
+
+<!-- SCHEDULING ROW -->
+<rect x="50" y="602" width="200" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.18" stroke="#9b6ec8" stroke-opacity="0.6" stroke-width="0.5"/>
+<text x="150" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Kafka</text>
+<text x="150" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">price-changes topic</text>
+<text x="150" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">crawl-jobs topic</text>
+
+<rect x="270" y="602" width="200" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="370" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Tier Classifier</text>
+<text x="370" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Nightly watcher count</text>
+<text x="370" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Hot/Warm/Cold reclassify</text>
+
+<rect x="490" y="602" width="200" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="590" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Downsampler</text>
+<text x="590" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Hourly → Daily aggregation</text>
+<text x="590" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Chart tier caching</text>
+
+<rect x="710" y="602" width="150" height="56" rx="6" fill="#9b6ec8" fill-opacity="0.12" stroke="#9b6ec8" stroke-opacity="0.4" stroke-width="0.5"/>
+<text x="785" y="623" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#c49ee8" text-anchor="middle">Retry Engine</text>
+<text x="785" y="639" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">Exp backoff</text>
+<text x="785" y="653" font-family="system-ui,sans-serif" font-size="10" fill="#9b6ec8" text-anchor="middle">downgrade tier on fail</text>
+
+<!-- ARROWS -->
+<line x1="125" y1="76" x2="135" y2="114" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="135" y1="184" x2="150" y2="600" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.5" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="150" y1="600" x2="335" y2="218" stroke="#c85e5e" stroke-width="1.5" stroke-opacity="0.7" marker-end="url(#arr)"/>
+<line x1="335" y1="184" x2="530" y2="114" stroke="#4a90d9" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="335" y1="184" x2="125" y2="218" stroke="#5ba55e" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="125" y1="296" x2="300" y2="218" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="300" y1="296" x2="478" y2="212" stroke="#c85e5e" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="300" y1="296" x2="145" y2="426" stroke="#d4844a" stroke-width="1" stroke-opacity="0.5" marker-end="url(#arr)"/>
+<line x1="300" y1="296" x2="350" y2="426" stroke="#c85e5e" stroke-width="1.2" stroke-opacity="0.6" marker-end="url(#arr)"/>
+<line x1="300" y1="296" x2="150" y2="600" stroke="#9b6ec8" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+<line x1="478" y1="302" x2="300" y2="360" stroke="#5ba55e" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="653" y1="296" x2="540" y2="426" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" marker-end="url(#arr)"/>
+<line x1="715" y1="184" x2="715" y2="426" stroke="#d4844a" stroke-width="0.8" stroke-opacity="0.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+<line x1="150" y1="658" x2="370" y2="600" stroke="#9b6ec8" stroke-width="0.6" stroke-opacity="0.4" marker-end="url(#arr)"/>
+</svg>
+</div>
+
+</div><!-- /diagram-area -->
+
+<script>
+function show(idx) {
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+}
+</script>
+</body>
+</html>
